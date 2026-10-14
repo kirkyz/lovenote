@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "lovenote",
+  "version": "1.0.0",
+  "name": "Lovenote",
+  "description": "Lovenote - a soft, sleek HvH client.",
+  "environment": "client",
+  "entrypoints": { "client": ["com.lovenote.LovenoteClient"] },
+  "mixins": ["lovenote.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "fabric-api": "*"
+  }
+}
