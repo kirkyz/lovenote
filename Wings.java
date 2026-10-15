@@ -65,7 +65,7 @@ Vec3d fwd = new Vec3d(-Math.sin(ry), 0, Math.cos(ry));
 
 double flap = Math.sin(time * 2.4 * flapSpeed.get()) * 0.30 * flapSpeed.get();
 Vec3d origin = pos.add(0, 1.15, 0).add(fwd.multiply(-0.12));
-float sz = size.get();
+float sz = (float) size.get();
 
 RenderSystem.enableBlend();
 RenderSystem.defaultBlendFunc();
