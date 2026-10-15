@@ -67,6 +67,10 @@ public class ModuleManager {
 		modules.add(new Fullbright());
 		modules.add(new Zoom());
 		modules.add(new ParticleField());
+		modules.add(new GroundRings());
+		modules.add(new TrailRibbon());
+		modules.add(new Halo());
+		modules.add(new WorldTint());
 		// ---- hud widgets
 		modules.add(new InterfaceModule());
 		modules.add(new Watermark());
