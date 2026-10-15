@@ -1,6 +1,6 @@
 plugins { id 'fabric-loom' version '1.7-SNAPSHOT' }
 
-version = project.modversion group = project.mavengroup
+version = project.modversion group = group = project.maven_group
 
 base { archivesName = project.archivesbasename }
 
