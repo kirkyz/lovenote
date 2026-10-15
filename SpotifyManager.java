@@ -36,6 +36,8 @@ public final class SpotifyManager {
     public volatile Identifier artTexture;
 
     private volatile boolean started;
+    private volatile Path resolvedHelper;
+    private volatile boolean missingLogged;
     private volatile String lastCover = "";
     private int artCounter;
     private final ExecutorService worker = Executors.newSingleThreadExecutor(r -> {
@@ -47,7 +49,33 @@ public final class SpotifyManager {
     private SpotifyManager() {}
 
     private Path helperPath() {
-        return FabricLoader.getInstance().getConfigDir().resolve("lovenote-media-bridge.exe");
+        // Fabric's config directory is the authoritative location, including PrismLauncher.
+        Path config = FabricLoader.getInstance().getConfigDir().toAbsolutePath().normalize();
+        Path[] candidates = {
+            config.resolve("lovenote-media-bridge.exe"),
+            MinecraftClient.getInstance().runDirectory.toPath().toAbsolutePath().normalize()
+                    .resolve("config").resolve("lovenote-media-bridge.exe"),
+            Path.of(System.getProperty("user.dir", ".")).toAbsolutePath().normalize()
+                    .resolve("config").resolve("lovenote-media-bridge.exe")
+        };
+        for (Path candidate : candidates) {
+            if (Files.isRegularFile(candidate)) {
+                if (!candidate.equals(resolvedHelper)) {
+                    System.out.println("[Lovenote Spotify] Found media bridge: " + candidate);
+                    resolvedHelper = candidate;
+                }
+                missingLogged = false;
+                return candidate;
+            }
+        }
+        if (!missingLogged) {
+            System.err.println("[Lovenote Spotify] Bridge EXE not found. Checked:");
+            for (Path candidate : candidates)
+                System.err.println("[Lovenote Spotify]   " + candidate);
+            missingLogged = true;
+        }
+        resolvedHelper = null;
+        return candidates[0];
     }
 
     public void start() {
@@ -58,6 +86,9 @@ public final class SpotifyManager {
             while (true) {
                 try {
                     Thread.sleep(2500);
+                    if (!connected) {
+                        if (Files.isRegularFile(helperPath())) connect();
+                    }
                     if (connected) poll();
                 } catch (InterruptedException e) {
                     return;
@@ -76,7 +107,7 @@ public final class SpotifyManager {
     public void connect() {
         if (!Files.isRegularFile(helperPath())) {
             connected = false;
-            status = "Missing config/lovenote-media-bridge.exe";
+            status = "Bridge missing: " + helperPath().toAbsolutePath();
             return;
         }
         connected = true;
@@ -98,7 +129,7 @@ public final class SpotifyManager {
 
     private JsonObject runHelper(String... args) throws Exception {
         String[] cmd = new String[args.length + 1];
-        cmd[0] = helperPath().toString();
+        cmd[0] = helperPath().toAbsolutePath().toString();
         System.arraycopy(args, 0, cmd, 1, args.length);
         Process p = new ProcessBuilder(cmd).redirectErrorStream(true).start();
         String line;
@@ -121,7 +152,7 @@ public final class SpotifyManager {
         if (!Files.isRegularFile(helperPath())) {
             connected = false;
             hasTrack = false;
-            status = "Missing config/lovenote-media-bridge.exe";
+            status = "Bridge missing: " + helperPath().toAbsolutePath();
             return;
         }
         JsonObject o = runHelper();
