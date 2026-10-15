@@ -509,7 +509,9 @@ public class LovenoteScreen extends Screen {
 			float sl = ease("ps" + i, sel ? 1f : 0f, 170);
 			if (sl > 0.02f || hv > 0.02f) rr(ctx, wx + 4, y, sbw - 8, 24, Colors.alpha(Colors.C2, (int) (62 * sl + 26 * hv)));
 			if (sl > 0.02f) rr(ctx, wx + 4, y + 5, 2, 14, Colors.alpha(Colors.wave(i * 0.1f), (int) (255 * sl)));
-			ctx.drawItem(icons[i], wx + 11, y + 4);
+			if (i < icons.length) {
+    ctx.drawItem(icons[i], wx + 11, y + 4);
+}
 			if (sb > 0.05f) txt(ctx, pages[i].label, wx + 34, y + 8, Colors.alpha(Colors.lerp(Colors.dim(), Colors.text(), sl), (int) (255 * sb)));
 			pageRects.add(new int[]{wx + 4, y, sbw - 8, 24, i});
 			y += 26;
