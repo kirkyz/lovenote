@@ -1,5 +1,5 @@
 package com.lovenote.module.impl;
-
+import com.lovenote.mixin.MinecraftClientAccessor;
 import com.lovenote.module.Category;
 import com.lovenote.module.Module;
 import com.lovenote.setting.BoolSetting;
