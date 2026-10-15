@@ -51,8 +51,11 @@ public class ModuleManager {
 		DESC.put("Tracers", "Lines from your view to each player.");
 		DESC.put("StorageESP", "Highlights chests, barrels and shulkers.");
 		DESC.put("HoleESP", "Marks safe holes around you.");
+		DESC.put("BlockESP", "Highlights ore and other blocks around you.");
 		DESC.put("Nametags", "Bigger nametags with health and distance.");
 		DESC.put("Trajectories", "Shows where your projectile lands.");
+		DESC.put("Zoom", "Hold a key to zoom in.");
+		DESC.put("Freelook", "Hold a key to look around freely.");
 		DESC.put("JumpCircles", "Ring effect on every jump.");
 		DESC.put("Trail", "Ribbon that follows you.");
 		DESC.put("Orbit", "Particles orbiting your body.");
@@ -84,12 +87,15 @@ public class ModuleManager {
 		DESC.put("CpsHud", "Clicks per second counter.");
 		DESC.put("CoordsHud", "Position, chunk and facing.");
 		DESC.put("ServerInfo", "Server, ping and player count.");
+		DESC.put("PingHud", "Ping and connection quality.");
 		DESC.put("Spotify", "Now playing widget.");
 		DESC.put("AutoLog", "Disconnects at low health.");
 		DESC.put("AutoTool", "Picks the right tool for the block.");
 		DESC.put("FastPlace", "Removes the place delay.");
 		DESC.put("AutoEat", "Eats when you get hungry.");
 		DESC.put("AntiAFK", "Moves so you are never idle.");
+		DESC.put("MiddleClick", "Middle click sends a pearl or totem to your off hand.");
+		DESC.put("ChatSuffix", "Adds a tag to the end of your chat messages.");
 		DESC.put("Panic", "One key to disable everything.");
 	}
 
@@ -142,8 +148,11 @@ public class ModuleManager {
 		modules.add(new SkyShader());
 		modules.add(new StorageESP());
 		modules.add(new HoleESP());
+		modules.add(new BlockESP());
 		modules.add(new Nametags());
 		modules.add(new Trajectories());
+		modules.add(new Zoom());
+		modules.add(new Freelook());
 		// hypixel
 		modules.add(new StaffDetector());
 		modules.add(new AutoClicker());
@@ -164,6 +173,7 @@ public class ModuleManager {
 		modules.add(new CpsHud());
 		modules.add(new CoordsHud());
 		modules.add(new ServerInfo());
+		modules.add(new PingHud());
 		modules.add(new SpotifyHud());
 		// misc
 		modules.add(new AutoLog());
@@ -171,6 +181,8 @@ public class ModuleManager {
 		modules.add(new FastPlace());
 		modules.add(new AutoEat());
 		modules.add(new AntiAFK());
+		modules.add(new MiddleClick());
+		modules.add(new ChatSuffix());
 		modules.add(new Panic());
 
 		// surface the server-relevant modules in the hypixel tab too
