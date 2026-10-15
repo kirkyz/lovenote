@@ -7,7 +7,7 @@ import com.lovenote.setting.ModeSetting;
 import com.lovenote.setting.NumberSetting;
 import com.lovenote.util.Colors;
 
-/** Holds the colour theme. Pick "Custom" to unlock the HSV picker below. */
+/** Holds the colour theme and menu layout. Pick "Custom" to unlock the HSV picker. */
 public class InterfaceModule extends Module {
 	public final ModeSetting theme = add(new ModeSetting("Theme", "Lovenote", Colors.themeNames()));
 
@@ -17,6 +17,17 @@ public class InterfaceModule extends Module {
 	public final NumberSetting spread = add(new NumberSetting("Gradient spread", 18, 0, 60, 1));
 	public final BoolSetting chroma = add(new BoolSetting("Chroma cycle", false));
 	public final NumberSetting chromaSpeed = add(new NumberSetting("Chroma speed", 12, 1, 60, 1));
+
+	// ---- menu layout
+	public final NumberSetting uiScale = add(new NumberSetting("UI scale", 100, 60, 160, 5));
+	public final NumberSetting panelWidth = add(new NumberSetting("Panel width", 460, 300, 900, 10));
+	public final NumberSetting panelHeight = add(new NumberSetting("Panel height", 300, 180, 700, 10));
+	public final NumberSetting corner = add(new NumberSetting("Corner radius", 5, 0, 12, 1));
+	public final NumberSetting rowHeight = add(new NumberSetting("Row height", 20, 16, 30, 1));
+	public final NumberSetting dim = add(new NumberSetting("Backdrop dim", 110, 0, 220, 5));
+	public final BoolSetting animations = add(new BoolSetting("Animations", true));
+	public final BoolSetting columns = add(new BoolSetting("Two columns", true));
+	public final BoolSetting tooltips = add(new BoolSetting("Tooltips", true));
 
 	public InterfaceModule() {
 		super("Interface", Category.HUD);
