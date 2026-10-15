@@ -23,7 +23,7 @@ MAP.put("Flash", ParticleTypes.FLASH);
 MAP.put("Firework", ParticleTypes.FIREWORK);
 MAP.put("Totem", ParticleTypes.TOTEM_OF_UNDYING);
 MAP.put("Sonic Boom", ParticleTypes.SONIC_BOOM);
-MAP.put("Shriek", ParticleTypes.SHRIEK);
+MAP.put("Shriek", new net.minecraft.particle.ShriekParticleEffect(0));
 MAP.put("Sculk Soul", ParticleTypes.SCULK_SOUL);
 MAP.put("Sculk Pop", ParticleTypes.SCULK_CHARGE_POP);
 MAP.put("Soul", ParticleTypes.SOUL);
@@ -40,7 +40,7 @@ MAP.put("Signal Smoke", ParticleTypes.CAMPFIRE_SIGNAL_SMOKE);
 MAP.put("Smoke", ParticleTypes.SMOKE);
 MAP.put("Large Smoke", ParticleTypes.LARGE_SMOKE);
 MAP.put("Cloud", ParticleTypes.CLOUD);
-MAP.put("Dust Plume", ParticleTypes.DUST_PLUME);
+MAP.put("Dust Plume", ParticleTypes.POOF);
 MAP.put("Snow", ParticleTypes.SNOWFLAKE);
 MAP.put("Cherry", ParticleTypes.CHERRY_LEAVES);
 MAP.put("Spore Blossom", ParticleTypes.SPORE_BLOSSOM_AIR);
@@ -82,7 +82,7 @@ MAP.put("Sweep", ParticleTypes.SWEEP_ATTACK);
 MAP.put("Explosion", ParticleTypes.EXPLOSION);
 MAP.put("Boom", ParticleTypes.EXPLOSION_EMITTER);
 MAP.put("Fishing", ParticleTypes.FISHING);
-MAP.put("Block Marker", ParticleTypes.BLOCK_MARKER);
+MAP.put("Block Marker", new net.minecraft.particle.BlockStateParticleEffect(ParticleTypes.BLOCK_MARKER, net.minecraft.block.Blocks.BARRIER.getDefaultState()));
 }
 
 private ParticleUtil() {}
