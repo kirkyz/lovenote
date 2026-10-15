@@ -29,6 +29,7 @@ public final class Config {
 				JsonObject o = new JsonObject();
 				o.addProperty("enabled", m.enabled);
 				o.addProperty("key", m.key);
+				o.addProperty("fav", m.favorite);
 				JsonObject s = new JsonObject();
 				for (Setting st : m.settings) st.save(s);
 				o.add("settings", s);
@@ -50,6 +51,7 @@ public final class Config {
 				JsonObject o = root.getAsJsonObject(m.name);
 				if (o.has("enabled")) m.enabled = o.get("enabled").getAsBoolean();
 				if (o.has("key")) m.key = o.get("key").getAsInt();
+				if (o.has("fav")) m.favorite = o.get("fav").getAsBoolean();
 				if (o.has("settings")) {
 					JsonObject s = o.getAsJsonObject("settings");
 					for (Setting st : m.settings) st.load(s);
