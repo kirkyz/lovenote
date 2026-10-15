@@ -148,17 +148,6 @@ if (aurora.get()) drawAurora(matrices, aur, time);
 if (stars.get()) drawStars(matrices, time);
 if (shooting.get()) drawShootingStars(matrices, time);
 if (sunMoon.get()) drawSunMoon(matrices, tickDelta);
-if (planet.get()) drawPlanet(matrices, tickDelta);
-		if (clouds.get()) drawClouds(matrices, time);
-		if (lightning.get()) drawLightning(matrices, time);
-if (planet.get()) drawPlanet(matrices, tickDelta);
-if (clouds.get()) drawClouds(matrices, time);
-if (lightning.get()) drawLightning(matrices, time);
-RenderSystem.defaultBlendFunc();
-RenderSystem.disableBlend();
-RenderSystem.enableCull();
-RenderSystem.depthMask(true);
-return true;
 }
 
 // ------------------------------------------------------------------ geometry
