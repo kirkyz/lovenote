@@ -52,7 +52,7 @@ public class ModuleManager {
 		modules.add(new Tracers());
 		modules.add(new TargetESP());
 		modules.add(new Wings());
-		modules.add(new WorldShaders());
+	    modules.add(new SkyShader()); 
 		modules.add(new SwingAnimation());
 		modules.add(new JumpCircles());
 		modules.add(new Trail());
