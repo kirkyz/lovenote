@@ -1,4 +1,4 @@
-ackage com.lovenote.util;
+package com.lovenote.util;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
