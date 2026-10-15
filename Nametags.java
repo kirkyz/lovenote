@@ -48,7 +48,7 @@ public class Nametags extends Module {
 			if (distance.get()) label += "  " + String.format("%.1fm", mc.player.distanceTo(p));
 			int w = mc.textRenderer.getWidth(label);
 			int x = (int) (sx - w / 2f), y = (int) sy;
-			if (background.get()) RenderUtil.rrect(ctx, x - 4, y - 3, w + 8, 13, 3, 0x90000000);
+			if (background.get()) RenderUtil.rrect(ctx, x - 4, y - 3, w + 8, 13, 0x90000000);
 			ctx.drawTextWithShadow(mc.textRenderer, label, x, y, Colors.wave(0f));
 		}
 	}

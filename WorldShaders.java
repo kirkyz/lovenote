@@ -1,6 +1,8 @@
 package com.lovenote.module.impl;
 
 import com.lovenote.module.Module;
+import com.lovenote.module.Category;
+import com.lovenote.module.Category;
 import net.minecraft.util.math.Vec3d;
 
 public class WorldShaders extends Module {

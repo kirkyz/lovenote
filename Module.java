@@ -1,5 +1,5 @@
 package com.lovenote.module;
-
+import com.lovenote.module.Category;
 import com.google.gson.JsonObject;
 import com.lovenote.setting.Setting;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
@@ -27,6 +27,9 @@ public abstract class Module {
 		this.name = name;
 		this.category = category;
 	}
+	protected void describe(String text) {
+    this.description = text;
+}
 
 	protected <T extends Setting> T add(T s) {
 		settings.add(s);

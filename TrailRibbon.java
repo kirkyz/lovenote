@@ -70,9 +70,9 @@ public class TrailRibbon extends Module {
 			double f = i / (double) (n - 1);
 			double w = width.get() * f;
 			int col = Colors.alpha(switch (colour.get()) {
-				case "Rainbow" -> Colors.rainbow(f * 0.6f);
+				case "Rainbow" -> Colors.rainbow((float) (f * 0.6f));
 				case "Static" -> 0xFF9A6BFF;
-				default -> Colors.skeet(f);
+				default -> Colors.skeet((float) f);
 			}, (int) (opacity.getI() * f * f));
 
 			Vec3d l = cur.add(side.multiply(w));

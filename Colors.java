@@ -64,7 +64,13 @@ public final class Colors {
 	public static int health(float f) {
 		return lerp(0xFFFF3B3B, 0xFF3BFF6B, f);
 	}
-
+public static int hsv(float hue, float saturation, float value) {
+    return 0xFF000000 | MathHelper.hsvToRgb(
+        hue - (float) Math.floor(hue),
+        MathHelper.clamp(saturation, 0f, 1f),
+        MathHelper.clamp(value, 0f, 1f)
+    );
+}
 	public static int rainbow(float offset) {
 		float h = ((System.currentTimeMillis() % 4000L) / 4000f + offset) % 1f;
 		return 0xFF000000 | MathHelper.hsvToRgb(h, 0.7f, 1f);

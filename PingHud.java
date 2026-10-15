@@ -30,7 +30,7 @@ public class PingHud extends Module {
 		int w = mc.textRenderer.getWidth(text) + 14;
 		int x = ctx.getScaledWindowWidth() - w - 8;
 		int y = ctx.getScaledWindowHeight() - 24;
-		RenderUtil.rrect(ctx, x, y, w, 14, 4, 0xB00C0C11);
+		RenderUtil.rrect(ctx, x, y, w, 14, 0xB00C0C11);
 		ctx.fill(x + 4, y + 4, x + 5, y + 10, c);
 		ctx.drawText(mc.textRenderer, text, x + 9, y + 3, Colors.wave(0f), false);
 	}

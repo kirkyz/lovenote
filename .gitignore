@@ -1,0 +1,4 @@
+.gradle/
+build/
+.Category.java.swp
+*.swp
