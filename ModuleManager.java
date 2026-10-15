@@ -24,7 +24,10 @@ public class ModuleManager {
 		modules.add(new Velocity());
 		modules.add(new AutoTotem());
 		modules.add(new CrystalBreak());
+		modules.add(new AutoCrystal());
 		modules.add(new Surround());
+		modules.add(new AutoTrap());
+		modules.add(new AutoCity());
 		// movement
 		modules.add(new Sprint());
 		modules.add(new Speed());
@@ -32,6 +35,7 @@ public class ModuleManager {
 		modules.add(new Bhop());
 		modules.add(new Scaffold());
 		modules.add(new NoFall());
+		modules.add(new AntiVoid());
 		// visuals
 		modules.add(new ESP());
 		modules.add(new Glow());
@@ -39,6 +43,7 @@ public class ModuleManager {
 		modules.add(new JumpCircles());
 		modules.add(new Trail());
 		modules.add(new Orbit());
+		modules.add(new Wings());
 		modules.add(new HitParticles());
 		modules.add(new KillEffects());
 		modules.add(new PopEffects());
@@ -60,6 +65,8 @@ public class ModuleManager {
 		modules.add(new SpotifyHud());
 		// misc
 		modules.add(new AutoLog());
+		modules.add(new AutoTool());
+		modules.add(new FastPlace());
 		modules.add(new Panic());
 	}
 
