@@ -52,7 +52,7 @@ float dx = (x - c) / c, dy = (y - c) / c;
 float d = (float) Math.sqrt(dx * dx + dy * dy);
 float a = Math.max(0f, 1f - d);
 a = (float) Math.pow(a, power);
-img.setPixelColor(x, y, px((int) (a * 255f), 255, 255, 255));
+img.setColor(x, y, px((int) (a * 255f), 255, 255, 255));
 }
 }
 return img;
@@ -69,7 +69,7 @@ float core = Math.max(0f, 1f - d * 3.4f);
 float armX = (float) Math.pow(Math.max(0f, 1f - dx), 7f) * Math.max(0f, 1f - dy * 5f);
 float armY = (float) Math.pow(Math.max(0f, 1f - dy), 7f) * Math.max(0f, 1f - dx * 5f);
 float a = Math.min(1f, core + armX + armY);
-img.setPixelColor(x, y, px((int) (a * 255f), 255, 255, 255));
+img.setColor(x, y, px((int) (a * 255f), 255, 255, 255));
 }
 }
 return img;
