@@ -31,7 +31,7 @@ import java.util.Set;
 
 /** Compact, rounded Lovenote menu: pill tabs on top, expandable module cards. */
 public class LovenoteScreen extends Screen {
-	private static final int W = 388, H = 262;
+	private static final int W = 520, H = 340;
 	private static final int BG = 0xF0101015, CARD = 0xFF17171E, CARD_HOV = 0xFF1D1D26;
 	private static final int TXT = 0xFFE8E8F0, DIM = 0xFF8A8A9A, FAINT = 0xFF5E5E70, TRACK = 0xFF2A2A36;
 
@@ -54,9 +54,11 @@ public class LovenoteScreen extends Screen {
 	private final Set<Module> expanded = new HashSet<>();
 	private final Map<String, Float> anim = new HashMap<>();
 
-	private int tab, scroll, maxScroll, wx, wy;
+	private int tab, scroll, maxScroll, wx, wy, panelW, panelH;
+	private TextFieldWidget searchField;
 	private Module listening;
 	private Hit dragging;
+	private String hoveredFullName;
 	private int localVol = -1;
 	private long openTime;
 	private float[] px, py, pvx, pvy;
@@ -82,9 +84,16 @@ public class LovenoteScreen extends Screen {
 			pvx[i] = (r.nextFloat() - 0.5f) * 0.3f;
 			pvy[i] = -0.1f - r.nextFloat() * 0.4f;
 		}
-		wx = (width - W) / 2;
-		wy = (height - H) / 2;
-		int cx = wx + 12, cy = wy + 44, cw = W - 24;
+		panelW = Math.min(W, Math.max(160, width - 24));
+		panelH = Math.min(H, Math.max(120, height - 24));
+		wx = (width - panelW) / 2;
+		wy = (height - panelH) / 2;
+		int cx = wx + 12, cy = wy + 73, cw = panelW - 24;
+		searchField = new TextFieldWidget(textRenderer, cx + 5, wy + 48, cw - 10, 16, Text.literal("Search modules"));
+		searchField.setMaxLength(80);
+		searchField.setSuggestion("Search modules...");
+		searchField.setChangedListener(value -> scroll = 0);
+		searchField.setFocused(false);
 		idField = new TextFieldWidget(textRenderer, cx + 9, cy + 18, cw - 18, 14, Text.literal("Client ID"));
 		idField.setMaxLength(64);
 		idField.setText(SpotifyManager.I.clientId);
@@ -121,11 +130,14 @@ public class LovenoteScreen extends Screen {
 	public void render(DrawContext ctx, int mx, int my, float delta) {
 		hits.clear();
 		tabRects.clear();
+		hoveredFullName = null;
 		InterfaceModule im = LovenoteClient.modules.get(InterfaceModule.class);
 		if (im != null) im.apply();
 
-		wx = (width - W) / 2;
-		wy = (height - H) / 2;
+		panelW = Math.min(W, Math.max(160, width - 24));
+		panelH = Math.min(H, Math.max(120, height - 24));
+		wx = (width - panelW) / 2;
+		wy = (height - panelH) / 2;
 		float open = Math.min(1f, (System.currentTimeMillis() - openTime) / 200f);
 
 		ctx.fill(0, 0, width, height, Colors.alpha(0x000000, (int) (110 * open)));
@@ -143,25 +155,33 @@ public class LovenoteScreen extends Screen {
 		}
 
 		// soft shadow + border + body
-		for (int i = 5; i >= 1; i--) RenderUtil.rrect(ctx, wx - i, wy - i, W + i * 2, H + i * 2, Colors.alpha(0x000000, 13));
-		RenderUtil.rrect(ctx, wx - 1, wy - 1, W + 2, H + 2, Colors.alpha(Colors.C2, 110));
-		RenderUtil.rrect(ctx, wx, wy, W, H, BG);
-		RenderUtil.skeetBar(ctx, wx + 4, wy + 1, W - 8, 1);
+		for (int i = 5; i >= 1; i--) RenderUtil.rrect(ctx, wx - i, wy - i, panelW + i * 2, panelH + i * 2, Colors.alpha(0x000000, 13));
+		RenderUtil.rrect(ctx, wx - 1, wy - 1, panelW + 2, panelH + 2, Colors.alpha(Colors.C2, 110));
+		RenderUtil.rrect(ctx, wx, wy, panelW, panelH, BG);
+		RenderUtil.skeetBar(ctx, wx + 4, wy + 1, panelW - 8, 1);
 
 		renderHeader(ctx, mx, my);
 
-		int cx = wx + 12, cy = wy + 44, cw = W - 24, bottom = wy + H - 10;
+		int cx = wx + 12, cy = wy + 73, cw = panelW - 24, bottom = wy + panelH - 10;
+		if (!spotifyTab()) searchField.render(ctx, mx, my, delta);
 		if (spotifyTab()) {
 			renderSpotify(ctx, mx, my, delta, cx, cy, cw);
 		} else {
 			ctx.enableScissor(cx - 2, cy - 2, cx + cw + 2, bottom);
 			renderModules(ctx, cx, cy, cw, bottom, mx, my);
 			ctx.disableScissor();
+			if (hoveredFullName != null) {
+				int tw = textRenderer.getWidth(hoveredFullName) + 12;
+				int tx = MathHelper.clamp(mx + 10, 0, Math.max(0, width - tw));
+				int ty = MathHelper.clamp(my + 10, 0, Math.max(0, height - 17));
+				RenderUtil.rrect(ctx, tx, ty, tw, 16, 0xF522222C);
+				ctx.drawTextWithShadow(textRenderer, hoveredFullName, tx + 6, ty + 4, TXT);
+			}
 		}
 
 		if (listening != null) {
 			ctx.drawCenteredTextWithShadow(textRenderer, "press a key to bind " + listening.name + "  (esc = clear)",
-					wx + W / 2, wy + H + 8, 0xFFFFD27A);
+					wx + panelW / 2, wy + panelH + 8, 0xFFFFD27A);
 		}
 	}
 
@@ -181,47 +201,45 @@ public class LovenoteScreen extends Screen {
 		ctx.drawTextWithShadow(textRenderer, "\u2665", bx + 3, 0, Colors.C2);
 		ms.pop();
 
-		// pill tabs, right aligned
-		int px = wx + W - 12, py = wy + 12, ph = 15;
-		TabRect[] rects = new TabRect[tabs.length];
-		for (int i = tabs.length - 1; i >= 0; i--) {
-			int pw = textRenderer.getWidth(tabs[i].label) + 14;
-			px -= pw;
+        // Category tabs occupy their own row, never overlap the logo.
+		int px = wx + 12, py = wy + 28, ph = 16;
+		int available = panelW - 24;
+		for (int i = 0; i < tabs.length; i++) {
+			int pw = Math.max(36, textRenderer.getWidth(tabs[i].label) + 14);
+			if (px + pw > wx + 12 + available) break;
 			TabRect r = new TabRect();
 			r.x = px; r.y = py; r.w = pw; r.h = ph;
-			rects[i] = r;
-			px -= 4;
-		}
-		for (int i = 0; i < tabs.length; i++) {
-			TabRect r = rects[i];
 			tabRects.add(r);
 			boolean sel = i == tab;
 			boolean hov = mx >= r.x && mx < r.x + r.w && my >= r.y && my < r.y + r.h;
-			if (sel) {
-				RenderUtil.rrect(ctx, r.x, r.y, r.w, r.h, Colors.C2);
-				RenderUtil.gradientH(ctx, r.x + 2, r.y + 1, r.x + r.w - 2, r.y + r.h - 1, Colors.C1, Colors.C3);
-			} else {
-				RenderUtil.rrect(ctx, r.x, r.y, r.w, r.h, hov ? 0xFF262632 : 0xFF1A1A22);
-			}
+			RenderUtil.rrect(ctx, r.x, r.y, r.w, r.h,
+					sel ? Colors.C2 : hov ? 0xFF292934 : 0xFF1C1C25);
 			ctx.drawCenteredTextWithShadow(textRenderer, tabs[i].label, r.x + r.w / 2, r.y + 4,
-					sel ? 0xFF15151B : hov ? TXT : DIM);
+					sel ? 0xFF101018 : hov ? TXT : DIM);
+			px += pw + 5;
 		}
-		ctx.fill(wx + 12, wy + 36, wx + W - 12, wy + 37, 0xFF20202A);
+		ctx.fill(wx + 12, wy + 68, wx + panelW - 12, wy + 69, 0xFF252530);
 	}
 
 	// ---------- module cards
 
 	private void renderModules(DrawContext ctx, int cx, int cy, int cw, int bottom, int mx, int my) {
 		List<Module> mods = LovenoteClient.modules.in(tabs[tab]);
-		int colW = (cw - 8) / 2;
+		String query = searchField.getText().trim().toLowerCase(java.util.Locale.ROOT);
+		if (!query.isEmpty()) mods.removeIf(m -> !m.name.toLowerCase(java.util.Locale.ROOT).contains(query));
+		if (mods.isEmpty()) {
+			ctx.drawCenteredTextWithShadow(textRenderer, "No matching modules", cx + cw / 2, cy + 22, DIM);
+		}
+		int columns = cw >= 300 ? 2 : 1;
+		int colW = columns == 2 ? (cw - 8) / 2 : cw;
 		int[] colY = {cy - scroll, cy - scroll};
 		for (Module m : mods) {
-			int col = colY[0] <= colY[1] ? 0 : 1;
+			int col = columns == 1 ? 0 : (colY[0] <= colY[1] ? 0 : 1);
 			int gx = cx + col * (colW + 8);
 			int h = drawCard(ctx, m, gx, colY[col], colW, mx, my);
 			colY[col] += h + 6;
 		}
-		int total = Math.max(colY[0], colY[1]) + scroll - cy;
+		int total = (columns == 1 ? colY[0] : Math.max(colY[0], colY[1])) + scroll - cy;
 		maxScroll = Math.max(0, total - (bottom - cy));
 		scroll = MathHelper.clamp(scroll, 0, maxScroll);
 	}
@@ -240,6 +258,16 @@ public class LovenoteScreen extends Screen {
 		Hit hit = new Hit();
 		hit.x = x; hit.y = y; hit.w = w; hit.h = h; hit.kind = kind; hit.module = m; hit.setting = s;
 		hits.add(hit);
+	}
+
+	private String fit(String value, int maxWidth) {
+		if (value == null || maxWidth <= 0) return "";
+		if (textRenderer.getWidth(value) <= maxWidth) return value;
+		String suffix = "\u2026";
+		if (textRenderer.getWidth(suffix) > maxWidth) return "";
+		int end = value.length();
+		while (end > 0 && textRenderer.getWidth(value.substring(0, end) + suffix) > maxWidth) end--;
+		return value.substring(0, end) + suffix;
 	}
 
 	private void drawSwitch(DrawContext ctx, int x, int y, float t) {
@@ -264,10 +292,14 @@ public class LovenoteScreen extends Screen {
 		RenderUtil.rrect(ctx, gx, gy, w, h, hov ? CARD_HOV : CARD);
 		if (on > 0.02f) ctx.fill(gx, gy + 6, gx + 2, gy + 16, Colors.alpha(Colors.wave(gy * 0.004f), (int) (255 * on)));
 
-		ctx.drawText(textRenderer, m.name, gx + 9, gy + 7, Colors.lerp(DIM, TXT, on), false);
+		int reserved = 48;
+		String key = m.key != -1 || listening == m ? "[" + (listening == m ? "..." : keyName(m.key)) + "]" : "";
+		int keyWidth = key.isEmpty() ? 0 : textRenderer.getWidth(key) + 4;
+		String title = fit(m.name, Math.max(0, w - reserved - keyWidth - 9));
+		if (hov && !title.equals(m.name)) hoveredFullName = m.name;
+		ctx.drawText(textRenderer, title, gx + 9, gy + 7, Colors.lerp(DIM, TXT, on), false);
 		if (m.key != -1 || listening == m) {
-			String b = "[" + (listening == m ? "..." : keyName(m.key)) + "]";
-			ctx.drawText(textRenderer, b, gx + 13 + textRenderer.getWidth(m.name), gy + 7, FAINT, false);
+			ctx.drawText(textRenderer, key, gx + 13 + textRenderer.getWidth(title), gy + 7, FAINT, false);
 		}
 		int sx = gx + w - 30, sy = gy + 6;
 		drawSwitch(ctx, sx, sy, on);
@@ -292,26 +324,26 @@ public class LovenoteScreen extends Screen {
 		int lx = gx + 9, rw = w - 18;
 		if (s instanceof BoolSetting b) {
 			float t = anim(m.name + ":" + b.name, b.get() ? 1f : 0f);
-			ctx.drawText(textRenderer, b.name, lx, ry + 3, b.get() ? TXT : DIM, false);
+			ctx.drawText(textRenderer, fit(b.name, rw - 32), lx, ry + 3, b.get() ? TXT : DIM, false);
 			drawSwitch(ctx, gx + w - 9 - 22, ry + 2, t);
 			if (active) addHit(gx + 4, ry, w - 8, 15, K_BOOL, m, b);
 		} else if (s instanceof NumberSetting n) {
-			ctx.drawText(textRenderer, n.name, lx, ry + 2, DIM, false);
+			ctx.drawText(textRenderer, fit(n.name, Math.max(0, rw - 55)), lx, ry + 2, DIM, false);
 			String val = n.step >= 1 ? String.valueOf(n.getI()) : String.format("%.2f", n.get());
 			ctx.drawText(textRenderer, val, lx + rw - textRenderer.getWidth(val), ry + 2, FAINT, false);
 			int sy = ry + 15;
-			float t = (float) ((n.get() - n.min) / (n.max - n.min));
+			float t = n.max <= n.min ? 0f : (float) ((n.get() - n.min) / (n.max - n.min));
 			ctx.fill(lx, sy, lx + rw, sy + 3, TRACK);
 			int fx = lx + (int) (rw * t);
 			RenderUtil.gradientH(ctx, lx, sy, Math.max(lx + 1, fx), sy + 3, Colors.C1, Colors.skeet(t));
 			RenderUtil.rrect(ctx, MathHelper.clamp(fx - 2, lx, lx + rw - 5), sy - 2, 5, 7, 0xFFFFFFFF);
 			if (active) addHit(lx, sy - 4, rw, 12, K_SLIDER, m, n);
 		} else if (s instanceof ModeSetting md) {
-			ctx.drawText(textRenderer, md.name, lx, ry + 4, DIM, false);
-			int pw = textRenderer.getWidth(md.get()) + 12;
+			ctx.drawText(textRenderer, fit(md.name, rw / 2), lx, ry + 4, DIM, false);
+			int pw = Math.min(rw / 2, textRenderer.getWidth(md.get()) + 12);
 			int pxx = lx + rw - pw;
 			RenderUtil.rrect(ctx, pxx, ry + 1, pw, 14, 0xFF24242E);
-			ctx.drawText(textRenderer, md.get(), pxx + 6, ry + 4, TXT, false);
+			ctx.drawText(textRenderer, fit(md.get(), pw - 12), pxx + 6, ry + 4, TXT, false);
 			if (active) addHit(gx + 4, ry, w - 8, 16, K_MODE, m, md);
 		}
 	}
@@ -342,8 +374,8 @@ public class LovenoteScreen extends Screen {
 		button(ctx, cx + 9, cy + 38, 62, 14, "connect", mx, my, K_CONNECT);
 		button(ctx, cx + 75, cy + 38, 72, 14, "disconnect", mx, my, K_DISCONNECT);
 		boolean ok = s.status.startsWith("Connected");
-		ctx.drawText(textRenderer, s.status, cx + 9, cy + 58, ok ? 0xFF8EE0A8 : 0xFFE8B86A, false);
-		if (!s.connected) ctx.drawText(textRenderer, "redirect uri: http://127.0.0.1:8888/callback", cx + 9, cy + 68, FAINT, false);
+		ctx.drawText(textRenderer, fit(s.status, cw - 18), cx + 9, cy + 58, ok ? 0xFF8EE0A8 : 0xFFE8B86A, false);
+		if (!s.connected) ctx.drawText(textRenderer, fit("redirect uri: http://127.0.0.1:8888/callback", cw - 18), cx + 9, cy + 68, FAINT, false);
 
 		// now playing card
 		int gy = cy + 88;
@@ -382,7 +414,7 @@ public class LovenoteScreen extends Screen {
 		int vol = localVol >= 0 ? localVol : Math.max(0, s.volume);
 		String vl = "vol " + vol;
 		ctx.drawText(textRenderer, vl, tx + 108, bty + 4, FAINT, false);
-		int vx = tx + 144, vw = tw - 144;
+		int vx = tx + 144, vw = Math.max(8, tw - 144);
 		bar(ctx, vx, bty + 6, vw, vol / 100f);
 		addHit(vx, bty + 2, vw, 12, K_VOL, null, null);
 
@@ -392,7 +424,7 @@ public class LovenoteScreen extends Screen {
 	// ------------------------------------------------------------------ input
 
 	private boolean inContent(double mx, double my) {
-		return mx >= wx + 10 && mx <= wx + W - 10 && my >= wy + 40 && my <= wy + H - 8;
+		return mx >= wx + 10 && mx <= wx + panelW - 10 && my >= wy + 72 && my <= wy + panelH - 8;
 	}
 
 	private void setSlider(Hit h, double mx) {
@@ -410,10 +442,16 @@ public class LovenoteScreen extends Screen {
 				scroll = 0;
 				listening = null;
 				idField.setFocused(false);
+				searchField.setFocused(false);
 				return true;
 			}
 		}
 
+		if (!spotifyTab()) {
+			boolean inSearch = searchField.mouseClicked(mx, my, btn);
+			searchField.setFocused(inSearch);
+			if (inSearch) return true;
+		}
 		if (spotifyTab()) {
 			boolean inField = idField.mouseClicked(mx, my, btn);
 			idField.setFocused(inField);
@@ -495,6 +533,11 @@ public class LovenoteScreen extends Screen {
 			listening = null;
 			return true;
 		}
+		if (!spotifyTab() && searchField.isFocused()) {
+			if (keyCode == GLFW.GLFW_KEY_ESCAPE) searchField.setFocused(false);
+			else searchField.keyPressed(keyCode, scanCode, modifiers);
+			return true;
+		}
 		if (spotifyTab() && idField.isFocused()) {
 			if (keyCode == GLFW.GLFW_KEY_ESCAPE) idField.setFocused(false);
 			else idField.keyPressed(keyCode, scanCode, modifiers);
@@ -509,6 +552,7 @@ public class LovenoteScreen extends Screen {
 
 	@Override
 	public boolean charTyped(char chr, int modifiers) {
+		if (!spotifyTab() && searchField.isFocused()) return searchField.charTyped(chr, modifiers);
 		if (spotifyTab() && idField.isFocused()) return idField.charTyped(chr, modifiers);
 		return super.charTyped(chr, modifiers);
 	}
