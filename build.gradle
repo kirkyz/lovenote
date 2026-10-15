@@ -1,13 +1,12 @@
-
 plugins {
     id 'fabric-loom' version '1.7.4'
 }
 
-version = '1.0.0'
-group = 'com.lovenote'
+version = project.mod_version
+group = project.maven_group
 
 base {
-    archivesName = 'lovenote'
+    archivesName = project.archives_base_name
 }
 
 repositories {
@@ -34,10 +33,10 @@ sourceSets {
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:1.21.1"
-    mappings "net.fabricmc:yarn:1.21.1+build.3:v2"
-    modImplementation "net.fabricmc:fabric-loader:0.16.5"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:0.102.1+1.21.1"
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -48,3 +47,4 @@ tasks.withType(JavaCompile).configureEach {
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+}
