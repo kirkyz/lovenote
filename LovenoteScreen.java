@@ -1,5 +1,5 @@
 package com.lovenote.gui;
-
+import net.minecraft.client.MinecraftClient;
 import com.lovenote.LovenoteClient;
 import com.lovenote.module.Category;
 import com.lovenote.module.Module;
@@ -289,6 +289,7 @@ public class LovenoteScreen extends Screen {
 		ms.pop();
 
 		String clock = LocalTime.now().format(CLOCK);
+		MinecraftClient mc = MinecraftClient.getInstance();
 		String fps = mc.getCurrentFps() + " fps";
 		String user = mc.getSession().getUsername();
 		int rx = wx + panelW - 8;
