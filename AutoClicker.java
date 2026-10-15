@@ -61,8 +61,8 @@ pauseUntil = now + (long) (pauseMs.get() * (0.6 + rnd.nextDouble() * 0.8));
 nextClick = pauseUntil;
 break;
 }
-if (left.get()) mc.doAttack();
-if (right.get()) mc.doItemUse();
+if (left.get()) ((com.lovenote.mixin.MinecraftClientAccessor) mc).invokeDoAttack();
+if (right.get()) ((com.lovenote.mixin.MinecraftClientAccessor) mc).invokeDoItemUse();
 nextClick = now + interval();
 }
 if (nextClick < now) nextClick = now + interval();
