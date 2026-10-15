@@ -1,4 +1,4 @@
-lugins { id 'fabric-loom' version '1.7-SNAPSHOT' }
+plugins { id 'fabric-loom' version '1.7-SNAPSHOT' }
 
 version = project.modversion group = project.mavengroup
 
