@@ -1,6 +1,7 @@
 package com.lovenote.module;
 
 import com.lovenote.module.impl.*;
+import com.lovenote.util.Colors;
 import com.lovenote.util.RenderUtil;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.gui.DrawContext;
@@ -46,6 +47,7 @@ public class ModuleManager {
 		modules.add(new HitSound());
 		modules.add(new TimeChanger());
 		modules.add(new Fullbright());
+		modules.add(new SkyShader());
 		// hud
 		on(new InterfaceModule());
 		on(new Watermark());
@@ -81,6 +83,7 @@ public class ModuleManager {
 	}
 
 	public void tick() {
+		Colors.applyCurrent();
 		for (Module m : modules) if (m.enabled) m.onTick();
 	}
 
