@@ -1,15 +1,50 @@
-plugins { id 'fabric-loom' version '1.7-SNAPSHOT' }
 
-version = project.modversion group = group = project.maven_group
+plugins {
+    id 'fabric-loom' version '1.7.4'
+}
 
-base { archivesName = project.archivesbasename }
+version = '1.0.0'
+group = 'com.lovenote'
 
-repositories { mavenCentral() maven { url = 'https://maven.fabricmc.net/' } }
+base {
+    archivesName = 'lovenote'
+}
 
-sourceSets { main { java { srcDirs = ['.'] include('*.java') } resources { srcDirs = ['.'] include('fabric.mod.json', 'lovenote.mixins.json') } } }
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://maven.fabricmc.net/'
+    }
+}
 
-dependencies { minecraft "com.mojang:minecraft:project.minecraftversion"mappings"net.fabricmc:yarn:{project.yarnmappings}:v2" modImplementation "net.fabricmc:fabric-loader:project.loaderversion"modImplementation"net.fabricmc.fabric−api:fabric−api:{project.fabricversion}" }
+sourceSets {
+    main {
+        java {
+            srcDirs = ['.']
+            include '**/*.java'
+            exclude 'build/**'
+        }
 
-tasks.withType(JavaCompile).configureEach { options.release = 17 }
+        resources {
+            srcDirs = ['.']
+            include 'fabric.mod.json'
+            include 'lovenote.mixins.json'
+        }
+    }
+}
 
-java { sourceCompatibility = JavaVersion.VERSION17 targetCompatibility = JavaVersion.VERSION17 }
+dependencies {
+    minecraft "com.mojang:minecraft:1.21.1"
+    mappings "net.fabricmc:yarn:1.21.1+build.3:v2"
+    modImplementation "net.fabricmc:fabric-loader:0.16.5"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.102.1+1.21.1"
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+    options.encoding = 'UTF-8'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
