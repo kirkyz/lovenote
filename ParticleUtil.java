@@ -1,3 +1,4 @@
+```java
 package com.lovenote.util;
 
 import net.minecraft.particle.ParticleEffect;
@@ -24,10 +25,10 @@ public final class ParticleUtil {
 		MAP.put("Firework", ParticleTypes.FIREWORK);
 		MAP.put("Totem", ParticleTypes.TOTEM_OF_UNDYING);
 		MAP.put("Sonic Boom", ParticleTypes.SONIC_BOOM);
-		MAP.put("Shriek", ParticleTypes.SHRIEK);
 		MAP.put("Sculk Soul", ParticleTypes.SCULK_SOUL);
 		MAP.put("Sculk Pop", ParticleTypes.SCULK_CHARGE_POP);
 		MAP.put("Soul", ParticleTypes.SOUL);
+
 		// fire / heat
 		MAP.put("Flame", ParticleTypes.FLAME);
 		MAP.put("Soul Flame", ParticleTypes.SOUL_FIRE_FLAME);
@@ -42,7 +43,8 @@ public final class ParticleUtil {
 		MAP.put("Smoke", ParticleTypes.SMOKE);
 		MAP.put("Large Smoke", ParticleTypes.LARGE_SMOKE);
 		MAP.put("Cloud", ParticleTypes.CLOUD);
-		MAP.put("Dust Plume", ParticleTypes.DUST_PLUME);
+		MAP.put("Dust Plume", ParticleTypes.WHITE_ASH);
+
 		// nature
 		MAP.put("Snow", ParticleTypes.SNOWFLAKE);
 		MAP.put("Cherry", ParticleTypes.CHERRY_LEAVES);
@@ -59,6 +61,7 @@ public final class ParticleUtil {
 		MAP.put("Egg Crack", ParticleTypes.EGG_CRACK);
 		MAP.put("Sneeze", ParticleTypes.SNEEZE);
 		MAP.put("Spit", ParticleTypes.SPIT);
+
 		// water / weather
 		MAP.put("Rain", ParticleTypes.RAIN);
 		MAP.put("Splash", ParticleTypes.SPLASH);
@@ -71,6 +74,7 @@ public final class ParticleUtil {
 		MAP.put("Falling Water", ParticleTypes.FALLING_WATER);
 		MAP.put("Dolphin", ParticleTypes.DOLPHIN);
 		MAP.put("Nautilus", ParticleTypes.NAUTILUS);
+
 		// otherworldly
 		MAP.put("Portal", ParticleTypes.PORTAL);
 		MAP.put("Dragon", ParticleTypes.DRAGON_BREATH);
@@ -87,7 +91,6 @@ public final class ParticleUtil {
 		MAP.put("Explosion", ParticleTypes.EXPLOSION);
 		MAP.put("Boom", ParticleTypes.EXPLOSION_EMITTER);
 		MAP.put("Fishing", ParticleTypes.FISHING);
-		MAP.put("Block Marker", ParticleTypes.BLOCK_MARKER);
 	}
 
 	private ParticleUtil() {}
@@ -100,3 +103,4 @@ public final class ParticleUtil {
 		return MAP.getOrDefault(name, ParticleTypes.END_ROD);
 	}
 }
+```
