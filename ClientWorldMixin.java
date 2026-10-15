@@ -11,17 +11,49 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientWorld.class)
 public class ClientWorldMixin {
-	@Inject(method = "getSkyColor", at = @At("RETURN"), cancellable = true, require = 0)
-	private void lovenote$sky(Vec3d cameraPos, float tickDelta, CallbackInfoReturnable<Vec3d> cir) {
-		if (LovenoteClient.modules == null) return;
-		WorldShaders ws = LovenoteClient.modules.get(WorldShaders.class);
-		if (ws != null && ws.enabled) cir.setReturnValue(ws.sky(cir.getReturnValue()));
-	}
 
-	@Inject(method = "getCloudsColor", at = @At("RETURN"), cancellable = true, require = 0)
-	private void lovenote$clouds(float tickDelta, CallbackInfoReturnable<Vec3d> cir) {
-		if (LovenoteClient.modules == null) return;
-		WorldShaders ws = LovenoteClient.modules.get(WorldShaders.class);
-		if (ws != null && ws.enabled) cir.setReturnValue(ws.clouds(cir.getReturnValue()));
-	}
+    @Inject(
+        method = "getSkyColor",
+        at = @At("RETURN"),
+        cancellable = true,
+        require = 0
+    )
+    private void lovenote$sky(
+        Vec3d cameraPos,
+        float tickDelta,
+        CallbackInfoReturnable<Vec3d> cir
+    ) {
+        if (LovenoteClient.modules == null) {
+            return;
+        }
+
+        WorldShaders shaders =
+            LovenoteClient.modules.get(WorldShaders.class);
+
+        if (shaders != null && shaders.enabled) {
+            cir.setReturnValue(shaders.sky(cir.getReturnValue()));
+        }
+    }
+
+    @Inject(
+        method = "getCloudsColor",
+        at = @At("RETURN"),
+        cancellable = true,
+        require = 0
+    )
+    private void lovenote$clouds(
+        float tickDelta,
+        CallbackInfoReturnable<Vec3d> cir
+    ) {
+        if (LovenoteClient.modules == null) {
+            return;
+        }
+
+        WorldShaders shaders =
+            LovenoteClient.modules.get(WorldShaders.class);
+
+        if (shaders != null && shaders.enabled) {
+            cir.setReturnValue(shaders.clouds(cir.getReturnValue()));
+        }
+    }
 }
