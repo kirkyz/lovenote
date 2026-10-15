@@ -1,7 +1,7 @@
 plugins { id 'fabric-loom' version '1.7-SNAPSHOT' }
 
 group = project.maven_group
-base { archivesName = project.archivesbasename }
+base { archivesName = project.archives_base_name }
 
 repositories { mavenCentral() maven { url = 'https://maven.fabricmc.net/' } }
 
