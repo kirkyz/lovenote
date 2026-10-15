@@ -318,6 +318,7 @@ public class LovenoteScreen extends Screen {
 		ms.pop();
 
 		String clock = LocalTime.now().format(CLOCK);
+		MinecraftClient mc = MinecraftClient.getInstance();
 		String fps = mc.getCurrentFps() + " fps";
 		String user = mc.getSession().getUsername();
 		int rx = wx + panelW - 10;
