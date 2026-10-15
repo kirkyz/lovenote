@@ -38,31 +38,45 @@ public class Watermark extends Module {
 		StringBuilder info = new StringBuilder();
 		if (fps.get()) info.append("  \u00B7  ").append(mc.getCurrentFps()).append(" fps");
 		if (ping.get()) {
-			int p = 0;
-			if (mc.getNetworkHandler() != null) {
-				PlayerListEntry e = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
-				if (e != null) p = e.getLatency();
-			}
-			info.append("  \u00B7  ").append(p).append("ms");
-		}
-		if (server.get()) {
-			String s = mc.getCurrentServerEntry() == null ? "singleplayer" : mc.getCurrentServerEntry().address;
-			info.append("  \u00B7  ").append(s);
-		}
-		if (coords.get()) {
-			info.append("  \u00B7  ").append(String.format("%.0f %.0f %.0f",
-					int w = 10 + logoW + tr.getWidth(brand) + tr.getWidth(info.toString()) + 10;
-		}
-		if (clock.get()) info.append("  \u00B7  ").append(LocalTime.now().format(CLOCK));
+            int p = 0;
+            if (mc.getNetworkHandler() != null) {
+                PlayerListEntry e = mc.getNetworkHandler()
+                        .getPlayerListEntry(mc.player.getUuid());
+                if (e != null) p = e.getLatency();
+            }
+            info.append("  \u00B7  ").append(p).append("ms");
+        }
 
-		String brand = "lovenote";
-		int logoW = logo.get() ? 15 : 0;
-		int w = 10 + logoW + tr.getWidth(brand) + tr.getWidth(info) + 10;
-		int h = 18;
-		int x = ctx.getScaledWindowWidth() - w - 8, y = 8;
+        if (server.get()) {
+            String s = mc.getCurrentServerEntry() == null
+                    ? "singleplayer"
+                    : mc.getCurrentServerEntry().address;
+            info.append("  \u00B7  ").append(s);
+        }
 
-		if (style.is("Glass")) {
-			RenderUtil.rrect(ctx, x, y, w, h, 4, 0x8C0C0C11);
+        if (coords.get()) {
+            info.append("  \u00B7  ").append(
+                    String.format("%.0f %.0f %.0f",
+                            mc.player.getX(),
+                            mc.player.getY(),
+                            mc.player.getZ()));
+        }
+
+        if (clock.get()) {
+            info.append("  \u00B7  ")
+                    .append(LocalTime.now().format(CLOCK));
+        }
+
+        String brand = "lovenote";
+        int logoW = logo.get() ? 15 : 0;
+        int w = 10 + logoW + tr.getWidth(brand)
+                + tr.getWidth(info.toString()) + 10;
+        int h = 18;
+        int x = ctx.getScaledWindowWidth() - w - 8;
+        int y = 8;
+
+        if (style.is("Glass")) {
+            RenderUtil.rrect(ctx, x, y, w, h, 4, 0x8C0C0C11);
 			RenderUtil.rrect(ctx, x, y, w, 1, 0, 0x33FFFFFF);
 			ctx.fill(x, y, x + 1, y + h, 0x22FFFFFF);
 		} else if (style.is("Solid")) {
