@@ -6,6 +6,7 @@ import com.lovenote.setting.BoolSetting;
 import com.lovenote.setting.NumberSetting;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import com.lovenote.mixin.MinecraftClientAccessor;
 
 /** Removes the 4 tick block place cooldown. */
 public class FastPlace extends Module {
