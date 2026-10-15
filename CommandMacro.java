@@ -92,7 +92,6 @@ return Math.max(20L, base + (long) ((rnd.nextDouble() * 2 - 1) * j));
 
 private void send(String cmd) {
 if (mc.getNetworkHandler() == null) return;
-mc.getNetworkHandler().sendPacket(new ChatMessageC2SPacket(cmd));{ if (cmd.startsWith("/")) mc.getNetworkHandler().sendChatCommand(cmd.substring(1)); else mc.getNetworkHandler().sendChatMessage(cmd); }
-if (log.get()) mc.inGameHud.getChatHud().addMessage(Text.literal("[Lovenote] > " + cmd));
+{ if (cmd.startsWith("/")) mc.getNetworkHandler().sendChatCommand(cmd.substring(1)); else mc.getNetworkHandler().sendChatMessage(cmd); }if (log.get()) mc.inGameHud.getChatHud().addMessage(Text.literal("[Lovenote] > " + cmd));
 }
 }
