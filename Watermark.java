@@ -51,7 +51,7 @@ public class Watermark extends Module {
 		}
 		if (coords.get()) {
 			info.append("  \u00B7  ").append(String.format("%.0f %.0f %.0f",
-					nt w = 10 + logoW + tr.getWidth(brand) + tr.getWidth(info.toString()) + 10;
+					int w = 10 + logoW + tr.getWidth(brand) + tr.getWidth(info.toString()) + 10;
 		}
 		if (clock.get()) info.append("  \u00B7  ").append(LocalTime.now().format(CLOCK));
 
