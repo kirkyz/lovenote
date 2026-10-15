@@ -1,4 +1,4 @@
-```java
+
 package com.lovenote.util;
 
 import net.minecraft.particle.ParticleEffect;
