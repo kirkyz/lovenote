@@ -23,6 +23,7 @@ if (blocksOnly.get()) {
 ItemStack held = mc.player.getMainHandStack();
 if (held.isEmpty() || !(held.getItem() instanceof BlockItem)) return;
 }
-if (mc.itemUseCooldown > delay.getI()) mc.itemUseCooldown = delay.getI();
+MinecraftClientAccessor acc = (MinecraftClientAccessor) mc;
+if (acc.getItemUseCooldown() > delay.getI()) acc.setItemUseCooldown(delay.getI());
 }
 }
