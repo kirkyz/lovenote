@@ -2,11 +2,11 @@ package com.lovenote.module.impl;
 
 import com.lovenote.module.Category;
 import com.lovenote.module.Module;
+import com.lovenote.mixin.MinecraftClientAccessor;
 import com.lovenote.setting.BoolSetting;
 import com.lovenote.setting.NumberSetting;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import com.lovenote.mixin.MinecraftClientAccessor;
 
 /** Removes the 4 tick block place cooldown. */
 public class FastPlace extends Module {
@@ -23,9 +23,8 @@ public class FastPlace extends Module {
 		if (blocksOnly.get()) {
 			ItemStack held = mc.player.getMainHandStack();
 			if (held.isEmpty() || !(held.getItem() instanceof BlockItem)) return;
-		if (mc.itemUseCooldown > delay.getI()) mc.itemUseCooldown = delay.getI();
-			MinecraftClientAccessor acc = (MinecraftClientAccessor) mc;
-if (acc.getItemUseCooldown() > delay.getI()) acc.setItemUseCooldown(delay.getI());
-		if (mc.itemUseCooldown > delay.getI()) mc.itemUseCooldown = delay.getI();
+		}
+		MinecraftClientAccessor acc = (MinecraftClientAccessor) mc;
+		if (acc.getItemUseCooldown() > delay.getI()) acc.setItemUseCooldown(delay.getI());
 	}
 }
