@@ -129,12 +129,21 @@ public final class RenderUtil {
 	}
 
 	/** Rounded rectangle (2px corner radius), drawn without overlaps so alpha stays even. */
-	public static void rrect(DrawContext ctx, int x, int y, int w, int h, int c) {
-		if (w < 5 || h < 5) { ctx.fill(x, y, x + w, y + h, c); return; }
-		ctx.fill(x + 2, y, x + w - 2, y + h, c);
-		ctx.fill(x + 1, y + 1, x + 2, y + h - 1, c);
-		ctx.fill(x + w - 2, y + 1, x + w - 1, y + h - 1, c);
-		ctx.fill(x, y + 2, x + 1, y + h - 2, c);
-		ctx.fill(x + w - 1, y + 2, x + w, y + h - 2, c);
+	/** Rounded rectangle with a custom radius. Drawn without overlaps so alpha stays even. */
+	public static void rrect(DrawContext ctx, int x, int y, int w, int h, int radius, int c) {
+		if (w <= 0 || h <= 0) return;
+		if ((c >>> 24) == 0) return;
+		int r = Math.max(0, Math.min(radius, Math.min(w, h) / 2));
+		if (r == 0) {
+			ctx.fill(x, y, x + w, y + h, c);
+			return;
+		}
+		ctx.fill(x, y + r, x + w, y + h - r, c);
+		for (int i = 0; i < r; i++) {
+			double dy = r - 1 - i;
+			int inset = (int) Math.ceil(r - Math.sqrt(Math.max(0.0, (double) r * r - dy * dy)));
+			ctx.fill(x + inset, y + i, x + w - inset, y + i + 1, c);
+			ctx.fill(x + inset, y + h - 1 - i, x + w - inset, y + h - i, c);
+		}
 	}
 }
