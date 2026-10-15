@@ -1,5 +1,7 @@
 package com.lovenote.mixin;
-
+import com.lovenote.module.impl.WorldTint;
+import net.minecraft.util.math.Vec3d;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.lovenote.LovenoteClient;
 import com.lovenote.module.impl.SkyShader;
 import net.minecraft.client.render.Camera;
@@ -16,6 +18,12 @@ public class WorldRendererMixin {
 
 @Inject(
 method = "renderSky(Lnet/minecraft/client/util/math/MatrixStack;Lorg/joml/Matrix4f;FLnet/minecraft/client/render/Camera;ZLjava/lang/Runnable;)V",
+@Inject(method = "getSkyColor", at = @At("RETURN"), cancellable = true)
+	private void lovenote$skyTint(Vec3d cameraPos, float tickDelta, CallbackInfoReturnable<Vec3d> cir) {
+		if (LovenoteClient.modules == null) return;
+		WorldTint t = LovenoteClient.modules.get(WorldTint.class);
+		if (t != null && t.enabled) cir.setReturnValue(t.tint(cir.getReturnValue()));
+	}
 at = @At("HEAD"),
 cancellable = true)
 private void lovenote$renderSky(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta,
