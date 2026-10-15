@@ -1,4 +1,4 @@
-package com.lovenote.module;
+can upackage com.lovenote.module;
 
 import com.lovenote.module.impl.*;
 import com.lovenote.util.Colors;
@@ -141,3 +141,5 @@ public class ModuleManager {
 		on(new TargetHud());
 		modules.add(new Keystrokes());
 		modules
+			}
+}
