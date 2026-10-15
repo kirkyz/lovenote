@@ -158,6 +158,10 @@ public class ModuleManager {
 		d("Fullbright", "See clearly in the dark");
 		d("Zoom", "Custom field of view, bind it to zoom");
 		d("ParticleField", "Ambient particle field drifting around you.");
+		d("GroundRings", "Expanding rings on the floor under you.");
+		d("TrailRibbon", "Camera-facing ribbon trailing behind you.");
+		d("Halo", "Glowing column and rising spark spiral.");
+		d("WorldTint", "Tints the sky, fog and screen edges.");
 
 		d("Watermark", "Client name, user, fps, time and IP");
 		d("Music", "Now-playing widget for Spotify");
