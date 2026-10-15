@@ -89,7 +89,7 @@ private void alert(String name, String rank) {
 if (chatAlert.get()) {
 mc.inGameHud.getChatHud().addMessage(Text.literal("[Lovenote] " + rank + " " + name + " detected"));
 }
-if (sound.get()) mc.player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.6f);
+if (sound.get()) mc.player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), 1.0f, 1.6f);
 }
 
 private void doPanic() {
