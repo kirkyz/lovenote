@@ -51,7 +51,7 @@ long now = System.currentTimeMillis();
 
 if (hook == null) {
 if (now < recastAt) return;
-mc.doItemUse();
+((com.lovenote.mixin.MinecraftClientAccessor) mc).invokeDoItemUse();
 recastAt = now + 400 + rnd.nextInt(300);
 waiting = false;
 hadHook = false;
@@ -77,7 +77,7 @@ return;
 
 if (waiting && now >= reactAt) {
 waiting = false;
-mc.doItemUse();
+((com.lovenote.mixin.MinecraftClientAccessor) mc).invokeDoItemUse();
 recastAt = now + recastMin.getI()
 + (long) (rnd.nextDouble() * Math.max(1, recastMax.getI() - recastMin.getI()));
 }
