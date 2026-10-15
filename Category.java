@@ -1,14 +1,15 @@
 package com.lovenote.module;
 
 public enum Category {
-	COMBAT("rage"),
-	MOVEMENT("movement"),
-	VISUALS("visuals"),
-	HUD("hud"),
-	MISC("misc"),
-	SPOTIFY("spotify");
+COMBAT("rage"),
+MOVEMENT("movement"),
+VISUALS("visuals"),
+HUD("hud"),
+MISC("misc"),
+HYPIXEL("hypixel"),
+SPOTIFY("spotify");
 
-	public final String label;
+public final String label;
 
-	Category(String label) { this.label = label; }
+Category(String label) { this.label = label; }
 }

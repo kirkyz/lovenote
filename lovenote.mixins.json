@@ -5,7 +5,6 @@
   "client": [
     "ClientPlayerInteractionManagerMixin",
     "ClientPlayNetworkHandlerMixin",
-    "MinecraftClientAccessor",
     "WorldRendererMixin"
   ],
   "injectors": { "defaultRequire": 1 }
