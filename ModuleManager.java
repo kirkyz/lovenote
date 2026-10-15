@@ -1,5 +1,4 @@
-can upackage com.lovenote.module;
-
+package com.lovenote.module;
 import com.lovenote.module.impl.*;
 import com.lovenote.util.Colors;
 import com.lovenote.util.RenderUtil;
@@ -140,6 +139,5 @@ public class ModuleManager {
 		on(new Notifications());
 		on(new TargetHud());
 		modules.add(new Keystrokes());
-		modules
 			}
 }
