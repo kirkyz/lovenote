@@ -54,7 +54,58 @@ public final class Tex {
 				float d = (float) Math.sqrt(dx * dx + dy * dy);
 				float a = Math.max(0f, 1f - d);
 				a = (float) Math.pow(a, power);
-				img.setColor(x, y, px((int) (a * 255f), 255, 255, 255));
+				img.setColor(x, y, px((int) (a * 255f), 255, 255, 255)); private static NativeImage sparkle(int size) {
+        NativeImage img = new NativeImage(size, size, false);
+        float c = (size - 1) / 2f;
+
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                float dx = (x - c) / c;
+                float dy = (y - c) / c;
+                float d = (float) Math.sqrt(dx * dx + dy * dy);
+
+                float ray = Math.max(
+                    0f,
+                    1f - Math.min(
+                        Math.abs(dx) * 12f,
+                        Math.abs(dy) * 12f
+                    )
+                );
+
+                float core = Math.max(0f, 1f - d * 5f);
+                float a = Math.max(ray * 0.65f, core);
+
+                img.setColor(
+                    x, y,
+                    px((int) (a * 255f), 255, 255, 255)
+                );
+            }
+        }
+
+        return img;
+    }
+
+    private static NativeImage vignette(int size) {
+        NativeImage img = new NativeImage(size, size, false);
+        float c = (size - 1) / 2f;
+
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                float dx = (x - c) / c;
+                float dy = (y - c) / c;
+                float d = (float) Math.sqrt(dx * dx + dy * dy);
+                float a = Math.min(1f, d * d * 0.8f);
+
+                img.setColor(
+                    x, y,
+                    px((int) (a * 180f), 0, 0, 0)
+                );
+            }
+        }
+
+        return img;
+    }
+}
 			}
 		}
 		return img;
