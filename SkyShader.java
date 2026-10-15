@@ -296,7 +296,7 @@ public class SkyShader extends Module {
 			float tw = 1f;
 			if (twinkle.get() > 0f) tw = 0.5f + 0.5f * (float) Math.sin(time * twinkle.get() + sphase[i]);
 			int alpha = (int) (255 * MathHelper.clamp(tw, 0f, 1f) * sbright[i]);
-			float size = starSize.get() * (0.7f + sbright[i] * 0.7f);
+			float size = (float) (starSize.get() * (0.7f + sbright[i] * 0.7f));
 			billboard(b, m, sx[i] * 98f, sy[i] * 98f, sz[i] * 98f, size, Colors.alpha(0xFFFFFFFF, alpha));
 		}
 		Tessellator.getInstance().draw();
