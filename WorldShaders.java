@@ -1,24 +1,19 @@
 package com.lovenote.module.impl;
 
+import com.lovenote.module.Module;
 import net.minecraft.util.math.Vec3d;
 
-public class WorldShaders {
+public class WorldShaders extends Module {
 
-    public boolean enabled = false;
+    public WorldShaders() {
+        super("WorldShaders", Category.RENDER);
+    }
 
     public Vec3d sky(Vec3d original) {
-        if (original == null) {
-            return Vec3d.ZERO;
-        }
-
-        return original;
+        return original == null ? Vec3d.ZERO : original;
     }
 
     public Vec3d clouds(Vec3d original) {
-        if (original == null) {
-            return Vec3d.ZERO;
-        }
-
-        return original;
+        return original == null ? Vec3d.ZERO : original;
     }
 }
