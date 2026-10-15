@@ -6,7 +6,9 @@ base { archivesName = project.archivesbasename }
 
 repositories { mavenCentral() maven { url = 'https://maven.fabricmc.net/' } }
 
-sourceSets { main { java { srcDirs = ['.'] include '*.java' } resources { srcDirs = ['.'] include 'fabric.mod.json', 'lovenote.mixins.json' } } }
+sourceSets { main { java { srcDirs = ['.'] include '*.java' }
+
+resources { srcDirs = ['.'] include 'fabric.mod.json', 'lovenote.mixins.json' } } }
 
 dependencies { minecraft "com.mojang:minecraft:project.minecraftversion"mappings"net.fabricmc:yarn:{project.yarnmappings}:v2" modImplementation "net.fabricmc:fabric-loader:project.loaderversion"modImplementation"net.fabricmc.fabric−api:fabric−api:{project.fabricversion}" }
 
