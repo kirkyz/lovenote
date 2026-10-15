@@ -2,70 +2,65 @@ package com.lovenote.module.impl;
 
 import com.lovenote.module.Category;
 import com.lovenote.module.Module;
-import com.lovenote.setting.BoolSetting;
 import com.lovenote.setting.NumberSetting;
+import com.lovenote.util.ToolUtil;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 
-/** Chews through the blocks holding your opponent in their hole. */
+/** Mines the obsidian that surrounds the nearest player so crystals can reach them. */
 public class AutoCity extends Module {
-private final NumberSetting range = add(new NumberSetting("Target range", 4.5, 2, 8, 0.5));
-private final NumberSetting delay = add(new NumberSetting("Delay (ticks)", 2, 1, 10, 1));
-private final BoolSetting roof = add(new BoolSetting("Break roof", true));
-private final BoolSetting swing = add(new BoolSetting("Swing hand", true));
+	private final NumberSetting range = add(new NumberSetting("Range", 4.5, 2.0, 6.0, 0.5));
+	private BlockPos current;
+	private int prevSlot = -1;
 
-private BlockPos current;
-private int cd;
+	public AutoCity() {
+		super("AutoCity", Category.COMBAT);
+	}
 
-public AutoCity() {
-super("AutoCity", Category.COMBAT);
-}
+	private static boolean mineable(BlockState s) {
+		Block b = s.getBlock();
+		return b == Blocks.OBSIDIAN || b == Blocks.CRYING_OBSIDIAN || b == Blocks.ENDER_CHEST || b == Blocks.ANCIENT_DEBRIS;
+	}
 
-@Override
-public void onDisable() {
-current = null;
-}
+	private void reset() {
+		current = null;
+		if (prevSlot != -1 && mc.player != null) mc.player.getInventory().selectedSlot = prevSlot;
+		prevSlot = -1;
+	}
 
-@Override
-public void onTick() {
-if (mc.player == null || mc.world == null || mc.interactionManager == null) return;
-if (mc.currentScreen != null) return;
+	@Override
+	public void onTick() {
+		if (mc.player == null || mc.world == null || mc.interactionManager == null) return;
+		if (current != null && !mineable(mc.world.getBlockState(current))) reset();
 
-if (current != null && !mc.world.getBlockState(current).isAir()) {
-if (cd > 0) { cd--; return; }
-mc.interactionManager.updateBlockBreakingProgress(current, Direction.UP);
-if (swing.get()) mc.player.swingHand(Hand.MAIN_HAND);
-cd = delay.getI();
-return;
-}
+		if (current == null) {
+			PlayerEntity t = AutoTrap.nearest(range.get() + 2);
+			if (t == null) return;
+			for (Direction d : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST}) {
+				BlockPos p = t.getBlockPos().offset(d);
+				if (mineable(mc.world.getBlockState(p)) && mc.player.getEyePos().distanceTo(Vec3d.ofCenter(p)) <= range.get()) {
+					current = p;
+					break;
+				}
+			}
+			if (current == null) return;
+			int slot = ToolUtil.bestSlot(mc.world.getBlockState(current));
+			if (slot != -1) { prevSlot = mc.player.getInventory().selectedSlot; mc.player.getInventory().selectedSlot = slot; }
+			mc.interactionManager.attackBlock(current, Direction.UP);
+		} else {
+			mc.interactionManager.updateBlockBreakingProgress(current, Direction.UP);
+		}
+		mc.player.swingHand(Hand.MAIN_HAND);
+	}
 
-current = findTarget();
-}
-
-private BlockPos findTarget() {
-PlayerEntity best = null;
-double bd = range.get();
-for (PlayerEntity p : mc.world.getPlayers()) {
-if (p == mc.player || !p.isAlive()) continue;
-double d = mc.player.distanceTo(p);
-if (d < bd) { bd = d; best = p; }
-}
-if (best == null) return null;
-
-BlockPos base = best.getBlockPos();
-BlockPos[] cands = roof.get()
-? new BlockPos[]{ base.north(), base.south(), base.east(), base.west(), base.up(2), base.up(3) }
-: new BlockPos[]{ base.north(), base.south(), base.east(), base.west(), base.up(2) };
-
-for (BlockPos pos : cands) {
-BlockState st = mc.world.getBlockState(pos);
-if (st.isAir()) continue;
-if (st.getHardness(mc.world, pos) < 0f) continue;
-return pos;
-}
-return null;
-}
+	@Override
+	public void onDisable() {
+		reset();
+	}
 }

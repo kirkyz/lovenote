@@ -1,5 +1,6 @@
 package com.lovenote;
 
+import com.lovenote.gui.HudEditorScreen;
 import com.lovenote.gui.LovenoteScreen;
 import com.lovenote.module.Module;
 import com.lovenote.module.ModuleManager;
@@ -19,7 +20,7 @@ import org.lwjgl.glfw.GLFW;
 
 public class LovenoteClient implements ClientModInitializer {
 	public static ModuleManager modules;
-	public static KeyBinding openGui, spotifyNext, spotifyPrev, spotifyPause;
+	public static KeyBinding openGui, hudEditor, spotifyNext, spotifyPrev, spotifyPause;
 
 	private static final String CAT = "Lovenote";
 
@@ -31,14 +32,15 @@ public class LovenoteClient implements ClientModInitializer {
 		if (theme != null) theme.apply();
 		SpotifyManager.I.start();
 
-		openGui = KeyBindingHelper.registerKeyBinding(new KeyBinding("Open Lovenote menu", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_INSERT, CAT));
-		// Unbound by default - set them in Options > Controls > Lovenote
+		openGui = KeyBindingHelper.registerKeyBinding(new KeyBinding("Open Lovenote menu", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, CAT));
+		hudEditor = KeyBindingHelper.registerKeyBinding(new KeyBinding("Edit HUD layout", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CAT));
 		spotifyNext = KeyBindingHelper.registerKeyBinding(new KeyBinding("Spotify: next", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CAT));
 		spotifyPrev = KeyBindingHelper.registerKeyBinding(new KeyBinding("Spotify: previous", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CAT));
 		spotifyPause = KeyBindingHelper.registerKeyBinding(new KeyBinding("Spotify: play/pause", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CAT));
 
 		ClientTickEvents.END_CLIENT_TICK.register(mc -> {
 			while (openGui.wasPressed()) mc.setScreen(new LovenoteScreen());
+			while (hudEditor.wasPressed()) mc.setScreen(new HudEditorScreen());
 			while (spotifyNext.wasPressed()) SpotifyManager.I.next();
 			while (spotifyPrev.wasPressed()) SpotifyManager.I.previous();
 			while (spotifyPause.wasPressed()) SpotifyManager.I.togglePlay();
@@ -58,6 +60,7 @@ public class LovenoteClient implements ClientModInitializer {
 		HudRenderCallback.EVENT.register((ctx, td) -> {
 			MinecraftClient mc = MinecraftClient.getInstance();
 			if (mc.player == null || mc.options.hudHidden) return;
+			if (mc.currentScreen instanceof HudEditorScreen) return; // editor draws the widgets itself
 			modules.hud(ctx, td);
 		});
 

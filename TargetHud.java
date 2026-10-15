@@ -1,22 +1,30 @@
 package com.lovenote.module.impl;
 
-import com.lovenote.module.Category;
-import com.lovenote.module.Module;
+import com.lovenote.setting.BoolSetting;
 import com.lovenote.util.Colors;
 import com.lovenote.util.RenderUtil;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 
-/** Shows the player you last hit: name, health bar, distance. */
-public class TargetHud extends Module {
+/** Shows whoever you last hit: head, name, distance, health ring and armour slots. */
+public class TargetHud extends HudWidget {
+	private final BoolSetting ring = add(new BoolSetting("Health ring", true));
+	private final BoolSetting armor = add(new BoolSetting("Armor slots", true));
+	private final BoolSetting headIcon = add(new BoolSetting("Head", true));
+
 	private LivingEntity target;
 	private long last;
 	private float shown = 1f;
 
 	public TargetHud() {
-		super("TargetHud", Category.HUD);
+		super("TargetHud", 0.18f, 0.145f);
+		enabled = true;
 	}
 
 	@Override
@@ -28,27 +36,63 @@ public class TargetHud extends Module {
 		}
 	}
 
-	@Override
-	public void onHud(DrawContext ctx, float td) {
-		if (target == null || mc.player == null) return;
-		long age = System.currentTimeMillis() - last;
-		if (age > 4500 || (!target.isAlive() && age > 1500)) { target = null; return; }
+	private void slot(DrawContext ctx, int x, int y, ItemStack st) {
+		RenderUtil.rrect(ctx, x, y, 17, 15, 0xFF1C1C25);
+		if (st == null || st.isEmpty()) return;
+		MatrixStack m = ctx.getMatrices();
+		m.push();
+		m.translate(x + 2.5f, y + 1.5f, 0);
+		m.scale(0.75f, 0.75f, 1f);
+		ctx.drawItem(st, 0, 0);
+		m.pop();
+	}
 
-		float f = MathHelper.clamp(target.getHealth() / target.getMaxHealth(), 0f, 1f);
+	@Override
+	protected void draw(DrawContext ctx, float td) {
+		long age = System.currentTimeMillis() - last;
+		if (target != null && (age > 4500 || (!target.isAlive() && age > 1500))) target = null;
+		boolean live = target != null;
+		if (!live && !editing) { w = 0; h = 0; return; }
+
+		TextRenderer tr = mc.textRenderer;
+		String name = live ? target.getName().getString() : "Target";
+		float hp = live ? target.getHealth() + target.getAbsorptionAmount() : 20f;
+		float max = live ? target.getMaxHealth() : 20f;
+		float f = MathHelper.clamp(hp / Math.max(1f, max), 0f, 1f);
 		shown += (f - shown) * 0.15f;
 
-		int w = 140, h = 36;
-		int x = ctx.getScaledWindowWidth() / 2 + 24, y = ctx.getScaledWindowHeight() / 2 + 14;
-		RenderUtil.rrect(ctx, x, y, w, h, 0xE0101015);
-		RenderUtil.skeetBar(ctx, x + 3, y, w - 6, 1);
-		ctx.drawTextWithShadow(mc.textRenderer, target.getName().getString(), x + 8, y + 7, 0xFFFFFFFF);
-		String hp = String.format("%.1f", Math.max(0f, target.getHealth() + target.getAbsorptionAmount()));
-		ctx.drawText(mc.textRenderer, hp, x + w - 8 - mc.textRenderer.getWidth(hp), y + 7, 0xFFB0B0C0, false);
+		int bw = 132, bh = armor.get() ? 52 : 34;
+		box(ctx, 0, 0, bw, bh);
+		RenderUtil.skeetBar(ctx, 3, 0, bw - 6, 1);
 
-		int bx = x + 8, by = y + 21, bw = w - 16;
-		ctx.fill(bx, by, bx + bw, by + 4, 0xFF24242E);
-		RenderUtil.gradientH(ctx, bx, by, bx + (int) (bw * shown), by + 4, Colors.C1, Colors.skeet(shown));
-		String d = String.format("%.1fm", mc.player.distanceTo(target));
-		ctx.drawText(mc.textRenderer, d, bx, by + 7, 0xFF70708A, false);
+		int tx = 8;
+		if (headIcon.get()) {
+			head(ctx, live ? target : null, 6, 6, 22);
+			tx = 34;
+		}
+		ctx.drawTextWithShadow(tr, name, tx, 8, 0xFFFFFFFF);
+		String dist = live && mc.player != null ? String.format("Distance: %.1f", mc.player.distanceTo(target)) : "Distance: 0.0";
+		ctx.drawText(tr, dist, tx, 19, 0xFF8A8A9A, false);
+
+		if (ring.get()) {
+			int cx = bw - 20, cy = 17, r = 9;
+			for (int i = 0; i < 48; i++) {
+				double a = -Math.PI / 2 + i * (Math.PI * 2 / 48);
+				int dx = (int) Math.round(Math.cos(a) * r), dy = (int) Math.round(Math.sin(a) * r);
+				ctx.fill(cx + dx - 1, cy + dy - 1, cx + dx + 1, cy + dy + 1, i < shown * 48 ? Colors.wave(i * 0.01f) : 0xFF2A2A36);
+			}
+			String n = String.valueOf((int) Math.ceil(hp));
+			ctx.drawCenteredTextWithShadow(tr, n, cx, cy - 4, 0xFFFFFFFF);
+		}
+
+		if (armor.get()) {
+			int y = 35;
+			EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND};
+			for (int i = 0; i < slots.length; i++) {
+				slot(ctx, 6 + i * 20, y, live ? target.getEquippedStack(slots[i]) : ItemStack.EMPTY);
+			}
+		}
+		w = bw;
+		h = bh;
 	}
 }

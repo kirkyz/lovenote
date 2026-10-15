@@ -1,12 +1,12 @@
 package com.lovenote.util;
 
-import com.lovenote.LovenoteClient;
-import com.lovenote.module.Module;
-import com.lovenote.setting.Setting;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.lovenote.LovenoteClient;
+import com.lovenote.module.Module;
+import com.lovenote.setting.Setting;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.IOException;
@@ -29,10 +29,10 @@ public final class Config {
 				JsonObject o = new JsonObject();
 				o.addProperty("enabled", m.enabled);
 				o.addProperty("key", m.key);
-				o.addProperty("fav", m.favorite);
 				JsonObject s = new JsonObject();
 				for (Setting st : m.settings) st.save(s);
 				o.add("settings", s);
+				m.saveExtra(o);
 				root.add(m.name, o);
 			}
 			Files.writeString(path(), GSON.toJson(root));
@@ -51,11 +51,11 @@ public final class Config {
 				JsonObject o = root.getAsJsonObject(m.name);
 				if (o.has("enabled")) m.enabled = o.get("enabled").getAsBoolean();
 				if (o.has("key")) m.key = o.get("key").getAsInt();
-				if (o.has("fav")) m.favorite = o.get("fav").getAsBoolean();
 				if (o.has("settings")) {
 					JsonObject s = o.getAsJsonObject("settings");
 					for (Setting st : m.settings) st.load(s);
 				}
+				m.loadExtra(o);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

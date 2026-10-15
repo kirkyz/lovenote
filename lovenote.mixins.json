@@ -5,7 +5,12 @@
   "client": [
     "ClientPlayerInteractionManagerMixin",
     "ClientPlayNetworkHandlerMixin",
-    "WorldRendererMixin"
+    "ClientWorldMixin",
+    "HeldItemRendererMixin",
+    "LivingEntityMixin",
+    "MinecraftClientAccessor"
   ],
-  "injectors": { "defaultRequire": 1 }
+  "injectors": {
+    "defaultRequire": 1
+  }
 }
