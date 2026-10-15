@@ -66,6 +66,7 @@ public class ModuleManager {
 		modules.add(new TimeChanger());
 		modules.add(new Fullbright());
 		modules.add(new Zoom());
+		modules.add(new ParticleField());
 		// ---- hud widgets
 		modules.add(new InterfaceModule());
 		modules.add(new Watermark());
@@ -152,6 +153,7 @@ public class ModuleManager {
 		d("TimeChanger", "Client-side time of day");
 		d("Fullbright", "See clearly in the dark");
 		d("Zoom", "Custom field of view, bind it to zoom");
+		d("ParticleField", "Ambient particle field drifting around you.");
 
 		d("Watermark", "Client name, user, fps, time and IP");
 		d("Music", "Now-playing widget for Spotify");
