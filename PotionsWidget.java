@@ -23,14 +23,14 @@ public class PotionsWidget extends HudWidget {
 		int y = 19;
 		for (StatusEffectInstance e : mc.player.getStatusEffects()) {
 			String name = e.getEffectType().getName().getString() + " " + (e.getAmplifier() + 1);
-			String time = StatusEffectUtil.getDurationText(e, 1.0f).getString();
+			String time = StatusEffectUtil.getDurationText(e, 1.0f, 1.0f).getString();
 			bw = Math.max(bw, tr.getWidth(name) + tr.getWidth(time) + 24);
 			y += 15;
 		}
 		y = 19;
 		for (StatusEffectInstance e : mc.player.getStatusEffects()) {
 			String name = e.getEffectType().getName().getString() + " " + (e.getAmplifier() + 1);
-			String time = StatusEffectUtil.getDurationText(e, 1.0f).getString();
+			String time = StatusEffectUtil.getDurationText(e, 1.0f, 1.0f).getString();
 			box(ctx, 0, y, bw, 14);
 			ctx.drawTextWithShadow(tr, name, 7, y + 3, e.getEffectType().isBeneficial() ? 0xFFE8E8F0 : 0xFFFF8A8A);
 			ctx.drawTextWithShadow(tr, time, bw - 7 - tr.getWidth(time), y + 3, Colors.wave(y * 0.01f));
