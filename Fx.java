@@ -3,6 +3,7 @@ package com.lovenote.util;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
@@ -37,6 +38,8 @@ public final class Fx {
 		RenderSystem.depthMask(true);
 		RenderSystem.enableCull();
 		RenderSystem.defaultBlendFunc();
+		// hand the plain colour program back so the next module's geometry batch is valid
+		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 	}
 
 	public static void vc(BufferBuilder b, Matrix4f m, float x, float y, float z, int c) {
@@ -65,7 +68,7 @@ public final class Fx {
 
 	/** Open a textured quad batch. Remember to call Tessellator.getInstance().draw(). */
 	public static BufferBuilder texQuads() {
-		RenderSystem.setShader(net.minecraft.client.render.GameRenderer::getPositionTexColorProgram);
+		RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
 		BufferBuilder b = Tessellator.getInstance().getBuffer();
 		b.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
 		return b;
