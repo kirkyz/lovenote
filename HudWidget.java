@@ -45,7 +45,7 @@ public abstract class HudWidget extends Module {
 
 	protected void head(DrawContext ctx, Entity e, int x, int y, int s) {
 		if (e instanceof AbstractClientPlayerEntity p) {
-			Identifier tex = p.getSkinTexture();
+			Identifier tex = p.getSkinTextures().texture();
 			ctx.drawTexture(tex, x, y, s, s, 8f, 8f, 8, 8, 64, 64);
 			ctx.drawTexture(tex, x, y, s, s, 40f, 8f, 8, 8, 64, 64);
 		} else {
