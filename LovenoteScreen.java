@@ -1361,10 +1361,10 @@ public class LovenoteScreen extends Screen {
 			return true;
 		}
 		if (selected != null && mx >= panX && mx <= panX + PW && my >= panY && my <= panY + PH) {
-			panelScrollTarget = MathHelper.clamp(panelScrollTarget - amount * 24, 0, panelMax);
+			panelScrollTarget = MathHelper.clamp(panelScrollTarget - (float) amount * 24f, 0f, (float) panelMax);
 			return true;
 		}
-		scrollTarget = MathHelper.clamp(scrollTarget - amount * 28, 0, maxScroll);
+		scrollTarget = MathHelper.clamp(scrollTarget - (float) amount * 28f, 0f, (float) maxScroll);
 		sbAlpha = 1f;
 		return true;
 	}
@@ -1386,23 +1386,4 @@ public class LovenoteScreen extends Screen {
 				return true;
 			}
 			close();
-			return true;
-		}
-		if (typing) {
-			if (search.isFocused() && search.keyPressed(key, scan, mods)) return true;
-			if (primField.isFocused() && primField.keyPressed(key, scan, mods)) return true;
-			if (secField.isFocused() && secField.keyPressed(key, scan, mods)) return true;
-			if (idField.isFocused() && idField.keyPressed(key, scan, mods)) return true;
-		}
-		return super.keyPressed(key, scan, mods);
-	}
-
-	@Override
-	public boolean charTyped(char c, int mods) {
-		if (search.isFocused()) return search.charTyped(c, mods);
-		if (primField.isFocused()) return primField.charTyped(c, mods);
-		if (secField.isFocused()) return secField.charTyped(c, mods);
-		if (idField.isFocused()) return idField.charTyped(c, mods);
-		return super.charTyped(c, mods);
-	}
-}
+			return true
