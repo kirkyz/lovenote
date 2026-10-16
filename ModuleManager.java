@@ -62,6 +62,11 @@ public class ModuleManager {
 		modules.add(new NoSlow());
 		modules.add(new FastFall());
 		modules.add(new ElytraPlus());
+		// ---- player
+		modules.add(new ToggleSprint());
+		modules.add(new AutoJump());
+		modules.add(new AntiHunger());
+		modules.add(new FastLadder());
 		// ---- visuals
 		modules.add(new ESP());
 		modules.add(new ItemESP());
@@ -105,13 +110,35 @@ public class ModuleManager {
 		modules.add(new CustomCrosshair());
 		modules.add(new Bloom());
 		modules.add(new Beams());
-		modules.add(new Fog());
 		modules.add(new BlockHighlight());
 		modules.add(new Waypoints());
+		// ---- render
+		modules.add(new Fog());
+		modules.add(new RenderDistance());
+		modules.add(new Clouds());
+		modules.add(new GraphicsMode());
+		modules.add(new Particles());
+		modules.add(new BiomeBlend());
+		modules.add(new EntityShadows());
+		modules.add(new MaxFps());
+		modules.add(new ChatOpacity());
+		modules.add(new Weather());
+		modules.add(new SmoothCamera());
+		modules.add(new FovOverride());
+		modules.add(new NoViewBob());
+		// ---- donut
+		modules.add(new AutoSell());
+		modules.add(new AutoBuy());
+		modules.add(new AutoTip());
+		modules.add(new ChestStealer());
+		modules.add(new SpawnerESP());
+		modules.add(new LootBeam());
+		modules.add(new AutoReconnect());
 		// ---- hud widgets
 		modules.add(new InterfaceModule());
 		modules.add(new Watermark());
 		modules.add(new SpotifyHud());
+		modules.add(new Lyrics());
 		modules.add(new StaffList());
 		modules.add(new TargetHud());
 		modules.add(new SpeedWidget());
@@ -147,6 +174,8 @@ public class ModuleManager {
 		hypixel("Velocity", "WTap", "Criticals", "AntiBot", "AutoTrap", "AutoWeb", "Surround",
 				"AutoCity", "AutoPotion", "AutoGApple", "AutoTool", "AutoLog", "AutoRespawn",
 				"AutoFarm", "AutoFish", "CommandMacro", "ServerInfo", "StaffDetector");
+		donut("AutoSell", "AutoBuy", "AutoTip", "ChestStealer", "SpawnerESP", "LootBeam",
+				"AutoReconnect", "AutoFarm", "AutoFish", "AutoTool", "AutoArmor");
 
 		describe();
 		for (String n : new String[]{"Interface", "Watermark", "ModuleList", "TargetHud",
@@ -155,12 +184,15 @@ public class ModuleManager {
 		}
 	}
 
-	private void hypixel(String... names) {
+	private void hypixel(String... names) { alias(Category.HYPIXEL, names); }
+	private void donut(String... names) { alias(Category.DONUT, names); }
+
+	private void alias(Category c, String... names) {
 		for (String n : names) {
 			for (Module m : modules) {
 				if (!m.name.equals(n)) continue;
 				if (m instanceof HudWidget) continue;
-				m.alsoIn.add(Category.HYPIXEL);
+				m.alsoIn.add(c);
 			}
 		}
 	}
@@ -183,7 +215,6 @@ public class ModuleManager {
 		d("Backtrack", "Shows targets at their delayed position");
 		d("TargetStrafe", "Strafes around whoever is closest");
 		d("Reach", "Extends your block and entity reach");
-
 		d("Velocity", "Reduces or cancels knockback");
 		d("WTap", "Resets sprint on hit for full knockback");
 		d("Criticals", "Allows you to do critical hits even when it's impossible");
@@ -216,6 +247,11 @@ public class ModuleManager {
 		d("NoSlow", "No slowdown while eating or blocking");
 		d("FastFall", "Drops faster so you land first");
 		d("ElytraPlus", "Elytra auto-deploy and rocket boost");
+
+		d("ToggleSprint", "Sprint stays on without holding the key");
+		d("AutoJump", "Vanilla auto jump toggle");
+		d("AntiHunger", "Sends onGround=false while moving to slow hunger");
+		d("FastLadder", "Climb ladders and vines much faster");
 
 		d("ESP", "Highlights player models with configurable boxes");
 		d("ItemESP", "Highlights dropped items");
@@ -259,12 +295,34 @@ public class ModuleManager {
 		d("CustomCrosshair", "Animated crosshair in your theme colour");
 		d("Bloom", "Soft additive glow around players");
 		d("Beams", "Vertical light shafts above players");
-		d("Fog", "Custom fog distance and colour");
 		d("BlockHighlight", "Outlines the block you are looking at");
 		d("Waypoints", "Saved points with beams and distance labels");
 
+		d("Fog", "Custom fog distance and colour");
+		d("RenderDistance", "Overrides the client view distance");
+		d("Clouds", "Cloud render mode, including fully off");
+		d("GraphicsMode", "Forces fast, fancy or fabulous graphics");
+		d("Particles", "Cuts particle spam for more fps");
+		d("BiomeBlend", "Biome colour blend radius");
+		d("EntityShadows", "Toggles entity drop shadows");
+		d("MaxFps", "Caps the framerate");
+		d("ChatOpacity", "Chat background transparency");
+		d("Weather", "Client-side weather override");
+		d("SmoothCamera", "Cinematic smoothed camera movement");
+		d("FovOverride", "Locks your field of view");
+		d("NoViewBob", "Removes walking camera bob");
+
+		d("AutoSell", "Runs your sell command on a timer");
+		d("AutoBuy", "Buys a set item on a timer");
+		d("AutoTip", "Tips everyone on a timer for free coins");
+		d("ChestStealer", "Empties any chest you open");
+		d("SpawnerESP", "Boxes spawners through walls");
+		d("LootBeam", "Vertical beams on dropped items");
+		d("AutoReconnect", "Rejoins the server after a disconnect");
+
 		d("Watermark", "Client name, user, fps, time and IP");
 		d("Music", "Now-playing widget");
+		d("Lyrics", "Live synced lyrics from lrclib.net");
 		d("StaffList", "Lists spectators (vanished staff)");
 		d("TargetHud", "Shows the player you last hit");
 		d("Speed Display", "Shows your current speed in blocks per second");
@@ -305,7 +363,7 @@ public class ModuleManager {
 		return null;
 	}
 
-	public List<Category> in(Category c) { return null; }
+	public List<Module> in(Category c) { return modulesIn(c); }
 
 	public List<Module> modulesIn(Category c) {
 		List<Module> out = new ArrayList<>();
