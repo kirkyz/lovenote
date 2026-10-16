@@ -30,6 +30,12 @@ public class InterfaceModule extends Module {
 	public final BoolSetting footer = add(new BoolSetting("Footer bar", true));
 	public final BoolSetting tooltips = add(new BoolSetting("Tooltips", true));
 
+	// ---- logo
+	public final BoolSetting logo = add(new BoolSetting("Spinning logo", true));
+	public final NumberSetting logoSpin = add(new NumberSetting("Logo spin (ms)", 2600, 800, 8000, 100));
+	public final NumberSetting logoSize = add(new NumberSetting("Logo size", 26, 16, 40, 1));
+	public final BoolSetting logoGlow = add(new BoolSetting("Logo glow", true));
+
 	// ---- style
 	public final ModeSetting style = add(new ModeSetting("GUI style", "Classic", "Classic", "Liquid", "Transparent"));
 	public final ModeSetting card = add(new ModeSetting("Card style", "Solid", "Solid", "Outline", "Glass"));
@@ -37,6 +43,7 @@ public class InterfaceModule extends Module {
 	public final NumberSetting glow = add(new NumberSetting("Accent glow", 5, 0, 10, 1));
 	public final BoolSetting shadow = add(new BoolSetting("Drop shadow", true));
 	public final BoolSetting headerLine = add(new BoolSetting("Header accent line", true));
+	public final BoolSetting sheen = add(new BoolSetting("Inner sheen", true));
 
 	// ---- animation
 	public final ModeSetting anim = add(new ModeSetting("Animation", "Fade", "Fade", "Tilt", "Scale", "None"));
