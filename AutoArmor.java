@@ -5,10 +5,12 @@ import com.lovenote.module.Module;
 import com.lovenote.setting.NumberSetting;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.AttributeModifiersComponent;
+import net.minecraft.component.type.EquippableComponent;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.equipment.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
@@ -21,9 +23,27 @@ public class AutoArmor extends Module {
 		super("AutoArmor", Category.COMBAT);
 	}
 
+	/** Armour now lives in the EQUIPPABLE component, not in an ArmorItem class. */
+	private static boolean isArmorFor(ItemStack st, EquipmentSlot type) {
+		EquippableComponent eq = st.get(DataComponentTypes.EQUIPPABLE);
+		return eq != null && eq.slot() == type;
+	}
+
+	private static double defense(ItemStack st) {
+		AttributeModifiersComponent mods = st.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+		if (mods == null) return 0.0;
+		double total = 0.0;
+		for (AttributeModifiersComponent.Entry e : mods.modifiers()) {
+			if (e.attribute().getKey().map(k -> "armor".equals(k.getValue().getPath())).orElse(false)) {
+				total += e.modifier().value();
+			}
+		}
+		return total;
+	}
+
 	private static double score(ItemStack st, EquipmentSlot type) {
-		if (!(st.getItem() instanceof ArmorItem a) || a.getSlotType() != type) return -1;
-		return a.getProtection() + a.getToughness() * 0.5 + EnchantmentHelper.getLevel(Enchantments.PROTECTION, st) * 0.4;
+		if (!isArmorFor(st, type)) return -1;
+		return defense(st) + EnchantmentHelper.getLevel(Enchantments.PROTECTION, st) * 0.4;
 	}
 
 	@Override
@@ -37,7 +57,7 @@ public class AutoArmor extends Module {
 		for (int i = 0; i < 4; i++) {
 			int armorSlot = 5 + i;
 			ItemStack cur = h.getSlot(armorSlot).getStack();
-			if (!cur.isEmpty() && !(cur.getItem() instanceof ArmorItem)) continue; // keep elytra etc.
+			if (!cur.isEmpty() && defense(cur) <= 0.0) continue; // keep elytra / non-armour
 			double best = score(cur, types[i]);
 			int from = -1;
 			for (int s = 9; s <= 44; s++) {
