@@ -6,11 +6,10 @@ import com.lovenote.setting.ModeSetting;
 import com.lovenote.setting.NumberSetting;
 import com.lovenote.util.Colors;
 import com.lovenote.util.Fx;
+import com.lovenote.util.Gl;
 import com.lovenote.util.Tex;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.lovenote.util.WorldRenderContext;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.util.math.MatrixStack;
 import org.joml.Matrix4f;
 
@@ -28,9 +27,9 @@ public class SunGlow extends Module {
 	}
 
 	private void disc(Matrix4f mat, double x, double y, double z, float size, int c) {
-		BufferBuilder b = Fx.texQuads();
+		BufferBuilder b = Fx.texQuads(Tex.SOFT);
 		Fx.billboard(b, mat, (float) x, (float) y, (float) z, size, c);
-		Tessellator.getInstance().draw();
+		Fx.draw();
 	}
 
 	@Override
@@ -38,11 +37,10 @@ public class SunGlow extends Module {
 		if (mc.player == null || mc.world == null) return;
 		Tex.ensure();
 		Fx.cameraBasis(ctx.camera());
-		RenderSystem.setShaderTexture(0, Tex.SOFT);
 		Fx.additive();
 
 		Matrix4f mat = m.peek().getPositionMatrix();
-		float ang = mc.world.getSkyAngleRadians(ctx.tickDelta());
+		float ang = Gl.skyAngleRadians(mc.world, ctx.tickDelta());
 		double dx = -Math.sin(ang), dy = Math.cos(ang);
 		double d = distance.get();
 		double cx = mc.player.getX(), cy = mc.player.getY(), cz = mc.player.getZ();
