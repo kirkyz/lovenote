@@ -7,7 +7,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.potion.PotionUtil;
+import net.minecraft.component.type.PotionContents;
 import net.minecraft.util.Hand;
 
 /** Throws a splash healing potion at your feet when health is low. */

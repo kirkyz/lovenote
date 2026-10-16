@@ -9,7 +9,7 @@ import com.lovenote.setting.BoolSetting;
 import com.lovenote.setting.NumberSetting;
 import com.lovenote.util.Colors;
 import com.lovenote.util.RenderUtil;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import com.lovenote.util.WorldRenderContext;
 import net.minecraft.block.BarrelBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;

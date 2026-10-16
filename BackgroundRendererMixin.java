@@ -2,7 +2,7 @@ package com.lovenote.mixin;
 
 import com.lovenote.LovenoteClient;
 import com.lovenote.module.impl.Fog;
-import net.minecraft.client.render.BackgroundRenderer;
+import net.minecraft.client.render.FogRenderer;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.world.ClientWorld;
 import org.spongepowered.asm.mixin.Mixin;

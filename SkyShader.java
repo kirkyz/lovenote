@@ -12,10 +12,10 @@ import com.lovenote.util.Tex;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.DimensionEffects;
+import net.minecraft.client.world.DimensionEffects;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
@@ -44,8 +44,8 @@ public class SkyShader extends Module {
 	private final NumberSetting domeDetail = add(new NumberSetting("Dome detail", 48, 16, 96, 8));
 
 	private static final float R = 260f;
-	private static final Identifier SUN = new Identifier("textures/environment/sun.png");
-	private static final Identifier MOON = new Identifier("textures/environment/moon_phases.png");
+	private static final Identifier SUN = Identifier.ofVanilla("textures/environment/sun.png");
+	private static final Identifier MOON = Identifier.ofVanilla("textures/environment/moon_phases.png");
 
 	private float[] stars;
 	private int starCount = -1;
