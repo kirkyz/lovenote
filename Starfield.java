@@ -8,10 +8,8 @@ import com.lovenote.setting.NumberSetting;
 import com.lovenote.util.Colors;
 import com.lovenote.util.Fx;
 import com.lovenote.util.Tex;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.lovenote.util.WorldRenderContext;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.util.math.MatrixStack;
 import org.joml.Matrix4f;
 
@@ -68,7 +66,6 @@ public class Starfield extends Module {
 		if (xs == null || built != n) build(n);
 		Tex.ensure();
 		Fx.cameraBasis(ctx.camera());
-		RenderSystem.setShaderTexture(0, Tex.STAR);
 		Fx.additive();
 
 		Matrix4f mat = m.peek().getPositionMatrix();
@@ -80,7 +77,7 @@ public class Starfield extends Module {
 		double cx = mc.player.getX(), cz = mc.player.getZ();
 		float sz = (float) size.get();
 
-		BufferBuilder b = Fx.texQuads();
+		BufferBuilder b = Fx.texQuads(Tex.STAR);
 		for (int i = 0; i < n; i++) {
 			double x = xs[i] * R, y = ys[i] * R, z = zs[i] * R;
 			double rx = x * cs - z * sn;
@@ -89,7 +86,7 @@ public class Starfield extends Module {
 			int c = Colors.alpha(pick(i), (int) (a * 220));
 			Fx.billboard(b, mat, (float) (cx + rx), (float) (baseY + y), (float) (cz + rz), sz, c);
 		}
-		Tessellator.getInstance().draw();
+		Fx.draw();
 		Fx.end();
 	}
 }
