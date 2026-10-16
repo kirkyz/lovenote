@@ -24,7 +24,8 @@ public class FakePlayer extends Module {
 		double x = mc.player.getX() - Math.sin(rad) * 3, z = mc.player.getZ() + Math.cos(rad) * 3;
 		fake.refreshPositionAndAngles(x, mc.player.getY(), z, mc.player.getYaw() + 180f, 0f);
 		fake.setHealth(20f);
-		mc.world.addEntity(1_900_000, fake);
+		fake.setId(1_900_000);
+mc.world.addEntity(fake);
 	}
 
 	@Override
