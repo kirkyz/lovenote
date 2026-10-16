@@ -4,6 +4,7 @@ import com.lovenote.gui.HudEditorScreen;
 import com.lovenote.gui.LovenoteScreen;
 import com.lovenote.module.Module;
 import com.lovenote.module.ModuleManager;
+import com.lovenote.module.impl.Fog;
 import com.lovenote.module.impl.InterfaceModule;
 import com.lovenote.spotify.SpotifyManager;
 import com.lovenote.util.Config;
@@ -56,6 +57,10 @@ public class LovenoteClient implements ClientModInitializer {
 			}
 			modules.tick();
 		});
+
+		// fog override is only live between these two events, so the GUI keeps vanilla fog values
+		WorldRenderEvents.START.register(ctx -> Fog.active = true);
+		WorldRenderEvents.END.register(ctx -> Fog.active = false);
 
 		HudRenderCallback.EVENT.register((ctx, td) -> {
 			MinecraftClient mc = MinecraftClient.getInstance();
