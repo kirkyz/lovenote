@@ -181,8 +181,6 @@ public final class LyricsManager {
 		return texts.get(i);
 	}
 
-	public synchronized boolean isCurrent(int delta) { return delta == 0 && curIndex >= 0; }
-
 	private static String str(JsonObject o, String n) {
 		return o.has(n) && !o.get(n).isJsonNull() ? o.get(n).getAsString() : "";
 	}
