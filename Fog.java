@@ -6,17 +6,16 @@ import com.lovenote.setting.BoolSetting;
 import com.lovenote.setting.ModeSetting;
 import com.lovenote.setting.NumberSetting;
 import com.lovenote.util.Colors;
-import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.DrawContext;
 
 /** Custom fog distance and colour, applied through RenderSystemMixin. */
 public class Fog extends Module {
 
-	/**
-	 * True only while the world (and not the interface) is being drawn. Vanilla switches fog off for
-	 * the GUI/HUD pass by setting huge fog distances, so the blanket fog override has to stand down
-	 * there or it tints every bit of UI text.
-	 */
+	/** True only while the world is being drawn, never during the HUD/GUI pass. */
 	public static boolean active = false;
+
+	/** Vanilla hands the interface a huge fog distance; anything past this is treated as "not world". */
+	public static final float UI_SENTINEL = 900f;
 
 	private final ModeSetting preset = add(new ModeSetting("Distance", "Thin", "Off", "Thin", "Thick", "Custom"));
 	private final NumberSetting start = add(new NumberSetting("Start", 20, 0, 256, 2));
@@ -35,9 +34,15 @@ public class Fog extends Module {
 		active = false;
 	}
 
+	@Override
+	public void onHud(DrawContext ctx, float td) {
+		// the HUD pass is drawn after the world: stand down so UI text is never fogged
+		active = false;
+	}
+
 	public float fogStart(float in) {
 		return switch (preset.get()) {
-			case "Off" -> 1f;
+			case "Off" -> 0f;
 			case "Thick" -> 6f;
 			case "Custom" -> (float) start.getI();
 			default -> 20f;
@@ -64,11 +69,5 @@ public class Fog extends Module {
 			case "White" -> 0xFFFFFFFF;
 			default -> Colors.C2;
 		};
-	}
-
-	/** Fallback path, used if BackgroundRendererMixin happens to match too. */
-	public void apply() {
-		RenderSystem.setShaderFogStart(fogStart(0f));
-		RenderSystem.setShaderFogEnd(fogEnd(0f));
 	}
 }
