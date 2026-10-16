@@ -14,8 +14,8 @@ import org.lwjgl.opengl.GL11;
 public final class Fx {
 	private Fx() {}
 
-	private static final Vector3f RIGHT = new Vector3f();
-	private static final Vector3f UP = new Vector3f();
+	public static final Vector3f RIGHT = new Vector3f();
+	public static final Vector3f UP = new Vector3f();
 
 	/** Refresh the camera basis so billboards always face the viewer. */
 	public static void cameraBasis(Camera cam) {
