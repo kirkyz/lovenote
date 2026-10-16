@@ -175,14 +175,8 @@ public class HudEditorScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double mx, double my, double amount) {
-		for (HudWidget w : active()) {
-			int x = w.px(width), y = w.py(height);
-			if (mx >= x && mx <= x + w.pxW() && my >= y && my <= y + w.pxH()) {
-				w.size.set(w.size.get() + amount * 0.05);
-				return true;
-			}
-		}
-		return super.mouseScrolled(mx, my, amount);
+public boolean mouseScrolled(double mx, double my, double horizontalAmount, double verticalAmount) {
+    return super.mouseScrolled(mx, my, horizontalAmount, verticalAmount);
+}
 	}
 }
