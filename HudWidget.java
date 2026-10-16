@@ -12,6 +12,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
 import org.joml.Matrix3x2fStack;
 
+/**
+ * Base class for draggable HUD widgets. Position is stored as a fraction of the screen
+ * so it survives resolution / GUI-scale changes. Drawn in local space starting at (0,0).
+ */
 public abstract class HudWidget extends Module {
 	/** true while the HUD editor is open: widgets show placeholder content. */
 	public static boolean editing;
