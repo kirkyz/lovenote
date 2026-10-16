@@ -1386,4 +1386,23 @@ public class LovenoteScreen extends Screen {
 				return true;
 			}
 			close();
-			return true
+			return true;
+		}
+		if (typing) {
+			if (search.isFocused() && search.keyPressed(key, scan, mods)) return true;
+			if (primField.isFocused() && primField.keyPressed(key, scan, mods)) return true;
+			if (secField.isFocused() && secField.keyPressed(key, scan, mods)) return true;
+			if (idField.isFocused() && idField.keyPressed(key, scan, mods)) return true;
+		}
+		return super.keyPressed(key, scan, mods);
+	}
+
+	@Override
+	public boolean charTyped(char c, int mods) {
+		if (search.isFocused()) return search.charTyped(c, mods);
+		if (primField.isFocused()) return primField.charTyped(c, mods);
+		if (secField.isFocused()) return secField.charTyped(c, mods);
+		if (idField.isFocused()) return idField.charTyped(c, mods);
+		return super.charTyped(c, mods);
+	}
+}
