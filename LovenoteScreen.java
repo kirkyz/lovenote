@@ -15,6 +15,7 @@ import com.lovenote.spotify.LyricsManager;
 import com.lovenote.spotify.SpotifyManager;
 import com.lovenote.util.Colors;
 import com.lovenote.util.Config;
+import com.lovenote.util.DrainLogo;
 import com.lovenote.util.RenderUtil;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -40,6 +41,7 @@ public class LovenoteScreen extends Screen {
 	private static final int RAIL_MIN = 46;
 
 	private static int mainX = Integer.MIN_VALUE, mainY, panX = Integer.MIN_VALUE, panY, page;
+	private static long sessionStart;
 
 	private static final int K_NONE = -1, K_CARD = 0, K_SWITCH = 1, K_BOOL = 2, K_SLIDER = 3, K_MODE = 4, K_MULTI = 5,
 			K_PTOGGLE = 6, K_PCLOSE = 7, K_BIND = 8, K_ACCENT = 9, K_EDITOR = 10, K_CLOSE = 12,
@@ -76,6 +78,7 @@ public class LovenoteScreen extends Screen {
 	private float gs = 1f;
 	private int vw, vh;
 	private float dt, ga = 1f, la = 1f, openMs, closeMs, tabMs, scrollTarget, scrollShown, panelScrollTarget, panelScrollShown;
+	private float pillY = -1f;
 	private int maxScroll, panelMax;
 	private boolean closing, finishClose, animating;
 	private long lastNano;
@@ -85,6 +88,7 @@ public class LovenoteScreen extends Screen {
 	private int[] clip = {0, 0, 99999, 99999};
 	private boolean settingFields;
 	private String tooltip;
+	private float sbAlpha = 0.45f;
 
 	private float[] px, py, pvx, pvy;
 	private int particleCount = 45;
@@ -112,6 +116,7 @@ public class LovenoteScreen extends Screen {
 
 	@Override
 	protected void init() {
+		if (sessionStart == 0L) sessionStart = System.currentTimeMillis();
 		InterfaceModule im0 = LovenoteClient.modules.get(InterfaceModule.class);
 		gs = im0 != null ? MathHelper.clamp(im0.guiScale.getI() / 100f, 0.4f, 1.1f) : 1f;
 		readLayout(im0);
@@ -152,11 +157,7 @@ public class LovenoteScreen extends Screen {
 
 	private void readLayout(InterfaceModule im) {
 		if (im == null) {
-			winW = 600;
-			winH = 372;
-			railW = 118;
-			railRight = false;
-			particleCount = 45;
+			winW = 600; winH = 372; railW = 118; railRight = false; particleCount = 45;
 			return;
 		}
 		winW = MathHelper.clamp(im.windowWidth.getI(), 460, 900);
@@ -223,7 +224,6 @@ public class LovenoteScreen extends Screen {
 		rounded(ctx, x, y, w, h, r, a(c));
 	}
 
-	/** Rounded rect from fills, so it does not depend on RenderUtil's private radius overload. */
 	private void rounded(DrawContext ctx, int x, int y, int w, int h, int r, int c) {
 		if (w <= 0 || h <= 0) return;
 		r = Math.max(0, Math.min(r, Math.min(w, h) / 2));
@@ -308,8 +308,8 @@ public class LovenoteScreen extends Screen {
 		int trackH = bottom - top;
 		int barH = Math.max(18, (int) (trackH * (trackH / (float) (trackH + max))));
 		int barY = top + (int) ((trackH - barH) * (shown / max));
-		rr(ctx, x, top, 3, trackH, 2, Colors.alpha(Colors.track(), 120));
-		rr(ctx, x, barY, 3, barH, 2, Colors.wave(0.1f));
+		rr(ctx, x, top, 3, trackH, 2, Colors.alpha(Colors.track(), (int) (120 * sbAlpha)));
+		rr(ctx, x, barY, 3, barH, 2, Colors.alpha(Colors.wave(0.1f), (int) (255 * sbAlpha)));
 	}
 
 	private int cols(InterfaceModule im) {
@@ -323,8 +323,15 @@ public class LovenoteScreen extends Screen {
 
 	private float stagger(int index, InterfaceModule im) {
 		if (im == null || !im.stagger.get()) return 1f;
-		float delay = index * im.staggerSpeed.getF();
-		return MathHelper.clamp((tabMs - delay) / 170f, 0f, 1f);
+		return MathHelper.clamp((tabMs - index * im.staggerSpeed.getF()) / 170f, 0f, 1f);
+	}
+
+	private static String groupName(Setting s) {
+		if (s instanceof BoolSetting) return "Toggles";
+		if (s instanceof NumberSetting) return "Values";
+		if (s instanceof ModeSetting) return "Modes";
+		if (s instanceof MultiSetting) return "Lists";
+		return "Other";
 	}
 
 	// ------------------------------------------------------------------ settings widgets
@@ -365,6 +372,17 @@ public class LovenoteScreen extends Screen {
 		if (s instanceof NumberSetting) return 29;
 		String[] names = s instanceof ModeSetting m ? m.modes : ((MultiSetting) s).names;
 		return 14 + chipsHeight(names, w) + 7;
+	}
+
+	private int panelTotal(Module m, int w) {
+		int total = 0;
+		String last = null;
+		for (Setting s : m.settings) {
+			String g = groupName(s);
+			if (!g.equals(last)) { total += 18; last = g; }
+			total += rowH(s, w);
+		}
+		return total;
 	}
 
 	private int drawSetting(DrawContext ctx, Module owner, Setting s, int x, int y, int w, boolean live) {
@@ -427,6 +445,7 @@ public class LovenoteScreen extends Screen {
 		wx = mainX;
 		wy = mainY;
 		tabMs += dt;
+		sbAlpha += (0.45f - sbAlpha) * 0.12f;
 
 		float open;
 		if (closing) {
@@ -533,6 +552,14 @@ public class LovenoteScreen extends Screen {
 		if (im == null || im.headerLine.get()) {
 			grad(ctx, wx + corner, wy, wx + winW - corner, wy + 1, Colors.alpha(Colors.C1, 150), Colors.alpha(Colors.C3, 150));
 		}
+		if (im != null && im.sheen.get()) {
+			for (int i = 0; i < 26; i++) {
+				int yy = wy + 2 + i * 2;
+				if (yy >= wy + winH - 2) break;
+				int al = (int) (10 * (1f - i / 26f));
+				fill(ctx, wx + 2, yy, wx + winW - 2, yy + 2, Colors.alpha(0xFFFFFF, al));
+			}
+		}
 		if (im != null && im.style.is("Liquid")) {
 			grad(ctx, wx + 2, wy + 2, wx + winW - 2, wy + 64, Colors.alpha(Colors.C1, 30), Colors.alpha(Colors.C3, 30));
 		}
@@ -555,17 +582,32 @@ public class LovenoteScreen extends Screen {
 		if (interactive) renderField(ctx, search, mx, my, delta);
 		if (search.getText().isEmpty() && !search.isFocused()) txt(ctx, "Search...", cx + 22, wy + 14, Colors.faint());
 
-		int bx = railRight ? wx + winW - 16 : wx + winW - 16;
+		// breadcrumb
+		String crumb = "lovenote";
+		int crumbX = cx + sw + 10;
+		txt(ctx, crumb, crumbX, wy + 14, Colors.alpha(Colors.faint(), 170));
+		crumbX += textRenderer.getWidth(crumb) + 4;
+		txt(ctx, "\u203A", crumbX, wy + 14, Colors.alpha(Colors.faint(), 120));
+		crumbX += 8;
+		txt(ctx, !q.isEmpty() ? "search" : pages[page].label.toLowerCase(), crumbX, wy + 14, Colors.wave(0f));
+
+		int bx = wx + winW - 16;
 		boolean cHov = interactive && mx >= bx - 4 && mx <= bx + 10 && my >= wy + 10 && my <= wy + 26;
 		circle(ctx, bx + 3, wy + 18, 5, Colors.alpha(cHov ? 0xFFEF4444 : Colors.chip(), 255));
 		addHit(bx - 3, wy + 10, 14, 14, K_CLOSE, null, null, 0);
 
+		// title, sliding in on tab change
+		float tSlide = MathHelper.clamp(tabMs / 220f, 0f, 1f);
+		float tEase = 1f - (1f - tSlide) * (1f - tSlide);
+		int titleY = wy + 46 + (int) ((1f - tEase) * 8f);
+		la = Math.min(1f, tEase + 0.15f);
 		String title = !q.isEmpty() ? "All" : pages[page].label;
-		txtScaled(ctx, title, cx, wy + 46, Colors.text(), 1.32f);
+		txtScaled(ctx, title, cx, titleY, Colors.text(), 1.32f);
 		int count = visibleModules(q).size();
 		String sub = count + (count == 1 ? " module" : " modules");
 		int subX = cx + (int) (textRenderer.getWidth(title) * 1.32f) + 8;
-		if (subX + textRenderer.getWidth(sub) < cx + cw) txt(ctx, sub, subX, wy + 50, Colors.faint());
+		if (subX + textRenderer.getWidth(sub) < cx + cw) txt(ctx, sub, subX, titleY + 4, Colors.faint());
+		la = 1f;
 
 		int top = wy + 66, bottom = ftr - 6;
 		if (q.isEmpty() && pages[page] == Category.HUD) {
@@ -595,23 +637,22 @@ public class LovenoteScreen extends Screen {
 
 	private void drawFooter(DrawContext ctx, int cx, int cw, int ftr, InterfaceModule im) {
 		int y = ftr + 7;
-		int left = cx;
-		txt(ctx, "lovenote", left, y, Colors.faint());
-		left += textRenderer.getWidth("lovenote") + 6;
-		txt(ctx, "v1.0.0", left, y, Colors.alpha(Colors.faint(), 140));
+		txt(ctx, "lovenote", cx, y, Colors.faint());
+		int left = cx + textRenderer.getWidth("lovenote") + 6;
+		long secs = (System.currentTimeMillis() - sessionStart) / 1000L;
+		String sess = String.format("%02d:%02d", secs / 60, secs % 60);
+		txt(ctx, sess, left, y, Colors.alpha(Colors.faint(), 140));
 
 		int enabled = 0;
 		for (Module m : LovenoteClient.modules.all()) if (m.enabled) enabled++;
-
 		String[] seg = { enabled + " on", client.getCurrentFps() + " fps", "ctrl+scroll" };
 		int[] w = new int[seg.length];
 		int total = 0;
 		for (int i = 0; i < seg.length; i++) { w[i] = textRenderer.getWidth(seg[i]); total += w[i] + 10; }
 		total -= 10;
-
 		int x = cx + cw - total;
 		for (int i = 0; i < seg.length; i++) {
-			if (x > cx + 90) txt(ctx, seg[i], x, y, Colors.alpha(Colors.faint(), 160));
+			if (x > cx + 80) txt(ctx, seg[i], x, y, Colors.alpha(Colors.faint(), 160));
 			x += w[i] + 10;
 		}
 	}
@@ -666,12 +707,14 @@ public class LovenoteScreen extends Screen {
 		boolean compact = im != null && im.compact.get();
 		int gap = 7;
 		int cardW = (cw - (ncols - 1) * gap) / ncols;
-		int cardH = compact ? 30 : 40;
+		int cardH = compact ? 30 : 42;
 		int rows = (list.size() + ncols - 1) / ncols;
 		maxScroll = Math.max(0, rows * (cardH + gap) - (bottom - top));
 		scrollTarget = MathHelper.clamp(scrollTarget, 0, maxScroll);
 		scrollShown += (scrollTarget - scrollShown) * (1f - (float) Math.exp(-dt / 40f));
 		if (Math.abs(scrollTarget - scrollShown) < 0.2f) scrollShown = scrollTarget;
+
+		if (mx > cx - 6 && mx < cx + cw + 12 && my > top && my < bottom) sbAlpha = 1f;
 
 		boolean showDesc = im == null || im.descriptions.get();
 		float lift = im != null ? im.hoverLift.getF() : 2f;
@@ -696,6 +739,7 @@ public class LovenoteScreen extends Screen {
 
 			int ly = sy - (int) (hv * lift);
 			if (sel > 0.02f) rr(ctx, x - 1, ly - 1, cardW + 2, cardH + 2, cr + 1, Colors.alpha(Colors.C2, (int) (150 * sel)));
+			if (hv > 0.02f) rr(ctx, x - 1, ly - 1, cardW + 2, cardH + 2, cr + 1, Colors.alpha(Colors.wave(0f), (int) (70 * hv)));
 
 			String cardStyle = im != null ? im.card.get() : "Solid";
 			if (cardStyle.equals("Outline")) {
@@ -706,18 +750,24 @@ public class LovenoteScreen extends Screen {
 			} else {
 				rr(ctx, x, ly, cardW, cardH, cr, Colors.lerp(Colors.card(), Colors.cardHover(), hv));
 			}
-			if (on > 0.02f) rr(ctx, x, ly + 8, 2, cardH - 16, 1, Colors.alpha(Colors.wave(x * 0.004f), (int) (255 * on)));
+			if (on > 0.02f) rr(ctx, x, ly + 9, 2, cardH - 18, 1, Colors.alpha(Colors.wave(x * 0.004f), (int) (255 * on)));
 
-			int textW = cardW - 11 - 44;
+			circle(ctx, x + 13, ly + (compact ? 15 : 13), 2, Colors.lerp(Colors.faint(), Colors.wave(0f), on));
+			int textW = cardW - 15 - 44;
 			String name = textRenderer.trimToWidth(m.name, textW);
-			txt(ctx, name, x + 11, ly + (compact ? 11 : 9), Colors.lerp(Colors.dim(), Colors.text(), Math.max(on, hv * 0.8f)));
+			txt(ctx, name, x + 20, ly + (compact ? 11 : 9), Colors.lerp(Colors.dim(), Colors.text(), Math.max(on, hv * 0.8f)));
 			if (!compact && showDesc) {
-				txt(ctx, textRenderer.trimToWidth(m.description, textW), x + 11, ly + 23, Colors.faint());
+				txt(ctx, textRenderer.trimToWidth(m.description, textW), x + 20, ly + 24, Colors.faint());
 			}
-			drawSwitch(ctx, x + cardW - 33, ly + (compact ? 10 : 15), on);
+			drawSwitch(ctx, x + cardW - 33, ly + (compact ? 10 : 16), on);
+			if (m.key != -1 && !compact) {
+				String kb = "[" + keyName(m.key) + "]";
+				txt(ctx, kb, x + cardW - 38 - textRenderer.getWidth(kb), ly + 26, Colors.alpha(Colors.faint(), 150));
+			}
+			txt(ctx, "\u203A", x + cardW - 12, ly + (compact ? 11 : 16), Colors.alpha(Colors.faint(), (int) (120 + 100 * hv)));
 
 			addHit(x, ly, cardW, cardH, K_CARD, m, null, 0);
-			addHit(x + cardW - 37, ly + (compact ? 4 : 9), 34, 22, K_SWITCH, m, null, 0);
+			addHit(x + cardW - 37, ly + (compact ? 4 : 10), 34, 22, K_SWITCH, m, null, 0);
 
 			if (hov && im != null && im.tooltips.get() && !name.equals(m.name)) tooltip = m.name;
 			la = 1f;
@@ -743,36 +793,63 @@ public class LovenoteScreen extends Screen {
 		rr(ctx, sx, wy, sbw, winH, corner, Colors.dark ? 0xFA0C0C12 : 0xFAEDEDF4);
 		grad(ctx, sx + 2, wy + 8, sx + sbw - 2, wy + 9, Colors.alpha(Colors.C1, 90), Colors.alpha(Colors.C3, 90));
 
-		int logoX = railRight ? sx + sbw - 44 : sx + 22;
-		circle(ctx, logoX, wy + 22, 9, Colors.wave(0f));
-		txtS(ctx, "\u2665", logoX - 3, wy + 18, 0xFFFFFFFF);
-		if (sb > 0.05f) txtS(ctx, "lovenote", sx + 37, wy + 18, Colors.alpha(Colors.text(), (int) (255 * sb)));
+		// ---- spinning 3D drain gang logo
+		int logoCx = sx + 23;
+		int logoCy = wy + 24;
+		boolean showLogo = im == null || im.logo.get();
+		int logoSize = im != null ? im.logoSize.getI() : 26;
+		long spinMs = im != null ? (long) im.logoSpin.getI() : 2600L;
+		if (showLogo) {
+			if (im == null || im.logoGlow.get()) {
+				for (int g = 12; g >= 1; g--) {
+					int al = (int) (6 * (1f - g / 13f) + 3);
+					circle(ctx, logoCx, logoCy, g + 8, Colors.alpha(Colors.C2, al));
+				}
+			}
+			DrainLogo.draw3D(ctx, logoCx, logoCy, logoSize, Colors.wave(0f), DrainLogo.spin(spinMs), 4);
+		} else {
+			circle(ctx, logoCx, logoCy, 9, Colors.wave(0f));
+			txtS(ctx, "\u2665", logoCx - 3, logoCy - 4, 0xFFFFFFFF);
+		}
+		if (sb > 0.05f) txtS(ctx, "lovenote", sx + 42, wy + 20, Colors.alpha(Colors.text(), (int) (255 * sb)));
 
+		// ---- rows
 		String q = search.getText().trim();
-		int avail = winH - 52 - 40;
+		int avail = winH - 56 - 40;
 		int rowH = MathHelper.clamp(avail / Math.max(1, pages.length), 16, 24);
-		int y = wy + 52;
+		int[] ys = new int[pages.length];
+		int y = wy + 56;
 		for (int i = 0; i < pages.length; i++) {
 			if (i == 7 || i == 9) y += 5;
-			boolean sel = i == page && q.isEmpty();
-			boolean hov = hover && mx >= sx + 5 && mx < sx + sbw - 5 && my >= y && my < y + rowH;
-			float hv = ease("pg" + i, hov ? 1f : 0f, 120);
-			float sl = ease("ps" + i, sel ? 1f : 0f, 170);
-			float slide = (1f - MathHelper.clamp((tabMs - i * 12f) / 220f, 0f, 1f)) * 10f;
-			if (sl > 0.02f || hv > 0.02f) rr(ctx, sx + 5, y, sbw - 10, rowH, 6, Colors.alpha(Colors.C2, (int) (58 * sl + 24 * hv)));
-			if (sl > 0.02f) rr(ctx, sx + 5, y + rowH / 2 - 7, 2, 14, 1, Colors.alpha(Colors.wave(i * 0.1f), (int) (255 * sl)));
-			if (i < icons.length) ctx.drawItem(icons[i], sx + 13 + (int) slide, y + (rowH - 16) / 2);
-			if (sb > 0.05f) txt(ctx, pages[i].label, sx + 37, y + (rowH - 8) / 2, Colors.alpha(Colors.lerp(Colors.dim(), Colors.text(), sl), (int) (255 * sb)));
-			pageRects.add(new int[]{sx + 5, y, sbw - 10, rowH, i});
+			ys[i] = y;
 			y += rowH;
 		}
 
-		int ey = wy + winH - 34;
+		// sliding selection pill
+		int targetY = ys[MathHelper.clamp(page, 0, pages.length - 1)];
+		pillY = pillY < 0f ? targetY : pillY + (targetY - pillY) * (1f - (float) Math.exp(-dt / 70f));
+		if (q.isEmpty() && sb > 0.05f) {
+			rr(ctx, sx + 5, Math.round(pillY), sbw - 10, rowH, 6, Colors.alpha(Colors.C2, (int) (70 * sb)));
+			rr(ctx, sx + 5, Math.round(pillY) + rowH / 2 - 7, 2, 14, 1, Colors.alpha(Colors.wave(0f), (int) (255 * sb)));
+		}
+
+		for (int i = 0; i < pages.length; i++) {
+			int ry = ys[i];
+			boolean hov = hover && mx >= sx + 5 && mx < sx + sbw - 5 && my >= ry && my < ry + rowH;
+			float hv = ease("pg" + i, hov ? 1f : 0f, 120);
+			float slide = (1f - MathHelper.clamp((tabMs - i * 12f) / 220f, 0f, 1f)) * 10f;
+			if (hv > 0.02f && i != page) rr(ctx, sx + 5, ry, sbw - 10, rowH, 6, Colors.alpha(Colors.C2, (int) (26 * hv)));
+			if (i < icons.length) ctx.drawItem(icons[i], sx + 13 + (int) slide, ry + (rowH - 16) / 2);
+			if (sb > 0.05f) txt(ctx, pages[i].label, sx + 42, ry + (rowH - 8) / 2, Colors.alpha(Colors.lerp(Colors.dim(), Colors.text(), Math.max(hv * 0.7f, i == page ? 1f : 0f)), (int) (255 * sb)));
+			pageRects.add(new int[]{sx + 5, ry, sbw - 10, rowH, i});
+		}
+
+		int ey = wy + winH - 36;
 		boolean ehov = hover && mx >= sx + 5 && mx < sx + sbw - 5 && my >= ey && my < ey + rowH;
 		float eh = ease("pgE", ehov ? 1f : 0f, 120);
 		if (eh > 0.02f) rr(ctx, sx + 5, ey, sbw - 10, rowH, 6, Colors.alpha(Colors.C2, (int) (28 * eh)));
 		ctx.drawItem(editorIcon, sx + 13, ey + (rowH - 16) / 2);
-		if (sb > 0.05f) txt(ctx, "HUD editor", sx + 37, ey + (rowH - 8) / 2, Colors.alpha(Colors.dim(), (int) (255 * sb)));
+		if (sb > 0.05f) txt(ctx, "HUD editor", sx + 42, ey + (rowH - 8) / 2, Colors.alpha(Colors.dim(), (int) (255 * sb)));
 		pageRects.add(new int[]{sx + 5, ey, sbw - 10, rowH, -2});
 	}
 
@@ -812,8 +889,7 @@ public class LovenoteScreen extends Screen {
 		fill(ctx, px + 9, py + 37, px + PW - 9, py + 38, Colors.alpha(Colors.track(), 170));
 
 		int top = py + 42, bottom = py + PH - 34;
-		int total = 4;
-		for (Setting s : m.settings) total += rowH(s, PW - 26);
+		int total = 4 + panelTotal(m, PW - 26);
 		panelMax = Math.max(0, total - (bottom - top));
 		panelScrollTarget = MathHelper.clamp(panelScrollTarget, 0, panelMax);
 		panelScrollShown += (panelScrollTarget - panelScrollShown) * (1f - (float) Math.exp(-dt / 40f));
@@ -821,7 +897,18 @@ public class LovenoteScreen extends Screen {
 
 		setClip(ctx, px, top, px + PW, bottom);
 		int y = top + 4 - Math.round(panelScrollShown);
-		for (Setting s : m.settings) y += drawSetting(ctx, m, s, px + 13, y, PW - 26, true);
+		String lastGroup = null;
+		for (Setting s : m.settings) {
+			String g = groupName(s);
+			if (!g.equals(lastGroup)) {
+				if (lastGroup != null) fill(ctx, px + 13, y - 2, px + PW - 13, y - 1, Colors.alpha(Colors.track(), 120));
+				y += 4;
+				txt(ctx, g, px + 13, y, Colors.alpha(Colors.faint(), 190));
+				y += 14;
+				lastGroup = g;
+			}
+			y += drawSetting(ctx, m, s, px + 13, y, PW - 26, true);
+		}
 		endClip(ctx);
 		scrollbar(ctx, px + PW - 6, top, bottom, panelScrollShown, panelMax);
 
@@ -860,7 +947,7 @@ public class LovenoteScreen extends Screen {
 
 		int leftH = 4 + (26 + rowH(im.main, colW - 22) + rowH(im.style, colW - 22) + rowH(im.card, colW - 22)
 				+ rowH(im.opacity, colW - 22) + rowH(im.glow, colW - 22) + rowH(im.shadow, colW - 22)
-				+ rowH(im.headerLine, colW - 22)) + 6 + accentH + 6;
+				+ rowH(im.headerLine, colW - 22) + rowH(im.sheen, colW - 22)) + 6 + accentH + 6;
 		int rightH = 4 + (26 + rowH(im.anim, colW - 22) + rowH(im.animSpeed, colW - 22) + rowH(im.sidebar, colW - 22)
 				+ rowH(im.stagger, colW - 22) + rowH(im.staggerSpeed, colW - 22) + rowH(im.hoverLift, colW - 22)
 				+ rowH(im.ripples, colW - 22)) + 6;
@@ -874,335 +961,12 @@ public class LovenoteScreen extends Screen {
 		setClip(ctx, cx - 2, top - 2, cx + cw + 4, bottom);
 
 		int y = top - Math.round(scrollShown);
+		y += themeCard(ctx, x1, y, colW, "Logo", im, interactive, corner,
+				im.logo, im.logoSpin, im.logoSize, im.logoGlow) + 6;
 		y += themeCard(ctx, x1, y, colW, "Window", im, interactive, corner,
 				im.guiScale, im.windowWidth, im.windowHeight, im.corner, im.railWidth, im.railSide, im.footer) + 6;
 		y += themeCard(ctx, x1, y, colW, "Content", im, interactive, corner,
 				im.columns, im.sort, im.compact, im.descriptions, im.tooltips) + 6;
-		y += themeCard(ctx, x1, y, colW, "Style", im, interactive, corner,
-				im.main, im.style, im.card, im.opacity, im.glow, im.shadow, im.headerLine) + 6;
 
 		int h = accentH;
-		rr(ctx, x1, y, colW, h, corner - 2, Colors.card());
-		rr(ctx, x1 + 11, y + 9, 7, 7, 2, Colors.wave(0f));
-		txt(ctx, "Accent color", x1 + 24, y + 8, Colors.text());
-		int selIdx = im.accent.index();
-		for (int i = 0; i < Colors.PRESETS.length; i++) {
-			int ccx = x1 + 20 + (i % ACC_COLS) * 18;
-			int ccy = y + 34 + (i / ACC_COLS) * 18;
-			int col = 0xFF000000 | Colors.PRESETS[i][0];
-			float t = ease("acc" + i, selIdx == i ? 1f : 0f, 140);
-			if (t > 0.02f) { circle(ctx, ccx, ccy, 8, Colors.alpha(Colors.text(), (int) (255 * t))); circle(ctx, ccx, ccy, 7, Colors.card()); }
-			circle(ctx, ccx, ccy, 5 + (int) Math.round(t), col);
-			addHit(ccx - 9, ccy - 9, 18, 18, K_ACCENT, null, null, i);
-		}
-
-		int fy = y + 34 + accRows * 18 + 6;
-		txt(ctx, "Primary", x1 + 13, fy, Colors.dim());
-		txt(ctx, "Secondary", x1 + colW / 2 + 5, fy, Colors.dim());
-		if (!primField.isFocused() && !secField.isFocused()) {
-			settingFields = true;
-			String p = String.format("%06X", Colors.C1 & 0xFFFFFF), s = String.format("%06X", Colors.C3 & 0xFFFFFF);
-			if (!primField.getText().equalsIgnoreCase(p)) primField.setText(p);
-			if (!secField.getText().equalsIgnoreCase(s)) secField.setText(s);
-			settingFields = false;
-		}
-		int fw = colW / 2 - 24;
-		circle(ctx, x1 + 19, fy + 19, 5, Colors.C1);
-		rr(ctx, x1 + 29, fy + 11, fw, 16, 8, Colors.chip());
-		placeField(primField, x1 + 35, fy + 15, fw - 10);
-		circle(ctx, x1 + colW / 2 + 11, fy + 19, 5, Colors.C3);
-		rr(ctx, x1 + colW / 2 + 21, fy + 11, fw, 16, 8, Colors.chip());
-		placeField(secField, x1 + colW / 2 + 27, fy + 15, fw - 10);
-		if (interactive) { renderField(ctx, primField, mx, my, delta); renderField(ctx, secField, mx, my, delta); }
-		drawSetting(ctx, im, im.gradient, x1 + 12, fy + 32, colW - 22, interactive);
-		y += h + 6;
-		themeCard(ctx, x1, y, colW, "Accent", im, interactive, corner, im.accent);
-
-		int y2 = top - Math.round(scrollShown);
-		y2 += themeCard(ctx, x2, y2, colW, "Animation", im, interactive, corner,
-				im.anim, im.animSpeed, im.sidebar, im.stagger, im.staggerSpeed, im.hoverLift, im.ripples) + 6;
-		themeCard(ctx, x2, y2, colW, "Background", im, interactive, corner, im.particles, im.particleSpeed);
-
-		endClip(ctx);
-		scrollbar(ctx, cx + cw + 6, top, bottom, scrollShown, maxScroll);
-	}
-
-	// ---------- spotify page
-
-	private void button(DrawContext ctx, int x, int y, int w, int h, String label, int mx, int my, int kind, boolean interactive) {
-		boolean hov = interactive && mx >= x && mx < x + w && my >= y && my < y + h;
-		float hv = ease("btn" + kind, hov ? 1f : 0f, 120);
-		rr(ctx, x, y, w, h, h / 2, Colors.lerp(Colors.chip(), Colors.C2, hv * 0.55f));
-		txt(ctx, label, x + (w - textRenderer.getWidth(label)) / 2, y + (h - 8) / 2 + 1, Colors.lerp(Colors.dim(), Colors.text(), hv));
-		addHit(x, y, w, h, kind, null, null, 0);
-	}
-
-	private void bar(DrawContext ctx, int x, int y, int w, float f) {
-		fill(ctx, x, y, x + w, y + 4, Colors.track());
-		int fx = x + (int) (w * f);
-		grad(ctx, x, y, Math.max(x + 1, fx), y + 4, Colors.C1, Colors.skeet(f));
-		rr(ctx, MathHelper.clamp(fx - 3, x, x + w - 6), y - 2, 6, 8, 3, 0xFFFFFFFF);
-	}
-
-	private void renderSpotify(DrawContext ctx, int mx, int my, float delta, int cx, int cy, int cw, int bottom, boolean interactive, InterfaceModule im, int corner) {
-		SpotifyManager s = SpotifyManager.I;
-		Lyrics ly = LovenoteClient.modules.get(Lyrics.class);
-
-		int totalH = 4 + 86 + 8 + 118 + 8 + 120;
-		maxScroll = Math.max(0, totalH - (bottom - cy));
-		scrollTarget = MathHelper.clamp(scrollTarget, 0, maxScroll);
-		scrollShown += (scrollTarget - scrollShown) * (1f - (float) Math.exp(-dt / 40f));
-		if (Math.abs(scrollTarget - scrollShown) < 0.2f) scrollShown = scrollTarget;
-
-		setClip(ctx, cx - 2, cy - 2, cx + cw + 4, bottom);
-		int y0 = cy + 4 - Math.round(scrollShown);
-
-		rr(ctx, cx, y0, cw, 86, corner - 2, Colors.card());
-		txt(ctx, "Spotify bridge", cx + 12, y0 + 10, Colors.text());
-		rr(ctx, cx + 11, y0 + 24, cw - 22, 16, 8, Colors.chip());
-		txt(ctx, "config/lovenote-media-bridge.exe", cx + 17, y0 + 28, Colors.faint());
-		button(ctx, cx + 11, y0 + 46, 66, 16, "connect", mx, my, SP_CONNECT, interactive);
-		button(ctx, cx + 83, y0 + 46, 76, 16, "disconnect", mx, my, SP_DISCONNECT, interactive);
-		boolean ok = s.status.startsWith("Connected");
-		txt(ctx, textRenderer.trimToWidth(s.status, cw - 24), cx + 11, y0 + 68, ok ? 0xFF8EE0A8 : 0xFFE8B86A);
-
-		int gy = y0 + 94;
-		rr(ctx, cx, gy, cw, 118, corner - 2, Colors.card());
-		int ax = cx + 12, ay = gy + 12;
-		if (s.connected && s.artTexture != null) ctx.drawTexture(s.artTexture, ax, ay, 64, 64, 0, 0, 64, 64, 64, 64);
-		else { rr(ctx, ax, ay, 64, 64, 6, Colors.chip()); txtS(ctx, "\u266A", ax + 29, ay + 28, Colors.wave(0f)); }
-
-		int tx = cx + 88, tw = cw - 100;
-		if (s.connected && s.hasTrack) {
-			marquee(ctx, s.title, tx, gy + 12, tw, Colors.text());
-			marquee(ctx, s.artist, tx, gy + 24, tw, Colors.dim());
-			marquee(ctx, s.album, tx, gy + 36, tw, Colors.faint());
-		} else txt(ctx, s.connected ? "nothing playing" : "not connected", tx, gy + 12, Colors.dim());
-
-		long prog = s.progress();
-		float f = s.durationMs <= 0 ? 0f : Math.min(1f, prog / (float) s.durationMs);
-		int by = gy + 58;
-		bar(ctx, tx, by, tw, f);
-		addHit(tx, by - 5, tw, 14, SP_SEEK, null, null, 0);
-		txt(ctx, SpotifyHud.fmt(prog), tx, by + 9, Colors.faint());
-		String dur = SpotifyHud.fmt(s.durationMs);
-		txt(ctx, dur, tx + tw - textRenderer.getWidth(dur), by + 9, Colors.faint());
-
-		int bty = gy + 82;
-		button(ctx, tx, bty, 32, 16, "<<", mx, my, SP_PREV, interactive);
-		button(ctx, tx + 36, bty, 32, 16, s.playing ? "||" : ">", mx, my, SP_PLAY, interactive);
-		button(ctx, tx + 72, bty, 32, 16, ">>", mx, my, SP_NEXT, interactive);
-
-		int ly0 = gy + 126;
-		rr(ctx, cx, ly0, cw, 120, corner - 2, Colors.card());
-		txt(ctx, "Lyrics", cx + 12, ly0 + 10, Colors.text());
-		txt(ctx, textRenderer.trimToWidth(LyricsManager.I.status, cw - 110), cx + 58, ly0 + 10, Colors.faint());
-		if (ly != null) {
-			float on = ease("lyr", ly.enabled ? 1f : 0f, 160);
-			drawSwitch(ctx, cx + cw - 45, ly0 + 9, on);
-			addHit(cx + cw - 49, ly0 + 5, 34, 18, K_LYRICS, ly, null, 0);
-
-			String cur = LyricsManager.I.lineAt(0);
-			if (cur.isEmpty()) cur = "press play in spotify";
-			txt(ctx, textRenderer.trimToWidth(cur, cw - 24), cx + 12, ly0 + 30, Colors.wave(0f));
-			txt(ctx, textRenderer.trimToWidth(LyricsManager.I.lineAt(1), cw - 24), cx + 12, ly0 + 44, Colors.faint());
-
-			int sy = ly0 + 62;
-			for (Setting set : ly.settings) {
-				sy += drawSetting(ctx, ly, set, cx + 12, sy, cw - 24, interactive);
-				if (sy > ly0 + 118) break;
-			}
-		} else {
-			txt(ctx, "lyrics module missing", cx + 12, ly0 + 30, Colors.faint());
-		}
-		endClip(ctx);
-		scrollbar(ctx, cx + cw + 6, cy, bottom, scrollShown, maxScroll);
-	}
-
-	private void marquee(DrawContext ctx, String text, int x, int y, int maxW, int color) {
-		int w = textRenderer.getWidth(text);
-		if (w <= maxW || animating) { txt(ctx, textRenderer.trimToWidth(text, maxW), x, y, color); return; }
-		int gap = 24, off = (int) ((System.currentTimeMillis() / 30) % (w + gap));
-		setClip(ctx, x, y - 1, x + maxW, y + 10);
-		txt(ctx, text, x - off, y, color);
-		txt(ctx, text, x - off + w + gap, y, color);
-		endClip(ctx);
-	}
-
-	// ------------------------------------------------------------------ input
-
-	private boolean inClip(Hit h, double mx, double my) {
-		return mx >= h.clip[0] && mx <= h.clip[2] && my >= h.clip[1] && my <= h.clip[3];
-	}
-
-	private TextFieldWidget[] fields() {
-		String q = search.getText().trim();
-		List<TextFieldWidget> l = new ArrayList<>();
-		l.add(search);
-		if (q.isEmpty() && pages[page] == Category.THEMES) { l.add(primField); l.add(secField); }
-		return l.toArray(new TextFieldWidget[0]);
-	}
-
-	private boolean anyFieldFocused() {
-		for (TextFieldWidget f : fields()) if (f.isFocused()) return true;
-		return false;
-	}
-
-	@Override
-	public boolean mouseClicked(double mx, double my, int btn) {
-		if (animating || closing) return true;
-		double gmx = mx, gmy = my;
-		mx /= gs; my /= gs;
-		InterfaceModule im = LovenoteClient.modules.get(InterfaceModule.class);
-
-		for (int[] r : pageRects) {
-			if (mx >= r[0] && mx < r[0] + r[2] && my >= r[1] && my < r[1] + r[3]) {
-				if (r[4] == -2) { client.setScreen(new HudEditorScreen()); return true; }
-				page = r[4];
-				search.setText("");
-				scrollTarget = 0;
-				scrollShown = 0;
-				tabMs = 0;
-				listening = null;
-				addRipple(r[0] + r[2] / 2, r[1] + r[3] / 2, im);
-				for (TextFieldWidget f : new TextFieldWidget[]{search, idField, primField, secField}) f.setFocused(false);
-				return true;
-			}
-		}
-
-		for (TextFieldWidget f : fields()) {
-			boolean in = f.mouseClicked(gmx, gmy, btn);
-			f.setFocused(in);
-			if (in) return true;
-		}
-
-		for (int i = hits.size() - 1; i >= 0; i--) {
-			Hit h = hits.get(i);
-			if (mx < h.x || mx >= h.x + h.w || my < h.y || my >= h.y + h.h || !inClip(h, mx, my)) continue;
-			switch (h.kind) {
-				case K_NONE -> {}
-				case K_CLOSE -> close();
-				case K_CARD -> {
-					if (btn == 0) {
-						selected = h.module;
-						panelScrollTarget = 0;
-						panelScrollShown = 0;
-						addRipple((int) mx, (int) my, im);
-					} else if (btn == 1) listening = h.module;
-				}
-				case K_SWITCH, K_PTOGGLE, K_LYRICS -> { if (btn == 0) { h.module.toggle(); addRipple((int) mx, (int) my, im); } }
-				case K_PCLOSE -> selected = null;
-				case K_BOOL -> { if (btn == 0) ((BoolSetting) h.setting).toggle(); }
-				case K_SLIDER -> { if (btn == 0) { dragging = h; setSlider(h, mx); } }
-				case K_MODE -> { ((ModeSetting) h.setting).setIndex(h.idx); addRipple((int) mx, (int) my, im); }
-				case K_MULTI -> { ((MultiSetting) h.setting).toggle(h.idx); addRipple((int) mx, (int) my, im); }
-				case K_BIND -> { if (btn == 1) h.module.key = -1; else listening = h.module; }
-				case K_ACCENT -> {
-					InterfaceModule ifm = LovenoteClient.modules.get(InterfaceModule.class);
-					if (ifm != null) ifm.accent.setIndex(h.idx);
-					addRipple((int) mx, (int) my, im);
-				}
-				case K_EDITOR -> client.setScreen(new HudEditorScreen());
-				case SP_CONNECT -> SpotifyManager.I.connect();
-				case SP_DISCONNECT -> SpotifyManager.I.disconnect();
-				case SP_PREV -> SpotifyManager.I.previous();
-				case SP_PLAY -> SpotifyManager.I.togglePlay();
-				case SP_NEXT -> SpotifyManager.I.next();
-				case SP_SEEK -> {
-					SpotifyManager sp = SpotifyManager.I;
-					if (sp.hasTrack) sp.seek((long) (MathHelper.clamp((mx - h.x) / (double) h.w, 0.0, 1.0) * sp.durationMs));
-				}
-				case SP_VOL -> { dragging = h; localVol = (int) (MathHelper.clamp((mx - h.x) / (double) h.w, 0.0, 1.0) * 100); }
-				default -> {}
-			}
-			return true;
-		}
-
-		float panelA = anim.getOrDefault("panel", 0f);
-		if (panelModule != null && panelA > 0.5f && mx >= panX && mx < panX + PW && my >= panY && my < panY + 36) {
-			dragWin = 2; grabX = (int) mx - panX; grabY = (int) my - panY;
-			return true;
-		}
-		boolean headerStrip = my >= wy && my < wy + 36 && mx >= wx && mx < wx + winW;
-		boolean logoZone = my >= wy && my < wy + 44 && ((railRight && mx >= railX()) || (!railRight && mx < railX() + RAIL_MIN));
-		if (headerStrip || logoZone) {
-			dragWin = 1; grabX = (int) mx - wx; grabY = (int) my - wy;
-			return true;
-		}
-		return super.mouseClicked(mx, my, btn);
-	}
-
-	@Override
-	public boolean mouseDragged(double mx, double my, int btn, double dx, double dy) {
-		mx /= gs; my /= gs;
-		if (dragWin == 1) {
-			mainX = MathHelper.clamp((int) mx - grabX, Math.min(0, vw - winW), Math.max(0, vw - winW));
-			mainY = MathHelper.clamp((int) my - grabY, Math.min(0, vh - winH), Math.max(0, vh - winH));
-			return true;
-		}
-		if (dragWin == 2) {
-			panX = MathHelper.clamp((int) mx - grabX, 0, Math.max(0, vw - PW));
-			panY = MathHelper.clamp((int) my - grabY, 0, Math.max(0, vh - PH));
-			return true;
-		}
-		if (dragging != null) {
-			if (dragging.kind == K_SLIDER) setSlider(dragging, mx);
-			else if (dragging.kind == SP_VOL) localVol = (int) (MathHelper.clamp((mx - dragging.x) / (double) dragging.w, 0.0, 1.0) * 100);
-			return true;
-		}
-		return super.mouseDragged(mx, my, btn, dx, dy);
-	}
-
-	@Override
-	public boolean mouseReleased(double mx, double my, int btn) {
-		if (dragging != null && dragging.kind == SP_VOL && localVol >= 0) SpotifyManager.I.setVolume(localVol);
-		dragging = null;
-		dragWin = 0;
-		localVol = -1;
-		return super.mouseReleased(mx / gs, my / gs, btn);
-	}
-
-	@Override
-	public boolean mouseScrolled(double mx, double my, double amount) {
-		if (hasControlDown()) {
-			InterfaceModule im = LovenoteClient.modules.get(InterfaceModule.class);
-			if (im != null) im.guiScale.set(im.guiScale.get() + amount * 5);
-			return true;
-		}
-		mx /= gs; my /= gs;
-		if (panelModule != null && selected != null && mx >= panX && mx < panX + PW && my >= panY && my < panY + PH) {
-			panelScrollTarget = MathHelper.clamp(panelScrollTarget - (float) amount * 22f, 0, panelMax);
-		} else {
-			scrollTarget = MathHelper.clamp(scrollTarget - (float) amount * 30f, 0, maxScroll);
-		}
-		return true;
-	}
-
-	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (listening != null) {
-			listening.key = keyCode == GLFW.GLFW_KEY_ESCAPE ? -1 : keyCode;
-			listening = null;
-			return true;
-		}
-		if (anyFieldFocused()) {
-			if (keyCode == GLFW.GLFW_KEY_ESCAPE) { for (TextFieldWidget f : fields()) f.setFocused(false); return true; }
-			for (TextFieldWidget f : fields()) if (f.isFocused()) f.keyPressed(keyCode, scanCode, modifiers);
-			return true;
-		}
-		if (LovenoteClient.openGui.matchesKey(keyCode, scanCode)) {
-			close();
-			return true;
-		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
-	}
-
-	@Override
-	public boolean charTyped(char chr, int modifiers) {
-		if (anyFieldFocused()) {
-			for (TextFieldWidget f : fields()) if (f.isFocused()) f.charTyped(chr, modifiers);
-			return true;
-		}
-		return super.charTyped(chr, modifiers);
-	}
-}
+		rr(ctx, x1, y, colW, h
