@@ -227,7 +227,9 @@ public class LovenoteScreen extends Screen {
 
 	private void setClip(DrawContext ctx, int x1, int y1, int x2, int y2) {
 		clip = new int[]{x1, y1, x2, y2};
-		if (!animating) ctx.enableScissor(x1, y1, x2, y2);
+		if (animating) return;
+		// 1.20.1's enableScissor uses the coords as-is (no matrix), so undo our gs scale here
+		ctx.enableScissor(Math.round(x1 * gs), Math.round(y1 * gs), Math.round(x2 * gs), Math.round(y2 * gs));
 	}
 
 	private void endClip(DrawContext ctx) {
@@ -329,6 +331,14 @@ public class LovenoteScreen extends Screen {
 		gs = im != null ? MathHelper.clamp(im.guiScale.getI() / 100f, 0.4f, 1.1f) : 1f;
 		vw = Math.max(160, Math.round(width / gs));
 		vh = Math.max(120, Math.round(height / gs));
+
+		// keep the windows reachable when the scale changes mid-session
+		mainX = MathHelper.clamp(mainX, Math.min(0, vw - W), Math.max(0, vw - W));
+		mainY = MathHelper.clamp(mainY, Math.min(0, vh - H), Math.max(0, vh - H));
+		panX = MathHelper.clamp(panX, 0, Math.max(0, vw - PW));
+		panY = MathHelper.clamp(panY, 0, Math.max(0, vh - PH));
+		mx /= gs; my /= gs; // every hover test below is in virtual coords
+
 		float animMs = im != null ? im.animSpeed.getF() : 300f;
 
 		hits.clear();
@@ -434,15 +444,21 @@ public class LovenoteScreen extends Screen {
 		if (pages[page] != Category.THEMES || !q.isEmpty()) { primField.setFocused(false); secField.setFocused(false); }
 	}
 
+	/** Fields live in GUI space (1.20.1 scissors ignore the matrix), so store scaled coords. */
 	private void placeField(TextFieldWidget f, int x, int y, int w) {
-		f.setX(x);
-		f.setY(y);
-		f.setWidth(w);
+		f.setX(Math.round(x * gs));
+		f.setY(Math.round(y * gs));
+		f.setWidth(Math.round(w * gs));
 		f.setEditableColor(Colors.text());
 	}
 
 	private void renderField(DrawContext ctx, TextFieldWidget f, int mx, int my, float delta) {
-		if (ga > 0.9f) f.render(ctx, mx, my, delta);
+		if (ga <= 0.9f) return;
+		var ms = ctx.getMatrices();
+		ms.push();
+		ms.scale(1f / gs, 1f / gs, 1f); // drop out of the menu scale: fields are in GUI space
+		f.render(ctx, Math.round(mx * gs), Math.round(my * gs), delta);
+		ms.pop();
 	}
 
 	// ---------- module cards
@@ -720,10 +736,10 @@ public class LovenoteScreen extends Screen {
 		int w = textRenderer.getWidth(text);
 		if (w <= maxW || animating) { txt(ctx, textRenderer.trimToWidth(text, maxW), x, y, color); return; }
 		int gap = 24, off = (int) ((System.currentTimeMillis() / 30) % (w + gap));
-		ctx.enableScissor(x, y - 1, x + maxW, y + 10);
+		setClip(ctx, x, y - 1, x + maxW, y + 10);
 		txt(ctx, text, x - off, y, color);
 		txt(ctx, text, x - off + w + gap, y, color);
-		ctx.disableScissor();
+		endClip(ctx);
 	}
 
 	// ------------------------------------------------------------------ input
@@ -749,6 +765,7 @@ public class LovenoteScreen extends Screen {
 	@Override
 	public boolean mouseClicked(double mx, double my, int btn) {
 		if (animating || closing) return true;
+		double gmx = mx, gmy = my; // GUI space, for the text fields
 		mx /= gs; my /= gs;
 
 		for (int[] r : pageRects) {
@@ -767,7 +784,7 @@ public class LovenoteScreen extends Screen {
 		TextFieldWidget[] fs = fields();
 		boolean hitField = false;
 		for (TextFieldWidget f : fs) {
-			boolean in = f.mouseClicked(mx, my, btn);
+			boolean in = f.mouseClicked(gmx, gmy, btn);
 			f.setFocused(in);
 			if (in) hitField = true;
 		}
