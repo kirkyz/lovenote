@@ -10,6 +10,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 /** Custom fog distance and colour, applied through RenderSystemMixin. */
 public class Fog extends Module {
+
+	/**
+	 * True only while the world (and not the interface) is being drawn. Vanilla switches fog off for
+	 * the GUI/HUD pass by setting huge fog distances, so the blanket fog override has to stand down
+	 * there or it tints every bit of UI text.
+	 */
+	public static boolean active = false;
+
 	private final ModeSetting preset = add(new ModeSetting("Distance", "Thin", "Off", "Thin", "Thick", "Custom"));
 	private final NumberSetting start = add(new NumberSetting("Start", 20, 0, 256, 2));
 	private final NumberSetting end = add(new NumberSetting("End", 130, 8, 512, 4));
@@ -20,6 +28,11 @@ public class Fog extends Module {
 	public Fog() {
 		super("Fog", Category.VISUALS);
 		describe("Custom fog distance and colour.");
+	}
+
+	@Override
+	public void onDisable() {
+		active = false;
 	}
 
 	public float fogStart(float in) {
