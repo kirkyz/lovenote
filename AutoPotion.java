@@ -3,11 +3,13 @@ package com.lovenote.module.impl;
 import com.lovenote.module.Category;
 import com.lovenote.module.Module;
 import com.lovenote.setting.NumberSetting;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.PotionContentsComponent;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.component.type.PotionContents;
 import net.minecraft.util.Hand;
 
 /** Throws a splash healing potion at your feet when health is low. */
@@ -24,7 +26,12 @@ public class AutoPotion extends Module {
 		for (int i = 0; i < 9; i++) {
 			ItemStack st = mc.player.getInventory().getStack(i);
 			if (!st.isOf(Items.SPLASH_POTION)) continue;
-			boolean heal = PotionUtil.getPotionEffects(st).stream().anyMatch(e -> e.getEffectType() == StatusEffects.INSTANT_HEALTH);
+			PotionContentsComponent contents = st.get(DataComponentTypes.POTION_CONTENTS);
+			if (contents == null) continue;
+			boolean heal = false;
+			for (StatusEffectInstance e : contents.getEffects()) {
+				if (e.getEffectType() == StatusEffects.INSTANT_HEALTH) { heal = true; break; }
+			}
 			if (heal) return i;
 		}
 		return -1;
@@ -38,11 +45,11 @@ public class AutoPotion extends Module {
 		int slot = findHeal();
 		if (slot == -1) return;
 
-		int prev = mc.player.getInventory().selectedSlot;
-		mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), 90f, mc.player.isOnGround()));
-		mc.player.getInventory().selectedSlot = slot;
+		int prev = mc.player.getInventory().getSelectedSlot();
+		mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), 90f, mc.player.isOnGround(), false));
+		mc.player.getInventory().setSelectedSlot(slot);
 		mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-		mc.player.getInventory().selectedSlot = prev;
+		mc.player.getInventory().setSelectedSlot(prev);
 		timer = delay.getI();
 	}
 }
