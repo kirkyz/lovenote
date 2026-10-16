@@ -6,6 +6,7 @@ import com.lovenote.setting.BoolSetting;
 import com.lovenote.setting.ModeSetting;
 import com.lovenote.setting.NumberSetting;
 import com.lovenote.util.Colors;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.DrawContext;
 
 /** Custom fog distance and colour, applied through RenderSystemMixin. */
@@ -69,5 +70,12 @@ public class Fog extends Module {
 			case "White" -> 0xFFFFFFFF;
 			default -> Colors.C2;
 		};
+	}
+
+	/** Fallback path, called from BackgroundRendererMixin at the end of the sky/fog pass. */
+	public void apply() {
+		active = true;
+		RenderSystem.setShaderFogStart(fogStart(0f));
+		RenderSystem.setShaderFogEnd(fogEnd(0f));
 	}
 }
