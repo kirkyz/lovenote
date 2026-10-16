@@ -1,5 +1,5 @@
 package com.lovenote.module;
-import com.lovenote.module.Category;
+
 import com.google.gson.JsonObject;
 import com.lovenote.setting.Setting;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
@@ -9,7 +9,10 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 public abstract class Module {
 	protected final MinecraftClient mc = MinecraftClient.getInstance();
@@ -23,13 +26,26 @@ public abstract class Module {
 	public int key = -1;
 	public boolean keyDown;
 
+	// ---- NEW 1: extra tabs + favourites, used by the menu
+	public final Set<Category> alsoIn = new HashSet<>();
+	public boolean favorite;
+
 	protected Module(String name, Category category) {
 		this.name = name;
 		this.category = category;
 	}
 
-	protected void describe(String text) {
+	// ---- NEW 2: now returns Module so describe() can be chained
+	public Module describe(String text) {
 		this.description = text;
+		return this;
+	}
+
+	// ---- NEW 3: search now also matches descriptions
+	public boolean matches(String q) {
+		if (q.isEmpty()) return true;
+		return name.toLowerCase(Locale.ROOT).contains(q)
+				|| description.toLowerCase(Locale.ROOT).contains(q);
 	}
 
 	protected <T extends Setting> T add(T s) {
