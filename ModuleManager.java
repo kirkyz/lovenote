@@ -1,6 +1,7 @@
 package com.lovenote.module;
 
 import com.lovenote.module.impl.*;
+import com.lovenote.util.Colors;
 import com.lovenote.util.RenderUtil;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.gui.DrawContext;
@@ -17,20 +18,37 @@ public class ModuleManager {
 	public ModuleManager() {
 		// ---- combat
 		modules.add(new Aura());
+		modules.add(new KillAura());
 		modules.add(new AimAssist());
 		modules.add(new Triggerbot());
+		modules.add(new Criticals());
+		modules.add(new Velocity());
+		modules.add(new WTap());
 		modules.add(new AutoClicker());
 		modules.add(new AutoTotem());
 		modules.add(new AutoArmor());
 		modules.add(new AutoCrystal());
 		modules.add(new CrystalTap());
 		modules.add(new CrystalBreak());
+		modules.add(new Backtrack());
+		modules.add(new TargetStrafe());
+		modules.add(new AutoWeb());
+		modules.add(new Reach());
+		modules.add(new Surround());
+		modules.add(new AutoTrap());
+		modules.add(new AutoCity());
 		// ---- hypixel
 		modules.add(new AutoFarm());
 		modules.add(new AutoFish());
 		modules.add(new CommandMacro());
 		modules.add(new ServerInfo());
 		modules.add(new StaffDetector());
+		modules.add(new AntiBot());
+		modules.add(new AutoPotion());
+		modules.add(new AutoGApple());
+		modules.add(new AutoTool());
+		modules.add(new AutoLog());
+		modules.add(new AutoRespawn());
 		// ---- movement
 		modules.add(new Sprint());
 		modules.add(new Speed());
@@ -41,6 +59,10 @@ public class ModuleManager {
 		modules.add(new Scaffold());
 		modules.add(new NoFall());
 		modules.add(new AntiVoid());
+		modules.add(new Step());
+		modules.add(new NoSlow());
+		modules.add(new FastFall());
+		modules.add(new ElytraPlus());
 		// ---- visuals
 		modules.add(new ESP());
 		modules.add(new ItemESP());
@@ -63,11 +85,21 @@ public class ModuleManager {
 		modules.add(new TimeChanger());
 		modules.add(new Fullbright());
 		modules.add(new Zoom());
+		modules.add(new Freelook());
 		modules.add(new ParticleField());
 		modules.add(new GroundRings());
 		modules.add(new TrailRibbon());
 		modules.add(new Halo());
 		modules.add(new WorldTint());
+		modules.add(new StorageESP());
+		modules.add(new HoleESP());
+		modules.add(new BlockESP());
+		modules.add(new Nametags());
+		modules.add(new Trajectories());
+		modules.add(new ScreenFX());
+		modules.add(new CustomCrosshair());
+		modules.add(new Bloom());
+		modules.add(new Beams());
 		// ---- hud widgets
 		modules.add(new InterfaceModule());
 		modules.add(new Watermark());
@@ -85,18 +117,30 @@ public class ModuleManager {
 		modules.add(new ModuleList());
 		modules.add(new HitLog());
 		modules.add(new Notifications());
+		modules.add(new InfoHud());
+		modules.add(new PotionList());
+		modules.add(new ArmorHud());
+		modules.add(new CpsHud());
+		modules.add(new CoordsHud());
+		modules.add(new PingHud());
+		modules.add(new TabList());
 		// ---- misc
 		modules.add(new FastPlace());
 		modules.add(new FakePlayer());
+		modules.add(new AutoEat());
+		modules.add(new AntiAFK());
+		modules.add(new MiddleClick());
+		modules.add(new ChatSuffix());
 		modules.add(new Panic());
 
-		// file the hypixel-specific stuff into its own tab (widgets stay on HUD)
+		// file the hypixel-specific stuff into its own tab as well (widgets stay on HUD)
 		hypixel("Velocity", "WTap", "Criticals", "AntiBot", "AutoTrap", "AutoWeb", "Surround",
 				"AutoCity", "AutoPotion", "AutoGApple", "AutoTool", "AutoLog", "AutoRespawn",
 				"AutoFarm", "AutoFish", "CommandMacro", "ServerInfo", "StaffDetector");
 
 		describe();
-		for (String n : new String[]{"Watermark", "ModuleList", "TargetHud", "Notifications", "HitLog"}) {
+		for (String n : new String[]{"Interface", "Watermark", "ModuleList", "TargetHud",
+				"Notifications", "HitLog"}) {
 			for (Module m : modules) if (m.name.equals(n)) m.enabled = true;
 		}
 	}
@@ -106,7 +150,7 @@ public class ModuleManager {
 			for (Module m : modules) {
 				if (!m.name.equals(n)) continue;
 				if (m instanceof HudWidget) continue;
-				m.category = Category.HYPIXEL;
+				m.alsoIn.add(Category.HYPIXEL);
 			}
 		}
 	}
@@ -117,6 +161,7 @@ public class ModuleManager {
 
 	private void describe() {
 		d("Aura", "Automatically attacks nearby entities");
+		d("KillAura", "Swings at anything in reach automatically");
 		d("AimAssist", "Smoothly aims at nearby targets");
 		d("Triggerbot", "Attacks when your crosshair is on a target");
 		d("AutoClicker", "Holds a steady CPS while you hold attack");
@@ -125,6 +170,9 @@ public class ModuleManager {
 		d("AutoCrystal", "Places and breaks end crystals around targets");
 		d("CrystalTap", "Places and detonates crystals under your crosshair");
 		d("CrystalBreak", "Breaks end crystals that are in range");
+		d("Backtrack", "Shows targets at their delayed position");
+		d("TargetStrafe", "Strafes around whoever is closest");
+		d("Reach", "Extends your block and entity reach");
 
 		d("Velocity", "Reduces or cancels knockback");
 		d("WTap", "Resets sprint on hit for full knockback");
@@ -154,6 +202,10 @@ public class ModuleManager {
 		d("Scaffold", "Places blocks under your feet as you walk");
 		d("NoFall", "Cancels fall damage");
 		d("AntiVoid", "Bounces you back up before you hit the void");
+		d("Step", "Steps up full blocks without jumping");
+		d("NoSlow", "No slowdown while eating or blocking");
+		d("FastFall", "Drops faster so you land first");
+		d("ElytraPlus", "Elytra auto-deploy and rocket boost");
 
 		d("ESP", "Highlights player models with configurable boxes");
 		d("ItemESP", "Highlights dropped items");
@@ -176,18 +228,27 @@ public class ModuleManager {
 		d("TimeChanger", "Client-side time of day");
 		d("Fullbright", "See clearly in the dark");
 		d("Zoom", "Custom field of view, bind it to zoom");
-		d("ParticleField", "Ambient particle field drifting around you.");
-		d("GroundRings", "Expanding rings on the floor under you.");
-		d("TrailRibbon", "Camera-facing ribbon trailing behind you.");
-		d("Halo", "Glowing column and rising spark spiral.");
-		d("WorldTint", "Tints the sky, fog and screen edges.");
+		d("Freelook", "Hold a key to look around freely");
+		d("ParticleField", "Ambient particle field drifting around you");
+		d("GroundRings", "Expanding rings on the floor under you");
+		d("TrailRibbon", "Camera-facing ribbon trailing behind you");
+		d("Halo", "Glowing column and rising spark spiral");
+		d("WorldTint", "Tints the sky, fog and screen edges");
+		d("StorageESP", "Highlights chests, barrels and shulkers");
+		d("HoleESP", "Marks safe holes around you");
+		d("BlockESP", "Highlights ore and other blocks around you");
+		d("Nametags", "Bigger nametags with health and distance");
+		d("Trajectories", "Shows where your projectile lands");
+		d("ScreenFX", "Grain, scanlines, damage flash and health pulse");
+		d("CustomCrosshair", "Animated crosshair in your theme colour");
+		d("Bloom", "Soft additive glow around players");
+		d("Beams", "Vertical light shafts above players");
 
 		d("Watermark", "Client name, user, fps, time and IP");
 		d("Music", "Now-playing widget");
 		d("StaffList", "Lists spectators (vanished staff)");
 		d("TargetHud", "Shows the player you last hit");
 		d("Speed Display", "Shows your current speed in blocks per second");
-		d("Speed", "Shows your current speed in blocks per second");
 		d("Coordinates", "Shows your coordinates");
 		d("Keybinds", "Lists your module keybinds");
 		d("Potions", "Shows active potion effects");
@@ -198,9 +259,20 @@ public class ModuleManager {
 		d("ModuleList", "List of enabled modules");
 		d("HitLog", "Log of hits, pops and events");
 		d("Notifications", "Toasts when modules are toggled");
+		d("Info", "Coordinates and speed readout");
+		d("PotionList", "Active effects with timers");
+		d("ArmorHud", "Armour and durability readout");
+		d("CpsHud", "Clicks per second counter");
+		d("CoordsHud", "Position, chunk and facing");
+		d("PingHud", "Ping and connection quality");
+		d("TabList", "Clean player list with ping");
 
 		d("FastPlace", "Removes the block placing delay");
 		d("FakePlayer", "Spawns a dummy player to test on");
+		d("AutoEat", "Eats when you get hungry");
+		d("AntiAFK", "Moves so you are never idle");
+		d("MiddleClick", "Middle click sends a pearl or totem to your off-hand");
+		d("ChatSuffix", "Adds a tag to the end of your chat messages");
 		d("Panic", "Turns every module off at once");
 	}
 
@@ -214,11 +286,12 @@ public class ModuleManager {
 
 	public List<Module> in(Category c) {
 		List<Module> out = new ArrayList<>();
-		for (Module m : modules) if (m.category == c) out.add(m);
+		for (Module m : modules) if (m.category == c || m.alsoIn.contains(c)) out.add(m);
 		return out;
 	}
 
 	public void tick() {
+		Colors.applyCurrent();
 		for (Module m : modules) if (m.enabled) m.onTick();
 	}
 
