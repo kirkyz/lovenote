@@ -8,10 +8,8 @@ import com.lovenote.setting.NumberSetting;
 import com.lovenote.util.Colors;
 import com.lovenote.util.Fx;
 import com.lovenote.util.Tex;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.lovenote.util.WorldRenderContext;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
@@ -128,13 +126,13 @@ public class ParticleField extends Module {
 		last = now;
 
 		float td = ctx.tickDelta();
-		double cx = MathHelper.lerp(td, p.prevX, p.getX());
-		double cy = MathHelper.lerp(td, p.prevY, p.getY());
-		double cz = MathHelper.lerp(td, p.prevZ, p.getZ());
+		double cx = MathHelper.lerp(td, p.lastX, p.getX());
+		double cy = MathHelper.lerp(td, p.lastY, p.getY());
+		double cz = MathHelper.lerp(td, p.lastZ, p.getZ());
 		update(dt, cx, cy, cz, sp, h);
 
 		Matrix4f mat = m.peek().getPositionMatrix();
-		Vec3d cam = ctx.camera().getPos();
+		Vec3d cam = ctx.camera().getCameraPos();
 		float time = (System.currentTimeMillis() % 100000L) / 1000f;
 		float base = size.getF();
 		int op = opacity.getI();
@@ -143,11 +141,9 @@ public class ParticleField extends Module {
 
 		Identifier tex = sprite.is("Star") ? Tex.STAR : sprite.is("Glow") ? Tex.GLOW : Tex.SOFT;
 
-		if (walls.get()) RenderSystem.disableDepthTest();
 		Fx.additive();
-		RenderSystem.setShaderTexture(0, tex);
 
-		BufferBuilder b = Fx.texQuads();
+		BufferBuilder b = Fx.texQuads(tex);
 		for (int i = 0; i < n; i++) {
 			float tw = twk > 0f ? 0.55f + 0.45f * (float) Math.sin(time * twk * 2f + ph[i] * 3f) : 1f;
 			float d = (float) Math.sqrt(sq(px[i] - (float) cam.x) + sq(py[i] - (float) cam.y) + sq(pz[i] - (float) cam.z));
@@ -157,10 +153,9 @@ public class ParticleField extends Module {
 			float sz = base * (0.55f + 0.75f * ps[i]) * (0.6f + 0.4f * depth);
 			Fx.billboard(b, mat, px[i], py[i], pz[i], sz, Colors.alpha(colour(i, time), a));
 		}
-		Tessellator.getInstance().draw();
+		Fx.draw();
 
 		Fx.end();
-		if (walls.get()) RenderSystem.enableDepthTest();
 	}
 
 	private int colour(int i, float time) {
