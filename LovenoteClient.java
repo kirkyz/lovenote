@@ -8,12 +8,12 @@ import com.lovenote.module.impl.Fog;
 import com.lovenote.module.impl.InterfaceModule;
 import com.lovenote.spotify.SpotifyManager;
 import com.lovenote.util.Config;
+import com.lovenote.util.WorldRender;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
@@ -59,8 +59,8 @@ public class LovenoteClient implements ClientModInitializer {
 			modules.tick();
 		});
 
-		WorldRenderEvents.START.register(ctx -> Fog.active = true);
-		WorldRenderEvents.END.register(ctx -> Fog.active = false);
+		WorldRender.START.add(ctx -> Fog.active = true);
+		WorldRender.END.add(ctx -> Fog.active = false);
 
 		HudRenderCallback.EVENT.register((ctx, tickCounter) -> {
 			MinecraftClient mc = MinecraftClient.getInstance();
@@ -69,7 +69,7 @@ public class LovenoteClient implements ClientModInitializer {
 			modules.hud(ctx, tickCounter.getTickDelta(false));
 		});
 
-		WorldRenderEvents.LAST.register(ctx -> {
+		WorldRender.LAST.add(ctx -> {
 			if (MinecraftClient.getInstance().player == null) return;
 			modules.render3D(ctx);
 		});
