@@ -11,8 +11,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(RenderSystem.class)
 public class RenderSystemMixin {
 
-	private static Fog fogModule() {
-		// only interfere while the world is being drawn; the GUI pass gets vanilla's fog values back
+	private static Fog fog() {
 		if (!Fog.active) return null;
 		if (LovenoteClient.modules == null) return null;
 		Fog f = LovenoteClient.modules.get(Fog.class);
@@ -20,7 +19,7 @@ public class RenderSystemMixin {
 	}
 
 	private static float channel(int idx, float value) {
-		Fog f = fogModule();
+		Fog f = fog();
 		if (f == null || !f.recolourOn()) return value;
 		int c = f.colour();
 		return switch (idx) {
@@ -32,13 +31,15 @@ public class RenderSystemMixin {
 
 	@ModifyVariable(method = "setShaderFogStart", at = @At("HEAD"), argsOnly = true, require = 0)
 	private static float lovenote$fogStart(float value) {
-		Fog f = fogModule();
+		if (value >= Fog.UI_SENTINEL) return value;
+		Fog f = fog();
 		return f == null ? value : f.fogStart(value);
 	}
 
 	@ModifyVariable(method = "setShaderFogEnd", at = @At("HEAD"), argsOnly = true, require = 0)
 	private static float lovenote$fogEnd(float value) {
-		Fog f = fogModule();
+		if (value >= Fog.UI_SENTINEL) return value;
+		Fog f = fog();
 		return f == null ? value : f.fogEnd(value);
 	}
 
