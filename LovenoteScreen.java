@@ -37,6 +37,7 @@ import java.util.function.IntPredicate;
  */
 public class LovenoteScreen extends Screen {
 	private static final int W = 500, H = 320, PW = 180, PH = 300;
+	private static final int ACC_COLS = 11;
 
 	// remembered between openings
 	private static int mainX = Integer.MIN_VALUE, mainY, panX = Integer.MIN_VALUE, panY, page;
@@ -242,8 +243,6 @@ public class LovenoteScreen extends Screen {
 		String n = InputUtil.fromKeyCode(key, -1).getLocalizedText().getString().toUpperCase();
 		return n.length() > 7 ? n.substring(0, 7) : n;
 	}
-
-	private static String cap(String s) { return s; }
 
 	// ------------------------------------------------------------------ settings widgets
 
@@ -622,26 +621,49 @@ public class LovenoteScreen extends Screen {
 		if (im == null) return;
 		int colW = (cw - 8) / 2, x1 = cx, x2 = cx + colW + 8;
 
-		int y = cy + 4;
+		int accRows = (Colors.PRESETS.length + ACC_COLS - 1) / ACC_COLS;
+		int accentH = 100 + accRows * 18;
+
+		int leftH = 4
+				+ (26 + rowH(im.guiScale, colW - 22)) + 6
+				+ (26 + rowH(im.main, colW - 22)) + 6
+				+ accentH + 6
+				+ (26 + rowH(im.sidebar, colW - 22));
+		int rightH = 4
+				+ (26 + rowH(im.anim, colW - 22) + rowH(im.animSpeed, colW - 22)) + 6
+				+ (26 + rowH(im.style, colW - 22) + rowH(im.opacity, colW - 22));
+
+		int top = cy + 4, bottom = wy + H - 10;
+		maxScroll = Math.max(0, Math.max(leftH, rightH) - (bottom - top));
+		scrollTarget = MathHelper.clamp(scrollTarget, 0, maxScroll);
+		scrollShown += (scrollTarget - scrollShown) * (1f - (float) Math.exp(-dt / 40f));
+		if (Math.abs(scrollTarget - scrollShown) < 0.2f) scrollShown = scrollTarget;
+
+		setClip(ctx, cx - 2, top - 2, cx + cw + 2, bottom);
+
+		int y = top - Math.round(scrollShown);
 		y += themeCard(ctx, x1, y, colW, "Menu", im, interactive, im.guiScale) + 6;
 		y += themeCard(ctx, x1, y, colW, "Main color", im, interactive, im.main) + 6;
 
 		// accent card
-		int h = 112;
+		int h = accentH;
 		rr(ctx, x1, y, colW, h, Colors.card());
 		rr(ctx, x1 + 10, y + 9, 7, 7, Colors.wave(0f));
 		txt(ctx, "Accent color", x1 + 22, y + 8, Colors.text());
 		int selIdx = im.accent.index();
 		for (int i = 0; i < Colors.PRESETS.length; i++) {
-			int ccx = x1 + 18 + i * 19, ccy = y + 31;
+			int ccx = x1 + 18 + (i % ACC_COLS) * 18;
+			int ccy = y + 34 + (i / ACC_COLS) * 18;
 			int col = 0xFF000000 | Colors.PRESETS[i][0];
 			float t = ease("acc" + i, selIdx == i ? 1f : 0f, 140);
 			if (t > 0.02f) { circle(ctx, ccx, ccy, 8, Colors.alpha(Colors.text(), (int) (255 * t))); circle(ctx, ccx, ccy, 7, Colors.card()); }
 			circle(ctx, ccx, ccy, 5 + (int) Math.round(t), col);
 			addHit(ccx - 9, ccy - 9, 18, 18, K_ACCENT, null, null, i);
 		}
-		txt(ctx, "Primary", x1 + 12, y + 50, Colors.dim());
-		txt(ctx, "Secondary", x1 + colW / 2 + 4, y + 50, Colors.dim());
+
+		int fy = y + 34 + accRows * 18 + 6;
+		txt(ctx, "Primary", x1 + 12, fy, Colors.dim());
+		txt(ctx, "Secondary", x1 + colW / 2 + 4, fy, Colors.dim());
 		if (!primField.isFocused() && !secField.isFocused()) {
 			settingFields = true;
 			String p = String.format("%06X", Colors.C1 & 0xFFFFFF), s = String.format("%06X", Colors.C3 & 0xFFFFFF);
@@ -650,21 +672,23 @@ public class LovenoteScreen extends Screen {
 			settingFields = false;
 		}
 		int fw = colW / 2 - 22;
-		circle(ctx, x1 + 18, y + 69, 5, Colors.C1);
-		rr(ctx, x1 + 28, y + 61, fw, 16, Colors.chip());
-		placeField(primField, x1 + 34, y + 65, fw - 10);
-		circle(ctx, x1 + colW / 2 + 10, y + 69, 5, Colors.C3);
-		rr(ctx, x1 + colW / 2 + 20, y + 61, fw, 16, Colors.chip());
-		placeField(secField, x1 + colW / 2 + 26, y + 65, fw - 10);
+		circle(ctx, x1 + 18, fy + 19, 5, Colors.C1);
+		rr(ctx, x1 + 28, fy + 11, fw, 16, Colors.chip());
+		placeField(primField, x1 + 34, fy + 15, fw - 10);
+		circle(ctx, x1 + colW / 2 + 10, fy + 19, 5, Colors.C3);
+		rr(ctx, x1 + colW / 2 + 20, fy + 11, fw, 16, Colors.chip());
+		placeField(secField, x1 + colW / 2 + 26, fy + 15, fw - 10);
 		if (interactive) { renderField(ctx, primField, mx, my, delta); renderField(ctx, secField, mx, my, delta); }
-		drawSetting(ctx, im, im.gradient, x1 + 11, y + 86, colW - 22, interactive);
+		drawSetting(ctx, im, im.gradient, x1 + 11, fy + 32, colW - 22, interactive);
 		y += h + 6;
 
 		themeCard(ctx, x1, y, colW, "Sidebar speed", im, interactive, im.sidebar);
 
-		int y2 = cy + 4;
+		int y2 = top - Math.round(scrollShown);
 		y2 += themeCard(ctx, x2, y2, colW, "Animation", im, interactive, im.anim, im.animSpeed) + 6;
 		themeCard(ctx, x2, y2, colW, "GUI style", im, interactive, im.style, im.opacity);
+
+		endClip(ctx);
 	}
 
 	// ---------- spotify page
