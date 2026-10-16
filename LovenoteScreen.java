@@ -954,7 +954,6 @@ public class LovenoteScreen extends Screen {
 
 		int top = cy + 2, bottom = wy + winH - 28;
 		maxScroll = Math.max(0, Math.max(leftH, rightH) - (bottom - top));
-		scrollTarget = MathHelper.clamp(scrollTarget, 0, maxScroll);
 		scrollShown += (scrollTarget - scrollShown) * (1f - (float) Math.exp(-dt / 40f));
 		if (Math.abs(scrollTarget - scrollShown) < 0.2f) scrollShown = scrollTarget;
 
@@ -1218,20 +1217,6 @@ public class LovenoteScreen extends Screen {
 		}
 		if (button == 0 && inSearch(mx, my)) { search.setFocused(true); return true; }
 
-		if (button == 0 && (selected == null || mx < panX || mx > panX + PW || my < panY || my > panY + PH)
-				&& mx >= wx && mx <= wx + winW && my >= wy && my <= wy + 34) {
-			dragWin = 1;
-			grabX = (int) mx - wx;
-			grabY = (int) my - wy;
-			return true;
-		}
-		if (button == 0 && selected != null && mx >= panX && mx <= panX + PW && my >= panY && my <= panY + 34) {
-			dragWin = 2;
-			grabX = (int) mx - panX;
-			grabY = (int) my - panY;
-			return true;
-		}
-
 		for (int[] r : pageRects) {
 			if (mx >= r[0] && mx <= r[0] + r[2] && my >= r[1] && my <= r[1] + r[3]) {
 				if (r[4] == -2) {
@@ -1251,9 +1236,12 @@ public class LovenoteScreen extends Screen {
 		for (int i = hits.size() - 1; i >= 0; i--) {
 			Hit hit = hits.get(i);
 			if (!over(hit, mx, my)) continue;
+			if (hit.kind == K_NONE) {
+				if (my > panY + 34) return true;
+				continue;
+			}
 			addRipple((int) mx, (int) my, im);
 			switch (hit.kind) {
-				case K_NONE -> { }
 				case K_CARD -> {
 					selected = hit.module;
 					panelModule = hit.module;
@@ -1307,6 +1295,19 @@ public class LovenoteScreen extends Screen {
 			}
 			return true;
 		}
+
+		if (button == 0 && selected != null && mx >= panX && mx <= panX + PW && my >= panY && my <= panY + 34) {
+			dragWin = 2;
+			grabX = (int) mx - panX;
+			grabY = (int) my - panY;
+			return true;
+		}
+		if (button == 0 && mx >= wx && mx <= wx + winW && my >= wy && my <= wy + 34) {
+			dragWin = 1;
+			grabX = (int) mx - wx;
+			grabY = (int) my - wy;
+			return true;
+		}
 		return super.mouseClicked(mx, my, button);
 	}
 
@@ -1352,7 +1353,7 @@ public class LovenoteScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double mx, double my, double amount) {
+	public boolean mouseScrolled(double mx, double my, double horizontal, double amount) {
 		mx /= gs;
 		my /= gs;
 		InterfaceModule im = LovenoteClient.modules.get(InterfaceModule.class);
