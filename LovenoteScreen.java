@@ -42,7 +42,7 @@ public class LovenoteScreen extends Screen {
 	private static int mainX = Integer.MIN_VALUE, mainY, panX = Integer.MIN_VALUE, panY, page;
 
 	private static final int K_NONE = -1, K_CARD = 0, K_SWITCH = 1, K_BOOL = 2, K_SLIDER = 3, K_MODE = 4, K_MULTI = 5,
-			K_PTOGGLE = 6, K_PCLOSE = 7, K_BIND = 8, K_ACCENT = 9, K_EDITOR = 10, K_MIN = 11, K_CLOSE = 12,
+			K_PTOGGLE = 6, K_PCLOSE = 7, K_BIND = 8, K_ACCENT = 9, K_EDITOR = 10, K_CLOSE = 12,
 			K_LYRICS = 13,
 			SP_CONNECT = 20, SP_DISCONNECT = 21, SP_PREV = 22, SP_PLAY = 23, SP_NEXT = 24, SP_SEEK = 25, SP_VOL = 26;
 
@@ -184,9 +184,34 @@ public class LovenoteScreen extends Screen {
 	}
 
 	private void fill(DrawContext ctx, int x1, int y1, int x2, int y2, int c) { ctx.fill(x1, y1, x2, y2, a(c)); }
-	private void rr(DrawContext ctx, int x, int y, int w, int h, int c) { RenderUtil.rrect(ctx, x, y, w, h, a(c)); }
-	private void rr(DrawContext ctx, int x, int y, int w, int h, int r, int c) { RenderUtil.rrect(ctx, x, y, w, h, r, a(c)); }
-	private void grad(DrawContext ctx, int x1, int y1, int x2, int y2, int c1, int c2) { RenderUtil.gradientH(ctx, x1, y1, x2, y2, a(c1), a(c2)); }
+
+	private void rr(DrawContext ctx, int x, int y, int w, int h, int c) {
+		RenderUtil.rrect(ctx, x, y, w, h, a(c));
+	}
+
+	private void rr(DrawContext ctx, int x, int y, int w, int h, int r, int c) {
+		rounded(ctx, x, y, w, h, r, a(c));
+	}
+
+	/** Rounded rect from fills, so it does not depend on RenderUtil's private radius overload. */
+	private void rounded(DrawContext ctx, int x, int y, int w, int h, int r, int c) {
+		if (w <= 0 || h <= 0) return;
+		r = Math.max(0, Math.min(r, Math.min(w, h) / 2));
+		if (r == 0) { ctx.fill(x, y, x + w, y + h, c); return; }
+		for (int i = 0; i < r; i++) {
+			double dy = r - i - 0.5;
+			int inset = (int) Math.round(r - Math.sqrt(Math.max(0.0, r * r - dy * dy)));
+			int x1 = Math.min(x + inset, x + w);
+			int x2 = Math.max(x + w - inset, x1);
+			ctx.fill(x1, y + i, x2, y + i + 1, c);
+			ctx.fill(x1, y + h - 1 - i, x2, y + h - i, c);
+		}
+		ctx.fill(x, y + r, x + w, y + h - r, c);
+	}
+
+	private void grad(DrawContext ctx, int x1, int y1, int x2, int y2, int c1, int c2) {
+		RenderUtil.gradientH(ctx, x1, y1, x2, y2, a(c1), a(c2));
+	}
 
 	private void txt(DrawContext ctx, String s, int x, int y, int c) {
 		int cc = a(c);
@@ -340,7 +365,7 @@ public class LovenoteScreen extends Screen {
 
 		InterfaceModule im = LovenoteClient.modules.get(InterfaceModule.class);
 		if (im != null) im.apply();
-		gs = im != null ? MathHelper.clamp(im.guiScale.getInt() / 100f, 0.4f, 1.1f) : 1f;
+		gs = im != null ? MathHelper.clamp(im.guiScale.getI() / 100f, 0.4f, 1.1f) : 1f;
 		vw = Math.max(160, Math.round(width / gs));
 		vh = Math.max(120, Math.round(height / gs));
 		clampWindows();
@@ -411,7 +436,9 @@ public class LovenoteScreen extends Screen {
 		rr(ctx, wx - 1, wy - 1, W + 2, H + 2, 11, Colors.alpha(Colors.C2, 64));
 		rr(ctx, wx, wy, W, H, 10, Colors.alpha(Colors.bg(), alpha));
 		grad(ctx, wx + 10, wy, wx + W - 10, wy + 1, Colors.alpha(Colors.C1, 150), Colors.alpha(Colors.C3, 150));
-		if (im != null && im.style.is("Liquid")) grad(ctx, wx + 2, wy + 2, wx + W - 2, wy + 64, 8, Colors.alpha(Colors.C1, 30), Colors.alpha(Colors.C3, 30));
+		if (im != null && im.style.is("Liquid")) {
+			grad(ctx, wx + 2, wy + 2, wx + W - 2, wy + 64, Colors.alpha(Colors.C1, 30), Colors.alpha(Colors.C3, 30));
+		}
 
 		int hdr = wy + 36;
 		int ftr = wy + H - 22;
@@ -422,7 +449,6 @@ public class LovenoteScreen extends Screen {
 		String q = search.getText().trim().toLowerCase();
 		boolean moduleGrid = !q.isEmpty() || (pages[page] != Category.SPOTIFY && pages[page] != Category.THEMES);
 
-		// search pill
 		int sw = 186;
 		rr(ctx, cx, wy + 9, sw, 18, 9, Colors.alpha(Colors.chip(), 210));
 		circle(ctx, cx + 11, wy + 18, 4, Colors.faint());
@@ -432,7 +458,6 @@ public class LovenoteScreen extends Screen {
 		if (interactive) renderField(ctx, search, mx, my, delta);
 		if (search.getText().isEmpty() && !search.isFocused()) txt(ctx, "Search...", cx + 22, wy + 14, Colors.faint());
 
-		// window buttons
 		int bx = wx + W - 16;
 		boolean cHov = interactive && mx >= bx - 4 && mx <= bx + 10 && my >= wy + 10 && my <= wy + 26;
 		circle(ctx, bx + 3, wy + 18, 5, Colors.alpha(cHov ? 0xFFEF4444 : Colors.chip(), 255));
@@ -442,7 +467,7 @@ public class LovenoteScreen extends Screen {
 		txtScaled(ctx, title, cx, wy + 46, Colors.text(), 1.32f);
 		int count = visibleModules(q).size();
 		String sub = count + (count == 1 ? " module" : " modules");
-		txt(ctx, sub, cx + textRenderer.getWidth(title) * 1.32f + 8, wy + 50, Colors.faint());
+		txt(ctx, sub, (int) (cx + textRenderer.getWidth(title) * 1.32f + 8), wy + 50, Colors.faint());
 
 		int top = wy + 66, bottom = ftr - 6;
 		if (q.isEmpty() && pages[page] == Category.HUD) {
@@ -463,15 +488,14 @@ public class LovenoteScreen extends Screen {
 			renderThemes(ctx, mx, my, delta, cx, top, cw, im, interactive);
 		}
 
-		// footer
 		txt(ctx, "lovenote", wx + RAIL_MIN + 12, ftr + 7, Colors.faint());
 		txt(ctx, "v1.0.0", wx + RAIL_MIN + 62, ftr + 7, Colors.alpha(Colors.faint(), 140));
-		String stat = mc.getCurrentFps() + " fps";
 		int enabled = 0;
 		for (Module m : LovenoteClient.modules.all()) if (m.enabled) enabled++;
-		String mid = enabled + " on  |  " + stat;
-		txt(ctx, mid, wx + W - 12 - textRenderer.getWidth(mid) - 78, ftr + 7, Colors.faint());
-		txt(ctx, "drag to move  |  ctrl+scroll scale", wx + W - 12 - textRenderer.getWidth("drag to move  |  ctrl+scroll scale"), ftr + 7, Colors.alpha(Colors.faint(), 150));
+		String mid = enabled + " on  |  " + client.getCurrentFps() + " fps";
+		txt(ctx, mid, wx + W - 12 - textRenderer.getWidth(mid) - 100, ftr + 7, Colors.faint());
+		String hint = "drag to move  |  ctrl+scroll scale";
+		txt(ctx, hint, wx + W - 12 - textRenderer.getWidth(hint), ftr + 7, Colors.alpha(Colors.faint(), 150));
 
 		if (!interactive) return;
 		if (pages[page] != Category.SPOTIFY || !q.isEmpty()) idField.setFocused(false);
@@ -789,12 +813,10 @@ public class LovenoteScreen extends Screen {
 		button(ctx, tx + 36, bty, 32, 16, s.playing ? "||" : ">", mx, my, SP_PLAY, interactive);
 		button(ctx, tx + 72, bty, 32, 16, ">>", mx, my, SP_NEXT, interactive);
 
-		// ---- lyrics card
 		int ly0 = gy + 126;
 		rr(ctx, cx, ly0, cw, 120, 8, Colors.card());
 		txt(ctx, "Lyrics", cx + 12, ly0 + 10, Colors.text());
-		String st = LyricsManager.I.hasLyrics() ? LyricsManager.I.status : LyricsManager.I.status;
-		txt(ctx, textRenderer.trimToWidth(st, cw - 100), cx + 60, ly0 + 10, Colors.faint());
+		txt(ctx, textRenderer.trimToWidth(LyricsManager.I.status, cw - 110), cx + 58, ly0 + 10, Colors.faint());
 		if (ly != null) {
 			float on = ease("lyr", ly.enabled ? 1f : 0f, 160);
 			drawSwitch(ctx, cx + cw - 45, ly0 + 9, on);
@@ -803,8 +825,7 @@ public class LovenoteScreen extends Screen {
 			String cur = LyricsManager.I.lineAt(0);
 			if (cur.isEmpty()) cur = "press play in spotify";
 			txt(ctx, textRenderer.trimToWidth(cur, cw - 24), cx + 12, ly0 + 30, Colors.wave(0f));
-			String nxt = LyricsManager.I.lineAt(1);
-			txt(ctx, textRenderer.trimToWidth(nxt, cw - 24), cx + 12, ly0 + 44, Colors.faint());
+			txt(ctx, textRenderer.trimToWidth(LyricsManager.I.lineAt(1), cw - 24), cx + 12, ly0 + 44, Colors.faint());
 
 			int sy = ly0 + 62;
 			for (Setting set : ly.settings) {
