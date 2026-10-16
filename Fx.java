@@ -1,22 +1,24 @@
 package com.lovenote.util;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BuiltBuffer;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.Tessellator;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.util.Identifier;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.lwjgl.opengl.GL11;
 
-/** Shared world-space effect drawing: camera basis, additive blending, vertex emitters. */
+/** Shared world-space effect drawing: camera basis, layer selection, vertex emitters. */
 public final class Fx {
 	private Fx() {}
 
 	public static final Vector3f RIGHT = new Vector3f();
 	public static final Vector3f UP = new Vector3f();
+
+	private static final ThreadLocal<RenderLayer> LAYER = new ThreadLocal<>();
+	private static final ThreadLocal<BufferBuilder> BUFFER = new ThreadLocal<>();
 
 	/** Refresh the camera basis so billboards always face the viewer. */
 	public static void cameraBasis(Camera cam) {
@@ -26,33 +28,25 @@ public final class Fx {
 		cam.getRotation().transform(UP);
 	}
 
-	/** Additive glow pass. Call Fx.end() when finished. */
-	public static void additive() {
-		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-		RenderSystem.disableCull();
-		RenderSystem.depthMask(false);
-	}
+	/**
+	 * No-op now: 1.21.11 has no RenderSystem blend state. Blending, culling and
+	 * depth writes are baked into the RenderLayer that texQuads/colorQuads picked.
+	 * Kept so every call site keeps working.
+	 */
+	public static void additive() { }
 
-	public static void end() {
-		RenderSystem.depthMask(true);
-		RenderSystem.enableCull();
-		RenderSystem.defaultBlendFunc();
-		// hand the plain colour program back so the next module's geometry batch is valid
-		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-	}
+	/** No-op now, same reason. */
+	public static void end() { }
 
 	public static void vc(BufferBuilder b, Matrix4f m, float x, float y, float z, int c) {
 		b.vertex(m, x, y, z)
-			.color((c >> 16) & 255, (c >> 8) & 255, c & 255, (c >>> 24) & 255)
-			.next();
+				.color((c >> 16) & 255, (c >> 8) & 255, c & 255, (c >>> 24) & 255);
 	}
 
 	public static void vt(BufferBuilder b, Matrix4f m, float x, float y, float z, float u, float v, int c) {
 		b.vertex(m, x, y, z)
-			.texture(u, v)
-			.color((c >> 16) & 255, (c >> 8) & 255, c & 255, (c >>> 24) & 255)
-			.next();
+				.texture(u, v)
+				.color((c >> 16) & 255, (c >> 8) & 255, c & 255, (c >>> 24) & 255);
 	}
 
 	/** Camera-facing quad, centred on (x,y,z). */
@@ -66,11 +60,9 @@ public final class Fx {
 		vt(b, m, x - rx + ux, y - ry + uy, z - rz + uz, 0f, 0f, color);
 	}
 
-	/** Open a textured quad batch. Remember to call Tessellator.getInstance().draw(). */
-	public static BufferBuilder texQuads() {
-		RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
-		BufferBuilder b = Tessellator.getInstance().getBuffer();
-		b.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
-		return b;
+	/** Open a textured quad batch for the given texture. Call Fx.draw() when done. */
+	public static BufferBuilder texQuads(Identifier texture) {
+		return begin(RenderLayers.blockScreenEffect(texture));
 	}
-}
+
+	/** Open an untextured coloured quad batch. Call Fx
