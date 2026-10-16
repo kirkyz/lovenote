@@ -9,21 +9,15 @@ import com.lovenote.setting.NumberSetting;
 import com.lovenote.util.Colors;
 import com.lovenote.util.Fx;
 import com.lovenote.util.Tex;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.world.DimensionEffects;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.Tessellator;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.dimension.DimensionType;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Random;
 
@@ -131,7 +125,7 @@ public class SkyShader extends Module {
 			Camera camera, Runnable fogCallback) {
 		if (!enabled || preset.is("Off")) return false;
 		if (overworldOnly.get() && mc.world != null
-				&& mc.world.getDimensionEffects().getSkyType() != DimensionEffects.SkyType.NORMAL) {
+				&& mc.world.getDimension().skybox() != DimensionType.Skybox.OVERWORLD) {
 			return false;
 		}
 
@@ -142,11 +136,6 @@ public class SkyShader extends Module {
 
 		Fx.cameraBasis(camera);
 
-		RenderSystem.depthMask(false);
-		RenderSystem.disableDepthTest();
-		RenderSystem.disableCull();
-		RenderSystem.disableBlend();
-
 		int seg = domeDetail.getI();
 		int rings = Math.max(6, seg / 3);
 		sphere(m, seg, rings);
@@ -155,34 +144,17 @@ public class SkyShader extends Module {
 		if (auroraOn()) aurora(m, tickDelta);
 		if (celestial.get()) sunMoon(m, tickDelta);
 
-		RenderSystem.enableCull();
-		RenderSystem.enableDepthTest();
-		RenderSystem.depthMask(true);
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.disableBlend();
-
 		if (fogCallback != null) fogCallback.run();
-		if (fogTintOn.get()) {
-			int h = horizon();
-			RenderSystem.setShaderFogColor(((h >> 16) & 255) / 255f, ((h >> 8) & 255) / 255f, (h & 255) / 255f);
-		}
 		matrices.pop();
 		return true;
 	}
 
-	/**
-	 * Full sphere instead of a box. The old version was four flat walls and a flat ceiling that
-	 * stopped short under the camera, which is what gave the "standing inside a square" look: hard
-	 * corner seams, a visible ceiling rim and a bottom edge you could see when flying.
-	 */
 	private void sphere(Matrix4f m, int seg, int rings) {
 		int zenith = top();
 		int horizon = horizon();
 		int nadir = Colors.lerp(horizon(), 0xFF000000, 0.45f);
 
-		BufferBuilder b = Tessellator.getInstance().getBuffer();
-		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-		b.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+		BufferBuilder b = Fx.colorQuads();
 
 		for (int r = 0; r < rings; r++) {
 			float phi0 = (float) (r * Math.PI / rings);
@@ -208,7 +180,7 @@ public class SkyShader extends Module {
 			}
 		}
 
-		Tessellator.getInstance().draw();
+		Fx.draw();
 	}
 
 	private static int band(float y, int zenith, int horizon, int nadir) {
@@ -232,16 +204,13 @@ public class SkyShader extends Module {
 			}
 		}
 
-		float spin = (mc.world == null ? 0f : mc.world.getSkyAngle(td)) * 6.28318f;
+		float spin = (mc.world == null ? 0f : Gl.skyAngle(mc.world, td)) * 6.28318f;
 		float cs = MathHelper.cos(spin), sn = MathHelper.sin(spin);
 		float bright = starBrightness.getF();
 
 		Tex.ensure();
-		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-		RenderSystem.setShaderTexture(0, Tex.STAR);
-
-		BufferBuilder b = Fx.texQuads();
+		Fx.additive();
+		BufferBuilder b = Fx.texQuads(Tex.STAR);
 		for (int i = 0; i < starCount; i++) {
 			float x = stars[i * 3], y = stars[i * 3 + 1], z = stars[i * 3 + 2];
 			float rx = x * cs - z * sn;
@@ -251,8 +220,8 @@ public class SkyShader extends Module {
 			if (a < 4) continue;
 			Fx.billboard(b, m, rx, y, rz, 2.6f, Colors.alpha(0xFFFFFFFF, a));
 		}
-		Tessellator.getInstance().draw();
-		RenderSystem.disableBlend();
+		Fx.draw();
+		Fx.end();
 	}
 
 	private void aurora(Matrix4f m, float td) {
@@ -260,11 +229,8 @@ public class SkyShader extends Module {
 		float time = (System.currentTimeMillis() % 100000L) / 1000f * auroraSpeed.getF();
 
 		Tex.ensure();
-		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-		RenderSystem.setShaderTexture(0, Tex.SOFT);
-
-		BufferBuilder b = Fx.texQuads();
+		Fx.additive();
+		BufferBuilder b = Fx.texQuads(Tex.SOFT);
 		for (int band = 0; band < 3; band++) {
 			float phase = time + band * 2.1f;
 			int col = Colors.rainbow(band * 0.22f + time * 0.02f);
@@ -281,23 +247,17 @@ public class SkyShader extends Module {
 			Fx.vt(b, m, w + xOff, y1, zOff, 1f, 0f, Colors.alpha(col, a));
 			Fx.vt(b, m, -w + xOff, y1, zOff, 0f, 0f, Colors.alpha(col, a));
 		}
-		Tessellator.getInstance().draw();
-		RenderSystem.disableBlend();
+		Fx.draw();
+		Fx.end();
 	}
 
 	private void sunMoon(Matrix4f m, float td) {
-		float ang = (mc.world == null ? 0f : mc.world.getSkyAngle(td)) * 6.28318f;
+		float ang = (mc.world == null ? 0f : Gl.skyAngle(mc.world, td)) * 6.28318f;
 		float sx = MathHelper.cos(ang) * R, sy = MathHelper.sin(ang) * R;
 		boolean day = sy > -20f;
 		float size = 34f * sunSize.getF();
 
-		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
-		RenderSystem.setShaderTexture(0, day ? SUN : MOON);
-
-		BufferBuilder b = Tessellator.getInstance().getBuffer();
-		b.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
+		BufferBuilder b = Fx.texQuads(day ? SUN : MOON);
 		int c = day ? 0xFFFFFFFF : 0xFFD8E4FF;
 		float h = size * 0.5f;
 		float rx = Fx.RIGHT.x * h, ry = Fx.RIGHT.y * h, rz = Fx.RIGHT.z * h;
@@ -306,8 +266,7 @@ public class SkyShader extends Module {
 		Fx.vt(b, m, sx + rx - ux, sy + ry - uy, rz - uz, 1f, 1f, c);
 		Fx.vt(b, m, sx + rx + ux, sy + ry + uy, rz + uz, 1f, 0f, c);
 		Fx.vt(b, m, sx - rx + ux, sy - ry + uy, -rz + uz, 0f, 0f, c);
-		Tessellator.getInstance().draw();
-		RenderSystem.disableBlend();
+		Fx.draw();
 	}
 
 	/** kept so anything else calling these still works. */
