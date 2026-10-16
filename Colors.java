@@ -8,10 +8,29 @@ public final class Colors {
 	public static boolean animated = true;
 	public static boolean dark = true;
 
-	public static final String[] PRESET_NAMES = {"Lovenote", "Purple", "Red", "Orange", "Yellow", "Green", "Cyan", "Blue", "Pink"};
+	public static final String[] PRESET_NAMES = {
+			"Lovenote", "Purple", "Red", "Orange", "Yellow", "Green", "Cyan", "Blue", "Pink",
+			"Sunset", "Dawn", "Mint", "Forest", "Ocean", "Ice", "Sky", "Lavender", "Magenta",
+			"Rose", "Coral", "Amber", "Gold", "Lime", "Emerald", "Teal", "Aqua", "Azure",
+			"Indigo", "Violet", "Plum", "Crimson", "Ember", "Neon", "Vapor", "Matrix", "Candy",
+			"Midnight", "Blood", "Frost", "Haze", "Sakura", "Toxic"
+	};
+
 	public static final int[][] PRESETS = {
 			{0xFF9ACB, 0xB28DFF}, {0xA855F7, 0x9647FF}, {0xEF4444, 0xF97316}, {0xF97316, 0xFACC15},
-			{0xFACC15, 0xA3E635}, {0x22C55E, 0x10B981}, {0x06B6D4, 0x3B82F6}, {0x3B82F6, 0x6366F1}, {0xEC4899, 0xF472B6}
+			{0xFACC15, 0xA3E635}, {0x22C55E, 0x10B981}, {0x06B6D4, 0x3B82F6}, {0x3B82F6, 0x6366F1},
+			{0xEC4899, 0xF472B6},
+			{0xFF7A45, 0xFFB84D}, {0xFFC48A, 0xFF7AB0}, {0x3BE8B0, 0x2BD9C4}, {0x2E7D32, 0x66BB6A},
+			{0x0E7490, 0x22D3EE}, {0xA5F3FC, 0x67E8F9}, {0x38BDF8, 0x818CF8}, {0xC4B5FD, 0xE9D5FF},
+			{0xE935C1, 0xFF5FD2},
+			{0xFB7185, 0xF472B6}, {0xFF7F50, 0xFFA36B}, {0xFFB020, 0xFFD166}, {0xFFD700, 0xFFB800},
+			{0xA3E635, 0x84CC16}, {0x10B981, 0x34D399}, {0x14B8A6, 0x0D9488}, {0x22D3EE, 0x38BDF8},
+			{0x2563EB, 0x60A5FA},
+			{0x4F46E5, 0x7C3AED}, {0x8B5CF6, 0xA78BFA}, {0xA21CAF, 0xD946EF}, {0xDC143C, 0xFF4D6D},
+			{0xFF4500, 0xFF8C00}, {0x39FF14, 0x00E5FF}, {0xFF71CE, 0x01CDFE}, {0x00FF41, 0x008F11},
+			{0xFF9ACB, 0x9BF6FF},
+			{0x191970, 0x4B0082}, {0x8A0303, 0xDC143C}, {0xB3E5FC, 0x4FC3F7}, {0x9D8DF1, 0x6FD1E8},
+			{0xFFB7C5, 0xFF8FAB}, {0xB6FF00, 0x00FF9C}
 	};
 
 	private Colors() {}
@@ -64,13 +83,15 @@ public final class Colors {
 	public static int health(float f) {
 		return lerp(0xFFFF3B3B, 0xFF3BFF6B, f);
 	}
-public static int hsv(float hue, float saturation, float value) {
-    return 0xFF000000 | MathHelper.hsvToRgb(
-        hue - (float) Math.floor(hue),
-        MathHelper.clamp(saturation, 0f, 1f),
-        MathHelper.clamp(value, 0f, 1f)
-    );
-}
+
+	public static int hsv(float hue, float saturation, float value) {
+		return 0xFF000000 | MathHelper.hsvToRgb(
+				hue - (float) Math.floor(hue),
+				MathHelper.clamp(saturation, 0f, 1f),
+				MathHelper.clamp(value, 0f, 1f)
+		);
+	}
+
 	public static int rainbow(float offset) {
 		float h = ((System.currentTimeMillis() % 4000L) / 4000f + offset) % 1f;
 		return 0xFF000000 | MathHelper.hsvToRgb(h, 0.7f, 1f);
