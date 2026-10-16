@@ -28,11 +28,12 @@ public class Fog extends Module {
 			case "White" -> 0xFFFFFFFF;
 			default -> Colors.C2;
 		};
-		float s, e;
+		float s;
+		float e;
 		switch (preset.get()) {
 			case "Off" -> { s = 1f; e = 256f; }
 			case "Thick" -> { s = 6f; e = 60f; }
-			case "Custom" -> { s = start.getF(); e = end.getF(); }
+			case "Custom" -> { s = start.getI(); e = end.getI(); }
 			default -> { s = 20f; e = 130f; }
 		}
 		RenderSystem.setShaderFogColor(((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f, 1f);
