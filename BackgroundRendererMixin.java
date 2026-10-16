@@ -2,7 +2,6 @@ package com.lovenote.mixin;
 
 import com.lovenote.LovenoteClient;
 import com.lovenote.module.impl.Fog;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.world.ClientWorld;
