@@ -32,7 +32,7 @@ public class AutoReconnect extends Module {
 			if (timer < 0) timer = delay.getI() * 20;
 			if (timer > 0) { timer--; return; }
 			timer = -1;
-			ConnectScreen.connect(mc, ServerAddress.parse(address), info);
+			ConnectScreen.connect(mc.currentScreen, mc, ServerAddress.parse(address), info, false);
 			return;
 		}
 		timer = -1;
