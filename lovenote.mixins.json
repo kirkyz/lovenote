@@ -8,6 +8,7 @@
     "ClientWorldMixin",
     "HeldItemRendererMixin",
     "LivingEntityMixin",
+    "LivingEntityRendererMixin",
     "MinecraftClientAccessor",
     "WorldRendererMixin"
   ],
