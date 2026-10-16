@@ -14,6 +14,6 @@ public class AutoJump extends Module {
 
 	@Override
 	public void onTick() {
-		if (mc.options.autoJump != on.get()) mc.options.autoJump = on.get();
+		if (mc.options.getAutoJump().getValue() != on.get()) mc.options.getAutoJump().setValue(on.get());
 	}
 }
