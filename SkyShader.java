@@ -21,8 +21,8 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Random;
@@ -117,8 +117,8 @@ public class SkyShader extends Module {
 		}
 
 		matrices.push();
-		matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(camera.getPitch()));
-		matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(camera.getYaw() + 180f));
+		matrices.multiply(new Quaternionf().rotationX((float) Math.toRadians(camera.getPitch())));
+		matrices.multiply(new Quaternionf().rotationY((float) Math.toRadians(camera.getYaw() + 180f)));
 		Matrix4f m = matrices.peek().getPositionMatrix();
 
 		Fx.cameraBasis(camera);
