@@ -75,7 +75,5 @@ public class Fog extends Module {
 	/** Fallback path, called from BackgroundRendererMixin at the end of the sky/fog pass. */
 	public void apply() {
 		active = true;
-		RenderSystem.setShaderFogStart(fogStart(0f));
-		RenderSystem.setShaderFogEnd(fogEnd(0f));
 	}
 }

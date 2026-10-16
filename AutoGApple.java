@@ -26,7 +26,7 @@ public class AutoGApple extends Module {
 	private void stop() {
 		if (!eating) return;
 		mc.options.useKey.setPressed(false);
-		if (prev != -1 && mc.player != null) mc.player.getInventory().selectedSlot = prev;
+		if (prev != -1 && mc.player != null) mc.player.getInventory().setSelectedSlot(prev);
 		prev = -1;
 		eating = false;
 	}
@@ -37,8 +37,8 @@ public class AutoGApple extends Module {
 		float hp = mc.player.getHealth() + mc.player.getAbsorptionAmount();
 		int slot = findApple();
 		if (slot != -1 && (hp <= health.get() || (eating && hp <= health.get() + 4))) {
-			if (!eating) { prev = mc.player.getInventory().selectedSlot; eating = true; }
-			mc.player.getInventory().selectedSlot = slot;
+			if (!eating) { prev = mc.player.getInventory().getSelectedSlot(); eating = true; }
+			mc.player.getInventory().setSelectedSlot(slot);
 			mc.options.useKey.setPressed(true);
 		} else {
 			stop();

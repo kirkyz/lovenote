@@ -1,4 +1,5 @@
 package com.lovenote.module.impl;
+import net.minecraft.util.PlayerInput;
 
 import com.lovenote.module.Category;
 import com.lovenote.module.Module;
@@ -36,16 +37,14 @@ public class TargetStrafe extends Module {
 		timer--;
 
 		float side = dir.is("Left") ? 1f : dir.is("Right") ? -1f : (left ? 1f : -1f);
-		mc.player.input.movementSideways = side;
-		mc.player.input.movementForward = best > radius.get() + 0.4 ? 1f : 0f;
+mc.player.input.playerInput = new PlayerInput(best > radius.get() + 0.4, false, side > 0f, side < 0f, mc.player.input.playerInput.jump(), mc.player.input.playerInput.sneak(), mc.player.input.playerInput.sprint());
 		if (jump.get() && best < radius.get() + 0.6 && mc.player.isOnGround()) mc.player.jump();
 	}
 
 	@Override
 	public void onDisable() {
 		if (mc.player != null && mc.player.input != null) {
-			mc.player.input.movementSideways = 0f;
-			mc.player.input.movementForward = 0f;
+mc.player.input.playerInput = new PlayerInput(false, false, false, false, mc.player.input.playerInput.jump(), mc.player.input.playerInput.sneak(), mc.player.input.playerInput.sprint());
 		}
 	}
 }

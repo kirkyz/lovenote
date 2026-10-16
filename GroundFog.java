@@ -45,8 +45,8 @@ public class GroundFog extends Module {
 		int N = detail.getI();
 		float cell = (R * 2f) / N;
 		float td = ctx.tickDelta();
-		double cx = MathHelper.lerp(td, p.prevX, p.getX());
-		double cz = MathHelper.lerp(td, p.prevZ, p.getZ());
+		double cx = MathHelper.lerp(td, p.lastX, p.getX());
+		double cz = MathHelper.lerp(td, p.lastZ, p.getZ());
 		float gy = (float) (p.getY() + 0.06 + height.getF() * 0.08);
 		float time = (System.currentTimeMillis() % 100000L) / 1000f * speed.getF();
 		float tl = tile.getF();
@@ -55,7 +55,7 @@ public class GroundFog extends Module {
 		boolean wv = wave.get();
 
 		Fx.additive();
-		RenderSystem.setShaderTexture(0, Tex.SOFT);
+		Fx.texture(Tex.SOFT);
 
 		BufferBuilder b = Fx.texQuads();
 		for (int gx = 0; gx < N; gx++) {
@@ -79,7 +79,7 @@ public class GroundFog extends Module {
 				Fx.vt(b, mat, x0, gy, z1, u0, v0, c);
 			}
 		}
-		Tessellator.getInstance().draw();
+		Fx.draw();
 		Fx.end();
 	}
 

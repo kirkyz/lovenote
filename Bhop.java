@@ -11,7 +11,7 @@ public class Bhop extends Module {
 	@Override
 	public void onTick() {
 		if (mc.player == null) return;
-		boolean moving = mc.player.input.movementForward != 0 || mc.player.input.movementSideways != 0;
+		boolean moving = mc.player.input.hasForwardMovement() || mc.player.input.getMovementInput().x != 0f;
 		if (mc.player.isOnGround() && moving && !mc.player.isSneaking()) mc.player.jump();
 	}
 }

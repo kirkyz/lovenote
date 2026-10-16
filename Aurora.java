@@ -44,7 +44,7 @@ public class Aurora extends Module {
 		if (mc.player == null || mc.world == null) return;
 		Tex.ensure();
 		Fx.cameraBasis(ctx.camera());
-		RenderSystem.setShaderTexture(0, Tex.SOFT);
+		Fx.texture(Tex.SOFT);
 		Fx.additive();
 
 		Matrix4f mat = m.peek().getPositionMatrix();
@@ -64,7 +64,7 @@ public class Aurora extends Module {
 			int c = Colors.alpha(pick(i), (int) (aF * (0.55f + 0.45f * (float) Math.sin(ph))));
 			BufferBuilder b = Fx.texQuads();
 			Fx.billboard(b, mat, bx, by, bz, wF, c);
-			Tessellator.getInstance().draw();
+			Fx.draw();
 		}
 		Fx.end();
 	}

@@ -48,11 +48,11 @@ public final class BlockUtil {
 			Direction face = d.getOpposite();
 			Vec3d hit = Vec3d.ofCenter(n).add(face.getOffsetX() * 0.5, face.getOffsetY() * 0.5, face.getOffsetZ() * 0.5);
 			PlayerInventory inv = mc.player.getInventory();
-			int prev = inv.selectedSlot;
-			inv.selectedSlot = slot;
+			int prev = inv.getSelectedSlot();
+			inv.setSelectedSlot(slot);
 			mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(hit, face, n, false));
 			mc.player.swingHand(Hand.MAIN_HAND);
-			inv.selectedSlot = prev;
+			inv.setSelectedSlot(prev);
 			return true;
 		}
 		return false;

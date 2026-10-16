@@ -17,6 +17,6 @@ public class AntiHunger extends Module {
 		if (mc.player.getVelocity().horizontalLengthSquared() < 0.003) return;
 		mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.Full(
 				mc.player.getX(), mc.player.getY(), mc.player.getZ(),
-				mc.player.getYaw(), mc.player.getPitch(), false));
+				mc.player.getYaw(), mc.player.getPitch(), false, false));
 	}
 }

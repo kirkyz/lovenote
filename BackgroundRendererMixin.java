@@ -2,7 +2,7 @@ package com.lovenote.mixin;
 
 import com.lovenote.LovenoteClient;
 import com.lovenote.module.impl.Fog;
-import net.minecraft.client.render.FogRenderer;
+import net.minecraft.client.render.fog.FogRenderer;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.world.ClientWorld;
 import org.spongepowered.asm.mixin.Mixin;
@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(BackgroundRenderer.class)
+@Mixin(FogRenderer.class)
 public class BackgroundRendererMixin {
 
 	@Inject(method = "render", at = @At("TAIL"), require = 0)

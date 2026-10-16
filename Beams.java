@@ -43,7 +43,7 @@ public class Beams extends Module {
 		if (mc.world == null || mc.player == null) return;
 		Tex.ensure();
 		Fx.cameraBasis(ctx.camera());
-		RenderSystem.setShaderTexture(0, Tex.SOFT);
+		Fx.texture(Tex.SOFT);
 		Fx.additive();
 		Matrix4f mat = m.peek().getPositionMatrix();
 		float td = ctx.tickDelta();
@@ -52,7 +52,7 @@ public class Beams extends Module {
 			if (p == mc.player && !self.get()) continue;
 			if (!p.isAlive()) continue;
 			Vec3d pos = p.getLerpedPos(td);
-			if (pos.distanceTo(mc.player.getPos()) > range.get()) continue;
+			if (pos.distanceTo(mc.player.getEntityPos()) > range.get()) continue;
 			float hp = Math.max(0f, Math.min(1f, p.getHealth() / p.getMaxHealth()));
 			int c = pick(color.get(), hp, i++ * 0.08f);
 
@@ -68,7 +68,7 @@ public class Beams extends Module {
 			Fx.vt(b, mat, x + rx, y0, z + rz, 1f, 1f, bottom);
 			Fx.vt(b, mat, x + rx, y1, z + rz, 1f, 0f, top);
 			Fx.vt(b, mat, x - rx, y1, z - rz, 0f, 0f, top);
-			Tessellator.getInstance().draw();
+			Fx.draw();
 		}
 		Fx.end();
 	}

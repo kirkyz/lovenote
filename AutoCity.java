@@ -30,7 +30,7 @@ public class AutoCity extends Module {
 
 	private void reset() {
 		current = null;
-		if (prevSlot != -1 && mc.player != null) mc.player.getInventory().selectedSlot = prevSlot;
+		if (prevSlot != -1 && mc.player != null) mc.player.getInventory().setSelectedSlot(prevSlot);
 		prevSlot = -1;
 	}
 
@@ -51,7 +51,7 @@ public class AutoCity extends Module {
 			}
 			if (current == null) return;
 			int slot = ToolUtil.bestSlot(mc.world.getBlockState(current));
-			if (slot != -1) { prevSlot = mc.player.getInventory().selectedSlot; mc.player.getInventory().selectedSlot = slot; }
+			if (slot != -1) { prevSlot = mc.player.getInventory().getSelectedSlot(); mc.player.getInventory().setSelectedSlot(slot); }
 			mc.interactionManager.attackBlock(current, Direction.UP);
 		} else {
 			mc.interactionManager.updateBlockBreakingProgress(current, Direction.UP);

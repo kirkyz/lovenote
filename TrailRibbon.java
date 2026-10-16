@@ -52,12 +52,12 @@ public class TrailRibbon extends Module {
 		if (points.size() < 3) return;
 		Tex.ensure();
 		Matrix4f mat = m.peek().getPositionMatrix();
-		Vec3d cam = ctx.camera().getPos();
+		Vec3d cam = ctx.camera().getCameraPos();
 		Vec3d[] pts = points.toArray(new Vec3d[0]);
 		int n = pts.length;
 
 		Fx.additive();
-		RenderSystem.setShaderTexture(0, Tex.SOFT);
+		Fx.texture(Tex.SOFT);
 		BufferBuilder b = Fx.texQuads();
 		for (int i = 0; i < n; i++) {
 			Vec3d cur = pts[i];
@@ -80,7 +80,7 @@ public class TrailRibbon extends Module {
 			Fx.vt(b, mat, (float) l.x, (float) l.y, (float) l.z, 0f, 1f, col);
 			Fx.vt(b, mat, (float) r.x, (float) r.y, (float) r.z, 1f, 1f, col);
 		}
-		Tessellator.getInstance().draw();
+		Fx.draw();
 		Fx.end();
 	}
 }

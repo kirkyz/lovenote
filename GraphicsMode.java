@@ -19,6 +19,6 @@ public class GraphicsMode extends Module {
 			case "Fabulous" -> net.minecraft.client.option.GraphicsMode.FABULOUS;
 			default -> net.minecraft.client.option.GraphicsMode.FANCY;
 		};
-		if (mc.options.getGraphicsMode().getValue() != want) mc.options.getGraphicsMode().setValue(want);
+		if (mc.options.getPreset().getValue() != want) mc.options.getPreset().setValue(want);
 	}
 }

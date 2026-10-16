@@ -21,7 +21,7 @@ public class Tracers extends Module {
 	public void onRender3D(WorldRenderContext ctx, MatrixStack m) {
 		if (mc.world == null) return;
 		float td = ctx.tickDelta();
-		Vec3d cam = ctx.camera().getPos();
+		Vec3d cam = ctx.camera().getCameraPos();
 		Vec3d start = cam.add(Vec3d.fromPolar(ctx.camera().getPitch(), ctx.camera().getYaw()));
 		int i = 0;
 		for (PlayerEntity p : mc.world.getPlayers()) {

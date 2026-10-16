@@ -30,7 +30,7 @@ public class JumpCircles extends Module {
 		if (mc.player == null) return;
 		boolean g = mc.player.isOnGround();
 		long now = System.currentTimeMillis();
-		if (wasGround && !g && mc.player.getVelocity().y > 0.2) circles.add(new Circle(mc.player.getPos(), now));
+		if (wasGround && !g && mc.player.getVelocity().y > 0.2) circles.add(new Circle(mc.player.getEntityPos(), now));
 		wasGround = g;
 		long life = (long) (duration.get() * 1000);
 		circles.removeIf(c -> now - c.start > life);

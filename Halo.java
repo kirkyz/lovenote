@@ -45,9 +45,9 @@ public class Halo extends Module {
 		Fx.cameraBasis(ctx.camera());
 
 		float td = ctx.tickDelta();
-		double x = MathHelper.lerp(td, p.prevX, p.getX());
-		double y = MathHelper.lerp(td, p.prevY, p.getY());
-		double z = MathHelper.lerp(td, p.prevZ, p.getZ());
+		double x = MathHelper.lerp(td, p.lastX, p.getX());
+		double y = MathHelper.lerp(td, p.lastY, p.getY());
+		double z = MathHelper.lerp(td, p.lastZ, p.getZ());
 
 		float time = (System.currentTimeMillis() % 100000L) / 1000f;
 		Matrix4f mat = m.peek().getPositionMatrix();
@@ -57,7 +57,7 @@ public class Halo extends Module {
 		int a = opacity.getI();
 
 		Fx.additive();
-		RenderSystem.setShaderTexture(0, Tex.SOFT);
+		Fx.texture(Tex.SOFT);
 
 		if (!style.is("Spiral")) beam(mat, x, y, z, r, h, time, base, a);
 		if (!style.is("Beam")) spiral(mat, x, y, z, r, h, time, base, a);
@@ -83,7 +83,7 @@ public class Halo extends Module {
 			Fx.vt(b, m, x1, (float) (y + h), z1, 1f, 0f, top);
 			Fx.vt(b, m, x0, (float) (y + h), z0, 0f, 0f, top);
 		}
-		Tessellator.getInstance().draw();
+		Fx.draw();
 	}
 
 	private void spiral(Matrix4f m, double x, double y, double z, float r, float h, float time, int base, int a) {
@@ -101,7 +101,7 @@ public class Halo extends Module {
 				(float) (y + yy),
 				(float) (z + Math.sin(ang) * rad), sz, c);
 		}
-		Tessellator.getInstance().draw();
+		Fx.draw();
 	}
 
 	private int base() {

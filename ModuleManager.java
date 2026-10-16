@@ -423,7 +423,7 @@ public class ModuleManager {
 
 	public void render3D(WorldRenderContext ctx) {
 		MatrixStack m = ctx.matrixStack();
-		Vec3d cam = ctx.camera().getPos();
+		Vec3d cam = ctx.camera().getCameraPos();
 		m.push();
 		m.translate(-cam.x, -cam.y, -cam.z);
 		RenderUtil.begin3D(1.5f);

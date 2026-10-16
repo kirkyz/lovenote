@@ -28,18 +28,13 @@ public abstract class LivingEntityRendererMixin {
 
 		if (on && c.throughWalls()) {
 			// glClear ignores the depth mask, so flip it on for the clear and let the layer restore it
-			RenderSystem.depthMask(true);
-			RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, false);
 		}
 
 		int t = on ? c.tint(entity) : 0xFFFFFFFF;
-		RenderSystem.setShaderColor(((t >> 16) & 255) / 255f, ((t >> 8) & 255) / 255f, (t & 255) / 255f,
-				((t >>> 24) & 255) / 255f);
 	}
 
 	@Inject(method = "render", at = @At("TAIL"))
 	private void lovenote$chamsTail(LivingEntity entity, float yaw, float tickDelta, MatrixStack matrices,
 			VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
-		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 	}
 }

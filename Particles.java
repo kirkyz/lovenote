@@ -3,7 +3,7 @@ package com.lovenote.module.impl;
 import com.lovenote.module.Category;
 import com.lovenote.module.Module;
 import com.lovenote.setting.ModeSetting;
-import net.minecraft.client.render.ParticlesMode;
+import net.minecraft.particle.ParticlesMode;
 
 public class Particles extends Module {
 	private final ModeSetting mode = add(new ModeSetting("Mode", "Decreased", "All", "Decreased", "Minimal"));

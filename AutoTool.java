@@ -22,19 +22,19 @@ public class AutoTool extends Module {
 		if (mining) {
 			BlockHitResult br = (BlockHitResult) mc.crosshairTarget;
 			int slot = ToolUtil.bestSlot(mc.world.getBlockState(br.getBlockPos()));
-			if (slot != -1 && slot != mc.player.getInventory().selectedSlot) {
-				if (prev == -1) prev = mc.player.getInventory().selectedSlot;
-				mc.player.getInventory().selectedSlot = slot;
+			if (slot != -1 && slot != mc.player.getInventory().getSelectedSlot()) {
+				if (prev == -1) prev = mc.player.getInventory().getSelectedSlot();
+				mc.player.getInventory().setSelectedSlot(slot);
 			}
 		} else if (prev != -1) {
-			mc.player.getInventory().selectedSlot = prev;
+			mc.player.getInventory().setSelectedSlot(prev);
 			prev = -1;
 		}
 	}
 
 	@Override
 	public void onDisable() {
-		if (prev != -1 && mc.player != null) mc.player.getInventory().selectedSlot = prev;
+		if (prev != -1 && mc.player != null) mc.player.getInventory().setSelectedSlot(prev);
 		prev = -1;
 	}
 }

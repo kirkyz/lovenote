@@ -24,7 +24,7 @@ public class InventoryWidget extends HudWidget {
 				ctx.fill(x, y, x + 17, y + 17, 0x40000000);
 				if (!st.isEmpty()) {
 					ctx.drawItem(st, x + 1, y + 1);
-					ctx.drawItemInSlot(mc.textRenderer, st, x + 1, y + 1);
+					ctx.drawStackOverlay(mc.textRenderer, st, x + 1, y + 1);
 				}
 			}
 		}

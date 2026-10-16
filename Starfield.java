@@ -1,4 +1,6 @@
 package com.lovenote.module.impl;
+import net.minecraft.client.render.RenderLayer;
+import com.lovenote.util.Gl;
 
 import com.lovenote.module.Category;
 import com.lovenote.module.Module;
@@ -8,8 +10,10 @@ import com.lovenote.setting.NumberSetting;
 import com.lovenote.util.Colors;
 import com.lovenote.util.Fx;
 import com.lovenote.util.Tex;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.lovenote.util.WorldRenderContext;
 import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.util.math.MatrixStack;
 import org.joml.Matrix4f;
 
@@ -66,6 +70,7 @@ public class Starfield extends Module {
 		if (xs == null || built != n) build(n);
 		Tex.ensure();
 		Fx.cameraBasis(ctx.camera());
+		Fx.texture(Tex.STAR);
 		Fx.additive();
 
 		Matrix4f mat = m.peek().getPositionMatrix();
@@ -77,7 +82,7 @@ public class Starfield extends Module {
 		double cx = mc.player.getX(), cz = mc.player.getZ();
 		float sz = (float) size.get();
 
-		BufferBuilder b = Fx.texQuads(Tex.STAR);
+		BufferBuilder b = Fx.texQuads();
 		for (int i = 0; i < n; i++) {
 			double x = xs[i] * R, y = ys[i] * R, z = zs[i] * R;
 			double rx = x * cs - z * sn;

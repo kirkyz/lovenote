@@ -25,7 +25,7 @@ public class HitParticles extends Module {
 		if (mc.world == null || !(target instanceof LivingEntity)) return;
 		double s = speed.get();
 		for (int i = 0; i < amount.getI(); i++) {
-			mc.world.addParticle(ParticleUtil.get(particle.get()),
+			mc.world.addParticleClient(ParticleUtil.get(particle.get()),
 					target.getX() + (rnd.nextDouble() - 0.5) * target.getWidth(),
 					target.getY() + rnd.nextDouble() * target.getHeight(),
 					target.getZ() + (rnd.nextDouble() - 0.5) * target.getWidth(),

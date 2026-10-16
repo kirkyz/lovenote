@@ -1,4 +1,5 @@
 package com.lovenote.module.impl;
+import net.minecraft.client.gl.RenderPipelines;
 
 import com.lovenote.setting.BoolSetting;
 import com.lovenote.spotify.SpotifyManager;
@@ -49,7 +50,7 @@ public class SpotifyHud extends HudWidget {
 		int tx = 8;
 		if (art.get()) {
 			if (live && s.artTexture != null) {
-				ctx.drawTexture(s.artTexture, 6, 6, 34, 34, 0, 0, 64, 64, 64, 64);
+				ctx.drawTexture(RenderPipelines.GUI_TEXTURED, s.artTexture, 6, 6, 0, 0, 34, 34, 64, 64, 64, 64);
 			} else {
 				RenderUtil.rrect(ctx, 6, 6, 34, 34, 0xFF22222C);
 				ctx.drawCenteredTextWithShadow(tr, "\u266A", 23, 20, Colors.wave(0));

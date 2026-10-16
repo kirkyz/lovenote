@@ -22,7 +22,7 @@ public class StaffList extends HudWidget {
 		List<String> names = new ArrayList<>();
 		if (mc.getNetworkHandler() != null) {
 			for (PlayerListEntry e : mc.getNetworkHandler().getPlayerList()) {
-				if (e.getGameMode() == GameMode.SPECTATOR) names.add(e.getProfile().getName());
+				if (e.getGameMode() == GameMode.SPECTATOR) names.add(e.getProfile().name());
 			}
 		}
 		if (editing && names.isEmpty()) names.add("spectators show here");

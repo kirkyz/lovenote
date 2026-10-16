@@ -168,8 +168,8 @@ public final class SpotifyManager {
         NativeImage image = NativeImage.read(new ByteArrayInputStream(png.toByteArray()));
         MinecraftClient.getInstance().execute(() -> {
             Identifier old = artTexture;
-            Identifier id = new Identifier("lovenote", "spotify_art_" + (artCounter++));
-            MinecraftClient.getInstance().getTextureManager().registerTexture(id, new NativeImageBackedTexture(image));
+            Identifier id = Identifier.of("lovenote", "spotify_art_" + (artCounter++));
+            MinecraftClient.getInstance().getTextureManager().registerTexture(id, new NativeImageBackedTexture(() -> "lovenote_spotify_art", image));
             artTexture = id;
             if (old != null) MinecraftClient.getInstance().getTextureManager().destroyTexture(old);
         });

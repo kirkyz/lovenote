@@ -28,7 +28,7 @@ public final class Tex {
         if (mc == null) return;
 
         try {
-            RenderSystem.assertOnRenderThreadOrInit();
+            RenderSystem.assertOnRenderThread();
 
             put(mc, GLOW, radial(96, 1.05f));
             put(mc, SOFT, radial(96, 2.30f));
@@ -48,8 +48,7 @@ public final class Tex {
             NativeImage img
     ) {
         NativeImageBackedTexture tex =
-                new NativeImageBackedTexture(img);
-        tex.setFilter(true, false);
+                new NativeImageBackedTexture(() -> "lovenote_gen", img);
         mc.getTextureManager().registerTexture(id, tex);
     }
 

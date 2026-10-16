@@ -1,4 +1,5 @@
 package com.lovenote.module.impl;
+import com.lovenote.util.Fx;
 
 import com.lovenote.module.Category;
 import com.lovenote.module.Module;
@@ -56,7 +57,7 @@ draw(m, p, td, time);
 
 private void draw(MatrixStack m, PlayerEntity p, float td, float time) {
 Vec3d pos = p.getLerpedPos(td);
-float yaw = MathHelper.lerp(td, p.prevYaw, p.getYaw());
+float yaw = MathHelper.lerp(td, p.lastYaw, p.getYaw());
 double ry = Math.toRadians(yaw);
 
 Vec3d right = new Vec3d(-Math.cos(ry), 0, -Math.sin(ry));
@@ -67,24 +68,16 @@ double flap = Math.sin(time * 2.4 * flapSpeed.get()) * 0.30 * flapSpeed.get();
 Vec3d origin = pos.add(0, 1.15, 0).add(fwd.multiply(-0.12));
 float sz = (float) size.get();
 
-RenderSystem.enableBlend();
-RenderSystem.defaultBlendFunc();
-RenderSystem.disableCull();
-RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-BufferBuilder b = Tessellator.getInstance().getBuffer();
+BufferBuilder b = Fx.texQuads();
 
 if (glow.get()) {
-b.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 wing(b, m, origin, right, up, fwd, flap, sz * 1.18f, 60);
-Tessellator.getInstance().draw();
+Fx.draw();
 }
 
-b.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 wing(b, m, origin, right, up, fwd, flap, sz, opacity.getI());
-Tessellator.getInstance().draw();
+Fx.draw();
 
-RenderSystem.enableCull();
-RenderSystem.disableBlend();
 }
 
 private void wing(BufferBuilder b, MatrixStack m, Vec3d o, Vec3d right, Vec3d up, Vec3d fwd,
@@ -133,6 +126,6 @@ vert(b, mat, d, cd);
 private static void vert(BufferBuilder b, Matrix4f mat, Vec3d v, int c) {
 b.vertex(mat, (float) v.x, (float) v.y, (float) v.z)
 .color((c >> 16) & 255, (c >> 8) & 255, c & 255, (c >>> 24) & 255)
-.next();
+;
 }
 }

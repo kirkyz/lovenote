@@ -1,4 +1,5 @@
 package com.lovenote.mixin;
+import net.minecraft.util.math.Vec3d;
 
 import com.lovenote.LovenoteClient;
 import com.lovenote.module.impl.Velocity;
@@ -18,16 +19,16 @@ public class ClientPlayNetworkHandlerMixin {
 	@Inject(method = "onEntityVelocityUpdate", at = @At("HEAD"), cancellable = true)
 	private void lovenote$velocity(EntityVelocityUpdateS2CPacket packet, CallbackInfo ci) {
 		MinecraftClient mc = MinecraftClient.getInstance();
-		if (LovenoteClient.modules == null || mc.player == null || packet.getId() != mc.player.getId()) return;
+		if (LovenoteClient.modules == null || mc.player == null || packet.getEntityId() != mc.player.getId()) return;
 		Velocity v = LovenoteClient.modules.get(Velocity.class);
 		if (v == null || !v.enabled) return;
 
 		ci.cancel();
 		double h = v.horizontal.get() / 100.0, vv = v.vertical.get() / 100.0;
 		if (h == 0 && vv == 0) return;
-		double x = packet.getVelocityX() / 8000.0, y = packet.getVelocityY() / 8000.0, z = packet.getVelocityZ() / 8000.0;
+		double x = packet.getVelocity().x / 8000.0, y = packet.getVelocity().y / 8000.0, z = packet.getVelocity().z / 8000.0;
 		mc.execute(() -> {
-			if (mc.player != null) mc.player.setVelocityClient(x * h, y * vv, z * h);
+			if (mc.player != null) mc.player.setVelocityClient(new Vec3d(x * h, y * vv, z * h));
 		});
 	}
 

@@ -26,7 +26,7 @@ public class ItemESP extends Module {
 		for (Entity e : mc.world.getEntities()) {
 			if (!(e instanceof ItemEntity) || mc.player.distanceTo(e) > range.get()) continue;
 			Vec3d l = e.getLerpedPos(td);
-			Box b = e.getBoundingBox().offset(l.subtract(e.getPos())).expand(0.05);
+			Box b = e.getBoundingBox().offset(l.subtract(e.getEntityPos())).expand(0.05);
 			int c = Colors.wave(0f);
 			RenderUtil.box(m, b, Colors.alpha(c, 45), c);
 		}

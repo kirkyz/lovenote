@@ -20,7 +20,7 @@ public class FastFall extends Module {
 	public void onTick() {
 		if (mc.player == null) return;
 		if (onlySneak.get() && !mc.player.isSneaking()) return;
-		if (mc.player.isOnGround() || mc.player.isFallFlying() || mc.player.isTouchingWater()) return;
+		if (mc.player.isOnGround() || mc.player.isGliding() || mc.player.isTouchingWater()) return;
 		Vec3d v = mc.player.getVelocity();
 		if (v.y >= 0) return;
 		mc.player.setVelocity(v.x, v.y * speed.get(), v.z);

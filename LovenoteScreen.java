@@ -1,4 +1,8 @@
 package com.lovenote.gui;
+import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.gui.Click;
 
 import com.lovenote.LovenoteClient;
 import com.lovenote.module.Category;
@@ -299,7 +303,7 @@ public class LovenoteScreen extends Screen {
 
 	private String keyName(int key) {
 		if (key == -1) return "none";
-		String n = InputUtil.fromKeyCode(key, -1).getLocalizedText().getString().toUpperCase();
+		String n = InputUtil.fromKeyCode(new KeyInput(key, 0, 0)).getLocalizedText().getString().toUpperCase();
 		return n.length() > 7 ? n.substring(0, 7) : n;
 	}
 
@@ -1078,7 +1082,7 @@ public class LovenoteScreen extends Screen {
 		int art = 96;
 		int ax = x + 16, ay = y + 18;
 		if (live && sp.artTexture != null) {
-			ctx.drawTexture(sp.artTexture, ax, ay, art, art, 0, 0, 64, 64, 64, 64);
+			ctx.drawTexture(RenderPipelines.GUI_TEXTURED, sp.artTexture, ax, ay, 0, 0, art, art, 64, 64, 64, 64);
 		} else {
 			rr(ctx, ax, ay, art, art, 10, Colors.alpha(Colors.chip(), 230));
 			txtScaled(ctx, "\u266A", ax + 36, ay + 26, Colors.faint(), 3.2f);
@@ -1189,7 +1193,13 @@ public class LovenoteScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseClicked(double mx, double my, int button) {
+	public boolean mouseClicked(Click click, boolean doubled) {
+		double mouseX = click.x();
+		double mouseY = click.y();
+		int button = click.button();
+		int btn = button;
+		double mx = mouseX;
+		double my = mouseY;
 		mx /= gs;
 		my /= gs;
 		InterfaceModule im = LovenoteClient.modules.get(InterfaceModule.class);
@@ -1204,7 +1214,7 @@ public class LovenoteScreen extends Screen {
 			panelModule = null;
 			return true;
 		}
-		if (button != 0 && button != 1) return super.mouseClicked(mx, my, button);
+		if (button != 0 && button != 1) return super.mouseClicked(new Click(mx, my, click.buttonInfo()), doubled);
 
 		search.setFocused(false);
 		primField.setFocused(false);
@@ -1308,11 +1318,21 @@ public class LovenoteScreen extends Screen {
 			grabY = (int) my - wy;
 			return true;
 		}
-		return super.mouseClicked(mx, my, button);
+		return super.mouseClicked(new Click(mx, my, click.buttonInfo()), doubled);
 	}
 
 	@Override
-	public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+	public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+		double mouseX = click.x();
+		double mouseY = click.y();
+		int button = click.button();
+		int btn = button;
+		double mx = mouseX;
+		double my = mouseY;
+		double deltaX = offsetX;
+		double deltaY = offsetY;
+		double dx = offsetX;
+		double dy = offsetY;
 		mx /= gs;
 		my /= gs;
 		if (dragWin == 1) {
@@ -1342,14 +1362,20 @@ public class LovenoteScreen extends Screen {
 				return true;
 			}
 		}
-		return super.mouseDragged(mx, my, button, dx, dy);
+		return super.mouseDragged(new Click(mx, my, click.buttonInfo()), dx, dy);
 	}
 
 	@Override
-	public boolean mouseReleased(double mx, double my, int button) {
+	public boolean mouseReleased(Click click) {
+		double mouseX = click.x();
+		double mouseY = click.y();
+		int button = click.button();
+		int btn = button;
+		double mx = mouseX;
+		double my = mouseY;
 		dragWin = 0;
 		dragging = null;
-		return super.mouseReleased(mx, my, button);
+		return super.mouseReleased(new Click(mx, my, click.buttonInfo()));
 	}
 
 	@Override
@@ -1357,7 +1383,7 @@ public class LovenoteScreen extends Screen {
 		mx /= gs;
 		my /= gs;
 		InterfaceModule im = LovenoteClient.modules.get(InterfaceModule.class);
-		if (InputUtil.isKeyPressed(client.getWindow().getHandle(), GLFW.GLFW_KEY_LEFT_CONTROL) && im != null) {
+		if (InputUtil.isKeyPressed(client.getWindow(), GLFW.GLFW_KEY_LEFT_CONTROL) && im != null) {
 			im.guiScale.set(im.guiScale.get() + amount * 5);
 			return true;
 		}
@@ -1371,7 +1397,13 @@ public class LovenoteScreen extends Screen {
 	}
 
 	@Override
-	public boolean keyPressed(int key, int scan, int mods) {
+	public boolean keyPressed(KeyInput input) {
+		int keyCode = input.key();
+		int scanCode = input.scancode();
+		int modifiers = input.modifiers();
+		int key = keyCode;
+		int scan = scanCode;
+		int mods = modifiers;
 		if (listening != null) {
 			listening.key = key == GLFW.GLFW_KEY_ESCAPE ? -1 : key;
 			listening = null;
@@ -1390,20 +1422,22 @@ public class LovenoteScreen extends Screen {
 			return true;
 		}
 		if (typing) {
-			if (search.isFocused() && search.keyPressed(key, scan, mods)) return true;
-			if (primField.isFocused() && primField.keyPressed(key, scan, mods)) return true;
-			if (secField.isFocused() && secField.keyPressed(key, scan, mods)) return true;
-			if (idField.isFocused() && idField.keyPressed(key, scan, mods)) return true;
+			if (search.isFocused() && search.keyPressed(input)) return true;
+			if (primField.isFocused() && primField.keyPressed(input)) return true;
+			if (secField.isFocused() && secField.keyPressed(input)) return true;
+			if (idField.isFocused() && idField.keyPressed(input)) return true;
 		}
-		return super.keyPressed(key, scan, mods);
+		return super.keyPressed(input);
 	}
 
 	@Override
-	public boolean charTyped(char c, int mods) {
-		if (search.isFocused()) return search.charTyped(c, mods);
-		if (primField.isFocused()) return primField.charTyped(c, mods);
-		if (secField.isFocused()) return secField.charTyped(c, mods);
-		if (idField.isFocused()) return idField.charTyped(c, mods);
-		return super.charTyped(c, mods);
+	public boolean charTyped(CharInput input) {
+		char c = (char) input.codepoint();
+		int modifiers = input.modifiers();
+		if (search.isFocused()) return search.charTyped(input);
+		if (primField.isFocused()) return primField.charTyped(input);
+		if (secField.isFocused()) return secField.charTyped(input);
+		if (idField.isFocused()) return idField.charTyped(input);
+		return super.charTyped(input);
 	}
 }

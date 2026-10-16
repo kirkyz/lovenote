@@ -1,4 +1,5 @@
 package com.lovenote.module.impl;
+import net.minecraft.component.DataComponentTypes;
 
 import com.lovenote.module.Category;
 import com.lovenote.module.Module;
@@ -38,9 +39,9 @@ public class AutoEat extends Module {
 		var inv = mc.player.getInventory();
 		for (int i = 0; i < 9; i++) {
 			ItemStack s = inv.getStack(i);
-			if (s.isEmpty() || !s.getItem().isFood()) continue;
-			prevSlot = inv.selectedSlot;
-			inv.selectedSlot = i;
+			if (s.isEmpty() || !s.contains(DataComponentTypes.FOOD)) continue;
+			prevSlot = inv.getSelectedSlot();
+			inv.setSelectedSlot(i);
 			mc.options.useKey.setPressed(true);
 			eating = true;
 			timer = delay.getI();
@@ -50,7 +51,7 @@ public class AutoEat extends Module {
 
 	private void stop() {
 		mc.options.useKey.setPressed(false);
-		if (prevSlot >= 0) mc.player.getInventory().selectedSlot = prevSlot;
+		if (prevSlot >= 0) mc.player.getInventory().setSelectedSlot(prevSlot);
 		prevSlot = -1;
 		eating = false;
 	}

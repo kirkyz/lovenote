@@ -1,4 +1,5 @@
 package com.lovenote.module.impl;
+import org.joml.Matrix3x2fStack;
 
 import com.lovenote.setting.BoolSetting;
 import com.lovenote.util.Colors;
@@ -39,12 +40,12 @@ public class TargetHud extends HudWidget {
 	private void slot(DrawContext ctx, int x, int y, ItemStack st) {
 		RenderUtil.rrect(ctx, x, y, 17, 15, 0xFF1C1C25);
 		if (st == null || st.isEmpty()) return;
-		MatrixStack m = ctx.getMatrices();
-		m.push();
-		m.translate(x + 2.5f, y + 1.5f, 0);
-		m.scale(0.75f, 0.75f, 1f);
+		Matrix3x2fStack m = ctx.getMatrices();
+		m.pushMatrix();
+		m.translate(x + 2.5f, y + 1.5f);
+		m.scale(0.75f, 0.75f);
 		ctx.drawItem(st, 0, 0);
-		m.pop();
+		m.popMatrix();
 	}
 
 	@Override

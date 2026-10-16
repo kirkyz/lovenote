@@ -63,7 +63,7 @@ public class GhostTrail extends Module {
 		float w = width.getF(), h = height.getF();
 
 		Fx.additive();
-		RenderSystem.setShaderTexture(0, Tex.SOFT);
+		Fx.texture(Tex.SOFT);
 		BufferBuilder b = Fx.texQuads();
 		for (int i = 0; i < n; i++) {
 			double[] q = pts.get(i);
@@ -73,7 +73,7 @@ public class GhostTrail extends Module {
 			if (a < 3) continue;
 			tallQuad(b, mat, (float) q[0], (float) q[1], (float) q[2], w * (0.5f + 0.5f * f), h, Colors.alpha(colour(f), a));
 		}
-		Tessellator.getInstance().draw();
+		Fx.draw();
 		Fx.end();
 	}
 

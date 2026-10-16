@@ -137,9 +137,9 @@ public class CustomParticles extends Module {
 		last = now;
 
 		float td = ctx.tickDelta();
-		double cx = MathHelper.lerp(td, p.prevX, p.getX());
-		double cy = MathHelper.lerp(td, p.prevY, p.getY());
-		double cz = MathHelper.lerp(td, p.prevZ, p.getZ());
+		double cx = MathHelper.lerp(td, p.lastX, p.getX());
+		double cy = MathHelper.lerp(td, p.lastY, p.getY());
+		double cz = MathHelper.lerp(td, p.lastZ, p.getZ());
 		update(dt, cx, cy, cz, sp, h);
 
 		Matrix4f mat = m.peek().getPositionMatrix();
@@ -150,11 +150,10 @@ public class CustomParticles extends Module {
 		String sh = shape.get();
 		boolean geom = sh.equals("Star") || sh.equals("Plus") || sh.equals("Diamond") || sh.equals("Ring");
 
-		if (walls.get()) RenderSystem.disableDepthTest();
 		Fx.additive();
 
 		if (!geom || halo.get()) {
-			RenderSystem.setShaderTexture(0, sh.equals("Soft") ? Tex.SOFT : Tex.GLOW);
+			Fx.texture(sh.equals("Soft") ? Tex.SOFT : Tex.GLOW);
 			BufferBuilder b = Fx.texQuads();
 			for (int i = 0; i < n; i++) {
 				float tw = twk > 0f ? 0.5f + 0.5f * (float) Math.sin(time * twk * 2f + ph[i] * 3f) : 1f;
@@ -163,13 +162,11 @@ public class CustomParticles extends Module {
 				float sz = base * (0.5f + 0.8f * ps[i]) * (geom ? 1.7f : 1f);
 				Fx.billboard(b, mat, px[i], py[i], pz[i], sz, Colors.alpha(colour(i, time), a));
 			}
-			Tessellator.getInstance().draw();
+			Fx.draw();
 		}
 
 		if (geom) {
-			RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-			BufferBuilder b = Tessellator.getInstance().getBuffer();
-			b.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+			BufferBuilder b = Fx.texQuads();
 			for (int i = 0; i < n; i++) {
 				float tw = twk > 0f ? 0.5f + 0.5f * (float) Math.sin(time * twk * 2f + ph[i] * 3f) : 1f;
 				int a = (int) (op * tw);
@@ -177,11 +174,10 @@ public class CustomParticles extends Module {
 				float sz = base * (0.5f + 0.8f * ps[i]);
 				drawShape(b, mat, sh, px[i], py[i], pz[i], sz, Colors.alpha(colour(i, time), a));
 			}
-			Tessellator.getInstance().draw();
+			Fx.draw();
 		}
 
 		Fx.end();
-		if (walls.get()) RenderSystem.enableDepthTest();
 	}
 
 	private int colour(int i, float time) {

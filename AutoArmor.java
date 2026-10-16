@@ -8,8 +8,6 @@ import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.component.type.EquippableComponent;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.PlayerScreenHandler;
@@ -23,7 +21,7 @@ public class AutoArmor extends Module {
 		super("AutoArmor", Category.COMBAT);
 	}
 
-	/** Armour now lives in the EQUIPPABLE component, not in an ArmorItem class. */
+	/** Armour is now an EQUIPPABLE component, not an ArmorItem class. */
 	private static boolean isArmorFor(ItemStack st, EquipmentSlot type) {
 		EquippableComponent eq = st.get(DataComponentTypes.EQUIPPABLE);
 		return eq != null && eq.slot() == type;
@@ -43,7 +41,7 @@ public class AutoArmor extends Module {
 
 	private static double score(ItemStack st, EquipmentSlot type) {
 		if (!isArmorFor(st, type)) return -1;
-		return defense(st) + EnchantmentHelper.getLevel(Enchantments.PROTECTION, st) * 0.4;
+		return defense(st);
 	}
 
 	@Override
@@ -57,7 +55,7 @@ public class AutoArmor extends Module {
 		for (int i = 0; i < 4; i++) {
 			int armorSlot = 5 + i;
 			ItemStack cur = h.getSlot(armorSlot).getStack();
-			if (!cur.isEmpty() && defense(cur) <= 0.0) continue; // keep elytra / non-armour
+			if (!cur.isEmpty() && defense(cur) <= 0.0) continue;
 			double best = score(cur, types[i]);
 			int from = -1;
 			for (int s = 9; s <= 44; s++) {

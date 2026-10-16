@@ -47,7 +47,7 @@ public class KillAura extends Module {
 		if (rotate.is("Packet")) {
 			float[] r = rotations(t);
 			mc.player.networkHandler.sendPacket(
-					new PlayerMoveC2SPacket.LookAndOnGround(r[0], r[1], mc.player.isOnGround()));
+					new PlayerMoveC2SPacket.LookAndOnGround(r[0], r[1], mc.player.isOnGround(), false));
 		}
 		mc.interactionManager.attackEntity(mc.player, t);
 		mc.player.swingHand(Hand.MAIN_HAND);
@@ -85,7 +85,7 @@ public class KillAura extends Module {
 
 	private float[] rotations(Entity e) {
 		Vec3d eye = mc.player.getEyePos();
-		Vec3d to = e.getPos().add(0, e.getHeight() * 0.6, 0);
+		Vec3d to = e.getEntityPos().add(0, e.getHeight() * 0.6, 0);
 		double dx = to.x - eye.x, dy = to.y - eye.y, dz = to.z - eye.z;
 		double flat = Math.sqrt(dx * dx + dz * dz);
 		float yaw = (float) (Math.toDegrees(Math.atan2(dz, dx)) - 90.0);

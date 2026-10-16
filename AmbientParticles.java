@@ -28,7 +28,7 @@ public class AmbientParticles extends Module {
 			double x = mc.player.getX() + (rnd.nextDouble() * 2 - 1) * a;
 			double y = mc.player.getY() + rnd.nextDouble() * 7 - 1;
 			double z = mc.player.getZ() + (rnd.nextDouble() * 2 - 1) * a;
-			mc.world.addParticle(e, x, y, z, (rnd.nextDouble() - 0.5) * 0.02, -0.02, (rnd.nextDouble() - 0.5) * 0.02);
+			mc.world.addParticleClient(e, x, y, z, (rnd.nextDouble() - 0.5) * 0.02, -0.02, (rnd.nextDouble() - 0.5) * 0.02);
 		}
 	}
 }

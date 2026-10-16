@@ -1,4 +1,5 @@
 package com.lovenote.util;
+import net.minecraft.particle.DragonBreathParticleEffect;
 
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
@@ -18,7 +19,7 @@ public final class ParticleUtil {
 		MAP.put("Heart", ParticleTypes.HEART);
 		MAP.put("Totem", ParticleTypes.TOTEM_OF_UNDYING);
 		MAP.put("Portal", ParticleTypes.PORTAL);
-		MAP.put("Dragon", ParticleTypes.DRAGON_BREATH);
+		MAP.put("Dragon", DragonBreathParticleEffect.of(ParticleTypes.DRAGON_BREATH, 1.0f));
 		MAP.put("Firework", ParticleTypes.FIREWORK);
 		MAP.put("Snow", ParticleTypes.SNOWFLAKE);
 		MAP.put("Soul", ParticleTypes.SOUL);

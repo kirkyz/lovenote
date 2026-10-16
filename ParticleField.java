@@ -1,4 +1,6 @@
 package com.lovenote.module.impl;
+import net.minecraft.client.render.RenderLayer;
+import com.lovenote.util.Gl;
 
 import com.lovenote.module.Category;
 import com.lovenote.module.Module;
@@ -8,8 +10,10 @@ import com.lovenote.setting.NumberSetting;
 import com.lovenote.util.Colors;
 import com.lovenote.util.Fx;
 import com.lovenote.util.Tex;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.lovenote.util.WorldRenderContext;
 import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
@@ -142,8 +146,9 @@ public class ParticleField extends Module {
 		Identifier tex = sprite.is("Star") ? Tex.STAR : sprite.is("Glow") ? Tex.GLOW : Tex.SOFT;
 
 		Fx.additive();
+		Fx.texture(tex);
 
-		BufferBuilder b = Fx.texQuads(tex);
+		BufferBuilder b = Fx.texQuads();
 		for (int i = 0; i < n; i++) {
 			float tw = twk > 0f ? 0.55f + 0.45f * (float) Math.sin(time * twk * 2f + ph[i] * 3f) : 1f;
 			float d = (float) Math.sqrt(sq(px[i] - (float) cam.x) + sq(py[i] - (float) cam.y) + sq(pz[i] - (float) cam.z));

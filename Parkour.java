@@ -16,7 +16,7 @@ public class Parkour extends Module {
 		if (mc.player == null || mc.world == null || !mc.player.isOnGround() || mc.player.isSneaking()) return;
 		Vec3d v = mc.player.getVelocity();
 		if (v.horizontalLengthSquared() < 0.005) return;
-		Vec3d ahead = mc.player.getPos().add(v.x * 3.0, -0.5, v.z * 3.0);
+		Vec3d ahead = mc.player.getEntityPos().add(v.x * 3.0, -0.5, v.z * 3.0);
 		if (mc.world.getBlockState(BlockPos.ofFloored(ahead)).isAir() && mc.world.getBlockState(BlockPos.ofFloored(ahead).down()).isAir()) {
 			mc.player.jump();
 		}

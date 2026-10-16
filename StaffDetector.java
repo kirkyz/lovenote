@@ -56,13 +56,13 @@ if (++timer % 20 != 0) return;
 found.clear();
 for (PlayerListEntry e : mc.getNetworkHandler().getPlayerList()) {
 Text dn = e.getDisplayName();
-String line = dn != null ? dn.getString() : e.getProfile().getName();
+String line = dn != null ? dn.getString() : e.getProfile().name();
 if (line == null) continue;
 String rank = rankOf(line);
 if (rank == null) continue;
-if (nearOnly.get() && !near(e.getProfile().getName())) continue;
-found.put(e.getProfile().getName(), rank);
-if (seen.add(e.getProfile().getName())) alert(e.getProfile().getName(), rank);
+if (nearOnly.get() && !near(e.getProfile().name())) continue;
+found.put(e.getProfile().name(), rank);
+if (seen.add(e.getProfile().name())) alert(e.getProfile().name(), rank);
 }
 seen.retainAll(found.keySet());
 
@@ -79,7 +79,7 @@ return null;
 private boolean near(String name) {
 for (PlayerEntity p : mc.world.getPlayers()) {
 if (p == mc.player) continue;
-if (p.getGameProfile().getName().equalsIgnoreCase(name))
+if (p.getGameProfile().name().equalsIgnoreCase(name))
 return mc.player.distanceTo(p) <= range.get();
 }
 return false;

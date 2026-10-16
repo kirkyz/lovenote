@@ -49,11 +49,11 @@ public class ComboCounter extends Module {
 		String text = combo + "x";
 		int w = mc.textRenderer.getWidth(text);
 		var ms = ctx.getMatrices();
-		ms.push();
+		ms.pushMatrix();
 		float s = 1f + pop * 0.35f;
-		ms.translate(ctx.getScaledWindowWidth() / 2, ctx.getScaledWindowHeight() / 2 - 42, 0);
-		ms.scale(s, s, 1f);
+		ms.translate(ctx.getScaledWindowWidth() / 2, ctx.getScaledWindowHeight() / 2 - 42);
+		ms.scale(s, s);
 		ctx.drawTextWithShadow(mc.textRenderer, text, -w / 2, 0, Colors.wave(0f));
-		ms.pop();
+		ms.popMatrix();
 	}
 }

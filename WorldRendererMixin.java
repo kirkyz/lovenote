@@ -38,7 +38,7 @@ public class WorldRendererMixin {
 	private static WorldRenderContext context(RenderTickCounter tickCounter, Camera camera, Matrix4f positionMatrix) {
 		MatrixStack ms = new MatrixStack();
 		ms.multiplyPositionMatrix(positionMatrix);
-		return new WorldRenderContext(ms, camera, tickCounter.getTickDelta(false));
+		return new WorldRenderContext(ms, camera, tickCounter.getTickProgress(false));
 	}
 
 	@Inject(
@@ -63,12 +63,10 @@ public class WorldRendererMixin {
 		if (sky == null || !sky.enabled) return;
 		int c = sky.cloudTint();
 		if (c < 0) return;
-		RenderSystem.setShaderColor(((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f, 1f);
 	}
 
 	@Inject(method = "renderClouds", at = @At("RETURN"), require = 0)
 	private void lovenote$cloudTintEnd(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta,
 			double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
-		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 	}
 }

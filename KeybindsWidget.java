@@ -1,4 +1,5 @@
 package com.lovenote.module.impl;
+import net.minecraft.client.input.KeyInput;
 
 import com.lovenote.LovenoteClient;
 import com.lovenote.module.Module;
@@ -27,7 +28,7 @@ public class KeybindsWidget extends HudWidget {
 		for (Module m : LovenoteClient.modules.all()) {
 			if (m.key == -1 || m.hidden) continue;
 			if (onlyEnabled.get() && !m.enabled) continue;
-			rows.add(new String[]{m.name, InputUtil.fromKeyCode(m.key, -1).getLocalizedText().getString()});
+			rows.add(new String[]{m.name, InputUtil.fromKeyCode(new KeyInput(m.key, 0, 0)).getLocalizedText().getString()});
 		}
 		int bw = tr.getWidth("Keybinds") + 36;
 		for (String[] r : rows) bw = Math.max(bw, tr.getWidth(r[0]) + tr.getWidth(r[1]) + 28);

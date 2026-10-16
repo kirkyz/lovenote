@@ -1,4 +1,5 @@
 package com.lovenote;
+import net.minecraft.client.util.Window;
 
 import com.lovenote.gui.HudEditorScreen;
 import com.lovenote.gui.LovenoteScreen;
@@ -49,7 +50,7 @@ public class LovenoteClient implements ClientModInitializer {
 
 			if (mc.player == null || mc.world == null) return;
 
-			long win = mc.getWindow().getHandle();
+			Window win = mc.getWindow();
 			for (Module m : modules.all()) {
 				if (m.key == -1) continue;
 				boolean down = InputUtil.isKeyPressed(win, m.key);
@@ -66,7 +67,7 @@ public class LovenoteClient implements ClientModInitializer {
 			MinecraftClient mc = MinecraftClient.getInstance();
 			if (mc.player == null || mc.options.hudHidden) return;
 			if (mc.currentScreen instanceof HudEditorScreen) return;
-			modules.hud(ctx, tickCounter.getTickDelta(false));
+			modules.hud(ctx, tickCounter.getTickProgress(false));
 		});
 
 		WorldRender.LAST.add(ctx -> {

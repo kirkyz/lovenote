@@ -67,14 +67,14 @@ public class Waypoints extends Module {
 		Matrix4f view = new Matrix4f();
 		view.rotateX((float) Math.toRadians(cam.getPitch()));
 		view.rotateY((float) Math.toRadians(cam.getYaw() + 180f));
-		view.translate((float) -cam.getPos().x, (float) -cam.getPos().y, (float) -cam.getPos().z);
+		view.translate((float) -cam.getCameraPos().x, (float) -cam.getCameraPos().y, (float) -cam.getCameraPos().z);
 		Matrix4f proj = mc.gameRenderer.getBasicProjectionMatrix(mc.options.getFov().getValue());
 		Matrix4f mvp = new Matrix4f(proj).mul(view);
 
 		int sw = ctx.getScaledWindowWidth(), sh = ctx.getScaledWindowHeight();
 		for (int i = 0; i < points.size(); i++) {
 			double[] p = points.get(i);
-			double d = new Vec3d(p[0], p[1], p[2]).distanceTo(mc.player.getPos());
+			double d = new Vec3d(p[0], p[1], p[2]).distanceTo(mc.player.getEntityPos());
 			if (d > range.getI()) continue;
 
 			Vector4f v = new Vector4f((float) p[0], (float) (p[1] + height.getI()), (float) p[2], 1f);

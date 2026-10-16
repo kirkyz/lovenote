@@ -33,15 +33,15 @@ public class Orbit extends Module {
 			double a = angle + i * (Math.PI * 2.0 / n);
 			double px = x + Math.cos(a) * r, pz = z + Math.sin(a) * r;
 			switch (style.get()) {
-				case "Halo" -> mc.world.addParticle(effect, px, y + h + 0.25, pz, 0, 0, 0);
-				case "Feet Ring" -> mc.world.addParticle(effect, px, y + 0.05, pz, 0, 0.01, 0);
+				case "Halo" -> mc.world.addParticleClient(effect, px, y + h + 0.25, pz, 0, 0, 0);
+				case "Feet Ring" -> mc.world.addParticleClient(effect, px, y + 0.05, pz, 0, 0.01, 0);
 				case "Double Ring" -> {
-					mc.world.addParticle(effect, px, y + h + 0.25, pz, 0, 0, 0);
-					mc.world.addParticle(effect, x + Math.cos(-a) * r, y + 0.05, z + Math.sin(-a) * r, 0, 0.01, 0);
+					mc.world.addParticleClient(effect, px, y + h + 0.25, pz, 0, 0, 0);
+					mc.world.addParticleClient(effect, x + Math.cos(-a) * r, y + 0.05, z + Math.sin(-a) * r, 0, 0.01, 0);
 				}
 				case "Helix" -> {
 					double t = ((angle * 0.15) + i / (double) n) % 1.0;
-					mc.world.addParticle(effect, px, y + t * h, pz, 0, 0, 0);
+					mc.world.addParticleClient(effect, px, y + t * h, pz, 0, 0, 0);
 				}
 			}
 		}

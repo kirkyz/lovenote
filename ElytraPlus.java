@@ -23,12 +23,12 @@ public class ElytraPlus extends Module {
 		if (mc.player == null || mc.options == null) return;
 		if (!mc.player.getEquippedStack(EquipmentSlot.CHEST).isOf(Items.ELYTRA)) return;
 
-		if (autoDeploy.get() && !mc.player.isOnGround() && !mc.player.isFallFlying()
+		if (autoDeploy.get() && !mc.player.isOnGround() && !mc.player.isGliding()
 				&& !mc.player.isTouchingWater() && mc.options.jumpKey.isPressed()) {
-			mc.player.startFallFlying();
+			mc.player.startGliding();
 			return;
 		}
-		if (mc.player.isFallFlying() && mc.options.jumpKey.isPressed()) {
+		if (mc.player.isGliding() && mc.options.jumpKey.isPressed()) {
 			Vec3d look = mc.player.getRotationVec(1f);
 			mc.player.setVelocity(mc.player.getVelocity().add(look.multiply(boost.get())));
 		}

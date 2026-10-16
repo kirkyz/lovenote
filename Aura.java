@@ -66,7 +66,7 @@ public class Aura extends Module {
 		if (modern && mc.player.getAttackCooldownProgress(0.5f) < (normal ? 0.95f : 0.85f)) return;
 
 		if (rotation.is("Packet")) {
-			mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(r[0], r[1], mc.player.isOnGround()));
+			mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(r[0], r[1], mc.player.isOnGround(), false));
 		}
 		mc.interactionManager.attackEntity(mc.player, t);
 		mc.player.swingHand(Hand.MAIN_HAND);

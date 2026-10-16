@@ -41,7 +41,7 @@ public class KillEffects extends Module {
 	public void onTick() {
 		if (target == null || mc.world == null) return;
 		if (!target.isAlive() || target.getHealth() <= 0f || target.isRemoved()) {
-			trigger(target.getPos());
+			trigger(target.getEntityPos());
 			target = null;
 			return;
 		}
@@ -51,7 +51,7 @@ public class KillEffects extends Module {
 	private void trigger(Vec3d p) {
 		switch (mode.get()) {
 			case "Lightning" -> {
-				LightningEntity bolt = EntityType.LIGHTNING_BOLT.create(mc.world);
+				LightningEntity bolt = new LightningEntity(EntityType.LIGHTNING_BOLT, mc.world);
 				if (bolt != null) {
 					bolt.setPosition(p.x, p.y, p.z);
 					bolt.setCosmetic(true);
@@ -68,7 +68,7 @@ mc.world.addEntity(bolt);
 
 	private void burst(ParticleEffect e, Vec3d p, double s) {
 		for (int i = 0; i < amount.getI(); i++) {
-			mc.world.addParticle(e, p.x, p.y + 1.0, p.z,
+			mc.world.addParticleClient(e, p.x, p.y + 1.0, p.z,
 					(rnd.nextDouble() - 0.5) * s * 2, rnd.nextDouble() * s, (rnd.nextDouble() - 0.5) * s * 2);
 		}
 	}

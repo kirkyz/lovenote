@@ -11,7 +11,7 @@ public class Sprint extends Module {
 	@Override
 	public void onTick() {
 		if (mc.player == null) return;
-		if (mc.player.input.movementForward > 0 && !mc.player.isSneaking() && !mc.player.horizontalCollision
+		if (mc.player.input.hasForwardMovement() && !mc.player.isSneaking() && !mc.player.horizontalCollision
 				&& mc.player.getHungerManager().getFoodLevel() > 6) {
 			mc.player.setSprinting(true);
 		}

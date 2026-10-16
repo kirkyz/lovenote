@@ -27,7 +27,7 @@ public class PotionList extends Module {
 		int y = ctx.getScaledWindowHeight() / 2 + 40;
 		int i = 0;
 		for (StatusEffectInstance e : effects) {
-			String name = Text.translatable(e.getEffectType().getTranslationKey()).getString();
+			String name = Text.translatable(e.getEffectType().value().getTranslationKey()).getString();
 			if (level.get() && e.getAmplifier() > 0) name += " " + (e.getAmplifier() + 1);
 			int secs = e.getDuration() / 20;
 			String time = e.getDuration() > 3200 ? "**" : String.format("%d:%02d", secs / 60, secs % 60);

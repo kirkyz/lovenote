@@ -38,7 +38,7 @@ public class AutoCrystal extends Module {
 
 	/** Rough vanilla-style explosion damage at 'pos' for entity e (power 6, no blocks / armour). */
 	private static double damage(Vec3d crystal, Entity e) {
-		double dist = crystal.distanceTo(e.getPos().add(0, e.getHeight() / 2, 0)) / 12.0;
+		double dist = crystal.distanceTo(e.getEntityPos().add(0, e.getHeight() / 2, 0)) / 12.0;
 		if (dist > 1.0) return 0;
 		double impact = 1.0 - dist;
 		return (impact * impact + impact) / 2.0 * 7.0 * 12.0 + 1.0;
@@ -54,8 +54,8 @@ public class AutoCrystal extends Module {
 		if (breakC.get() && bTimer == 0) {
 			for (Entity e : mc.world.getEntities()) {
 				if (!(e instanceof EndCrystalEntity) || mc.player.distanceTo(e) > breakRange.get()) continue;
-				double self = damage(e.getPos(), mc.player);
-				double tgt = target == null ? 0 : damage(e.getPos(), target);
+				double self = damage(e.getEntityPos(), mc.player);
+				double tgt = target == null ? 0 : damage(e.getEntityPos(), target);
 				if (self > maxSelf.get() && tgt < minDamage.get() * 2) continue;
 				if (target != null && tgt < 1 && self > 1) continue;
 				mc.interactionManager.attackEntity(mc.player, e);

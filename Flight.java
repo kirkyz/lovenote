@@ -20,7 +20,7 @@ public class Flight extends Module {
 		if (mc.options.jumpKey.isPressed()) y = vspeed.get();
 		else if (mc.options.sneakKey.isPressed()) y = -vspeed.get();
 
-		double f = mc.player.input.movementForward, s = mc.player.input.movementSideways;
+		double f = mc.player.input.getMovementInput().y, s = mc.player.input.getMovementInput().x;
 		double vx = 0, vz = 0;
 		if (f != 0 || s != 0) {
 			double len = Math.sqrt(f * f + s * s);

@@ -1,4 +1,5 @@
 package com.lovenote.util;
+import net.minecraft.client.render.RenderLayers;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -32,7 +33,7 @@ public final class RenderUtil {
 
 	public static void line(MatrixStack s, Vec3d a, Vec3d b, int c) {
 		Matrix4f m = s.peek().getPositionMatrix();
-		VertexConsumer vc = provider().getBuffer(RenderLayer.getLines());
+		VertexConsumer vc = provider().getBuffer(RenderLayers.lines());
 		v(vc, m, a.x, a.y, a.z, c);
 		v(vc, m, b.x, b.y, b.z, c);
 		provider().draw();
@@ -43,7 +44,7 @@ public final class RenderUtil {
 		double x1 = b.minX, y1 = b.minY, z1 = b.minZ, x2 = b.maxX, y2 = b.maxY, z2 = b.maxZ;
 
 		if ((fill >>> 24) != 0) {
-			VertexConsumer vc = provider().getBuffer(RenderLayer.getDebugQuads());
+			VertexConsumer vc = provider().getBuffer(RenderLayers.debugQuads());
 			v(vc, m, x1, y1, z1, fill); v(vc, m, x2, y1, z1, fill); v(vc, m, x2, y1, z2, fill); v(vc, m, x1, y1, z2, fill);
 			v(vc, m, x1, y2, z1, fill); v(vc, m, x1, y2, z2, fill); v(vc, m, x2, y2, z2, fill); v(vc, m, x2, y2, z1, fill);
 			v(vc, m, x1, y1, z1, fill); v(vc, m, x1, y2, z1, fill); v(vc, m, x2, y2, z1, fill); v(vc, m, x2, y1, z1, fill);
@@ -54,7 +55,7 @@ public final class RenderUtil {
 		}
 
 		if ((line >>> 24) != 0) {
-			VertexConsumer vc = provider().getBuffer(RenderLayer.getLines());
+			VertexConsumer vc = provider().getBuffer(RenderLayers.lines());
 			v(vc, m, x1, y1, z1, line); v(vc, m, x2, y1, z1, line);
 			v(vc, m, x2, y1, z1, line); v(vc, m, x2, y1, z2, line);
 			v(vc, m, x2, y1, z2, line); v(vc, m, x1, y1, z2, line);
@@ -73,7 +74,7 @@ public final class RenderUtil {
 
 	public static void ring(MatrixStack s, Vec3d c, double radius, int color, int segments) {
 		Matrix4f m = s.peek().getPositionMatrix();
-		VertexConsumer vc = provider().getBuffer(RenderLayer.getLines());
+		VertexConsumer vc = provider().getBuffer(RenderLayers.lines());
 		double px = c.x + radius, pz = c.z;
 		for (int i = 1; i <= segments; i++) {
 			double a = (Math.PI * 2.0 * i) / segments;

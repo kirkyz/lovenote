@@ -28,7 +28,7 @@ public class NoSlow extends Module {
 	private void speed(float mult) {
 		if (mc.player == null) return;
 		mc.player.getAbilities().setWalkSpeed(0.1f * mult);
-		var inst = mc.player.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+		var inst = mc.player.getAttributeInstance(EntityAttributes.MOVEMENT_SPEED);
 		if (inst != null) inst.setBaseValue(0.1 * mult);
 	}
 }

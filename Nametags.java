@@ -28,7 +28,7 @@ public class Nametags extends Module {
 		Matrix4f view = new Matrix4f();
 		view.rotateX((float) Math.toRadians(cam.getPitch()));
 		view.rotateY((float) Math.toRadians(cam.getYaw() + 180f));
-		view.translate((float) -cam.getPos().x, (float) -cam.getPos().y, (float) -cam.getPos().z);
+		view.translate((float) -cam.getCameraPos().x, (float) -cam.getCameraPos().y, (float) -cam.getCameraPos().z);
 		Matrix4f proj = mc.gameRenderer.getBasicProjectionMatrix(mc.options.getFov().getValue());
 		Matrix4f mvp = new Matrix4f(proj).mul(view);
 

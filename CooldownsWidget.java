@@ -1,4 +1,5 @@
 package com.lovenote.module.impl;
+import org.joml.Matrix3x2fStack;
 
 import com.lovenote.util.Colors;
 import com.lovenote.util.RenderUtil;
@@ -24,15 +25,15 @@ public class CooldownsWidget extends HudWidget {
 		ctx.drawTextWithShadow(mc.textRenderer, "Cooldowns", 19, 5, 0xFFFFFFFF);
 		int y = 19;
 		for (Item it : ITEMS) {
-			float p = mc.player.getItemCooldownManager().getCooldownProgress(it, td);
+			float p = mc.player.getItemCooldownManager().getCooldownProgress(new ItemStack(it), td);
 			if (p <= 0f) continue;
 			box(ctx, 0, y, bw, 16);
-			MatrixStack m = ctx.getMatrices();
-			m.push();
-			m.translate(5, y + 2, 0);
-			m.scale(0.75f, 0.75f, 1f);
+			Matrix3x2fStack m = ctx.getMatrices();
+			m.pushMatrix();
+			m.translate(5, y + 2);
+			m.scale(0.75f, 0.75f);
 			ctx.drawItem(new ItemStack(it), 0, 0);
-			m.pop();
+			m.popMatrix();
 			int bx = 22;
 			ctx.fill(bx, y + 7, bw - 7, y + 9, 0xFF2A2A36);
 			RenderUtil.gradientH(ctx, bx, y + 7, bx + (int) ((bw - 7 - bx) * p), y + 9, Colors.C1, Colors.skeet(p));

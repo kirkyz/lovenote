@@ -1,4 +1,5 @@
 package com.lovenote.module.impl;
+import net.minecraft.client.gl.RenderPipelines;
 
 import com.google.gson.JsonObject;
 import com.lovenote.module.Category;
@@ -45,9 +46,9 @@ public abstract class HudWidget extends Module {
 
 	protected void head(DrawContext ctx, Entity e, int x, int y, int s) {
 		if (e instanceof AbstractClientPlayerEntity p) {
-			Identifier tex = p.getSkinTextures().texture();
-			ctx.drawTexture(tex, x, y, s, s, 8f, 8f, 8, 8, 64, 64);
-			ctx.drawTexture(tex, x, y, s, s, 40f, 8f, 8, 8, 64, 64);
+			Identifier tex = p.getSkin().body().texturePath();
+			ctx.drawTexture(RenderPipelines.GUI_TEXTURED, tex, x, y, 8f, 8f, s, s, 8, 8, 64, 64);
+			ctx.drawTexture(RenderPipelines.GUI_TEXTURED, tex, x, y, 40f, 8f, s, s, 8, 8, 64, 64);
 		} else {
 			RenderUtil.rrect(ctx, x, y, s, s, 0xFF2A2A36);
 		}

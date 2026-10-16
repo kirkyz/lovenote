@@ -47,7 +47,7 @@ public class Backtrack extends Module {
 		for (PlayerEntity p : mc.world.getPlayers()) {
 			if (p == mc.player) continue;
 			Deque<Snap> q = history.computeIfAbsent(p.getUuid(), k -> new ArrayDeque<>());
-			q.addLast(new Snap(p.getPos(), now));
+			q.addLast(new Snap(p.getEntityPos(), now));
 			while (q.size() > 1 && now - q.peekFirst().time > 800) q.removeFirst();
 		}
 	}
@@ -60,7 +60,7 @@ public class Backtrack extends Module {
 		int i = 0;
 		for (PlayerEntity p : mc.world.getPlayers()) {
 			if (p == mc.player || !p.isAlive()) continue;
-			if (p.getLerpedPos(td).distanceTo(mc.player.getPos()) > range.get()) continue;
+			if (p.getLerpedPos(td).distanceTo(mc.player.getEntityPos()) > range.get()) continue;
 			Deque<Snap> q = history.get(p.getUuid());
 			if (q == null) continue;
 			Vec3d at = null;

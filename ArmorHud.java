@@ -27,10 +27,10 @@ public class ArmorHud extends Module {
 		RenderUtil.rrect(ctx, x, y, w, size + 6, 0xB00C0C11);
 		int cx = x + 3;
 		for (int i = 3; i >= 0; i--) {
-			ItemStack s = mc.player.getInventory().getArmorStack(i);
+			ItemStack s = mc.player.getInventory().getStack(36 + i);
 			if (!s.isEmpty()) {
 				ctx.drawItem(s, cx, y + 3);
-				ctx.drawItemInSlot(mc.textRenderer, s, cx, y + 3);
+				ctx.drawStackOverlay(mc.textRenderer, s, cx, y + 3);
 			}
 			cx += size;
 		}
@@ -38,7 +38,7 @@ public class ArmorHud extends Module {
 			ItemStack s = mc.player.getOffHandStack();
 			if (!s.isEmpty()) {
 				ctx.drawItem(s, cx, y + 3);
-				ctx.drawItemInSlot(mc.textRenderer, s, cx, y + 3);
+				ctx.drawStackOverlay(mc.textRenderer, s, cx, y + 3);
 			}
 		}
 	}

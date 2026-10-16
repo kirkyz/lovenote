@@ -14,7 +14,7 @@ public class InfoHud extends Module {
 	@Override
 	public void onHud(DrawContext ctx, float td) {
 		if (mc.player == null) return;
-		double bps = Math.hypot(mc.player.getX() - mc.player.prevX, mc.player.getZ() - mc.player.prevZ) * 20.0;
+		double bps = Math.hypot(mc.player.getX() - mc.player.lastX, mc.player.getZ() - mc.player.lastZ) * 20.0;
 		String[] lines = {
 				String.format("xyz  %.0f  %.0f  %.0f", mc.player.getX(), mc.player.getY(), mc.player.getZ()),
 				String.format("speed  %.2f b/s", bps)

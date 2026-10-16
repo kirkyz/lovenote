@@ -68,15 +68,14 @@ public class Nebula extends Module {
 		float hgt = height.getF();
 		float time = (System.currentTimeMillis() % 100000L) / 1000f;
 		float td = ctx.tickDelta();
-		double cx = MathHelper.lerp(td, p.prevX, p.getX());
-		double cy = MathHelper.lerp(td, p.prevY, p.getY());
-		double cz = MathHelper.lerp(td, p.prevZ, p.getZ());
+		double cx = MathHelper.lerp(td, p.lastX, p.getX());
+		double cy = MathHelper.lerp(td, p.lastY, p.getY());
+		double cz = MathHelper.lerp(td, p.lastZ, p.getZ());
 		Matrix4f mat = m.peek().getPositionMatrix();
 		int op = opacity.getI();
 
-		RenderSystem.disableDepthTest();
 		Fx.additive();
-		RenderSystem.setShaderTexture(0, Tex.SOFT);
+		Fx.texture(Tex.SOFT);
 
 		BufferBuilder b = Fx.texQuads();
 		for (int i = 0; i < n; i++) {
@@ -89,10 +88,10 @@ public class Nebula extends Module {
 			Fx.billboard(b, mat, (float) cx + ox * dist, (float) cy + hgt * by[i], (float) cz + oz * dist,
 					size.getF() * bs[i], Colors.alpha(colour(i, time), a));
 		}
-		Tessellator.getInstance().draw();
+		Fx.draw();
 
 		if (sparkles.get()) {
-			RenderSystem.setShaderTexture(0, Tex.STAR);
+			Fx.texture(Tex.STAR);
 			BufferBuilder s = Fx.texQuads();
 			for (int i = 0; i < n; i++) {
 				float ang = time * drift.getF() * 0.05f * ((i % 2 == 0) ? 1f : -1f);
@@ -105,11 +104,10 @@ public class Nebula extends Module {
 				Fx.billboard(s, mat, (float) cx + ox * dist, (float) cy + hgt * by[i] + 30f, (float) cz + oz * dist,
 						6f * bs[i], Colors.alpha(0xFFFFFFFF, a));
 			}
-			Tessellator.getInstance().draw();
+			Fx.draw();
 		}
 
 		Fx.end();
-		RenderSystem.enableDepthTest();
 	}
 
 	private int colour(int i, float time) {

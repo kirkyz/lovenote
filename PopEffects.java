@@ -30,7 +30,7 @@ public class PopEffects extends Module {
 		if (mc.world == null) return;
 		if (e == mc.player && !self.get()) return;
 		for (int i = 0; i < amount.getI(); i++) {
-			mc.world.addParticle(ParticleTypes.TOTEM_OF_UNDYING,
+			mc.world.addParticleClient(ParticleTypes.TOTEM_OF_UNDYING,
 					e.getX(), e.getY() + e.getHeight() / 2.0, e.getZ(),
 					(rnd.nextDouble() - 0.5) * 0.9, rnd.nextDouble() * 0.6, (rnd.nextDouble() - 0.5) * 0.9);
 		}

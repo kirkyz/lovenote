@@ -1,4 +1,5 @@
 package com.lovenote.module.impl;
+import net.minecraft.client.gl.RenderPipelines;
 
 import com.lovenote.module.Category;
 import com.lovenote.module.Module;
@@ -26,9 +27,7 @@ public class Vignette extends Module {
 		int w = ctx.getScaledWindowWidth(), h = ctx.getScaledWindowHeight();
 		Tex.ensure();
 		int m = (int) (Math.max(w, h) * (spread.get() / 100.0) * 0.5);
-		RenderSystem.setShaderColor(1f, 1f, 1f, darkness.getF() / 180f);
-		ctx.drawTexture(Tex.VIGNETTE, w / 2 - m, h / 2 - m, m * 2, m * 2, 0, 0, 256, 256, 256, 256);
-		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+		ctx.drawTexture(RenderPipelines.GUI_TEXTURED, Tex.VIGNETTE, w / 2 - m, h / 2 - m, 0f, 0f, m * 2, m * 2, 256, 256, 256, 256);
 		if (letterbox.get()) {
 			int b = barSize.getI();
 			ctx.fill(0, 0, w, b, 0xFF000000);

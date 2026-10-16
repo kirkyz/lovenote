@@ -16,9 +16,9 @@ public class Speed extends Module {
 	@Override
 	public void onTick() {
 		if (mc.player == null) return;
-		double f = mc.player.input.movementForward, s = mc.player.input.movementSideways;
+		double f = mc.player.input.getMovementInput().y, s = mc.player.input.getMovementInput().x;
 		if (f == 0 && s == 0) return;
-		if (mc.player.isSneaking() || mc.player.isTouchingWater() || mc.player.isInLava() || mc.player.isFallFlying()) return;
+		if (mc.player.isSneaking() || mc.player.isTouchingWater() || mc.player.isInLava() || mc.player.isGliding()) return;
 		if (autoJump.get() && mc.player.isOnGround()) mc.player.jump();
 
 		double len = Math.sqrt(f * f + s * s);

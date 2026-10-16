@@ -29,7 +29,7 @@ public class TabList extends Module {
 		if (!mc.options.playerListKey.isPressed()) return;
 
 		List<PlayerListEntry> list = new ArrayList<>(mc.getNetworkHandler().getPlayerList());
-		list.sort(Comparator.comparing(e -> e.getProfile().getName().toLowerCase()));
+		list.sort(Comparator.comparing(e -> e.getProfile().name().toLowerCase()));
 		int max = Math.min(list.size(), limit.getI());
 
 		int w = 0;
@@ -47,7 +47,7 @@ public class TabList extends Module {
 	}
 
 	private String label(PlayerListEntry e) {
-		String n = e.getProfile().getName();
+		String n = e.getProfile().name();
 		return ping.get() ? n + "  " + e.getLatency() + "ms" : n;
 	}
 }

@@ -77,8 +77,6 @@ public class Shockwave extends Module {
 		waves.removeIf(w -> now - w.start > dur);
 		if (waves.isEmpty()) return;
 
-		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-		RenderSystem.lineWidth(2f);
 		int base = base();
 		int seg = segments.getI();
 
@@ -94,20 +92,17 @@ public class Shockwave extends Module {
 				if (dome.get()) dome(m, w.x, w.y, w.z, r, Colors.alpha(base, a / 2), seg);
 			}
 		}
-		RenderSystem.lineWidth(1f);
-		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 	}
 
 	private void dome(MatrixStack s, double x, double y, double z, float r, int c, int seg) {
 		Matrix4f m = s.peek().getPositionMatrix();
 		Tessellator t = Tessellator.getInstance();
-		BufferBuilder b = t.getBuffer();
-		b.begin(VertexFormat.DrawMode.DEBUG_LINE_STRIP, VertexFormats.POSITION_COLOR);
+		BufferBuilder b = Fx.colorQuads();
 		for (int i = 0; i <= seg; i++) {
 			double a = i * Math.PI / seg;
 			Fx.vc(b, m, (float) (x + Math.cos(a) * r), (float) (y + Math.sin(a) * r), (float) z, c);
 		}
-		t.draw();
+		Fx.draw();
 	}
 
 	private int base() {

@@ -60,7 +60,6 @@ public class GroundRings extends Module {
 		long lifeMs = (long) (life.get() * 1000);
 
 		Fx.additive();
-		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 
 		rings.removeIf(r -> now - r.start > lifeMs);
 		int i = 0;
@@ -87,14 +86,13 @@ public class GroundRings extends Module {
 	private void annulus(Matrix4f m, double cx, double cy, double cz, float r, float th, int col) {
 		if (r <= th) return;
 		final int SEG = 64;
-		BufferBuilder b = Tessellator.getInstance().getBuffer();
-		b.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
+		BufferBuilder b = Fx.texQuads();
 		for (int i = 0; i <= SEG; i++) {
 			double ang = i * (Math.PI * 2.0 / SEG);
 			float ca = (float) Math.cos(ang), sa = (float) Math.sin(ang);
 			Fx.vc(b, m, (float) (cx + ca * (r - th)), (float) cy, (float) (cz + sa * (r - th)), col);
 			Fx.vc(b, m, (float) (cx + ca * (r + th)), (float) cy, (float) (cz + sa * (r + th)), col);
 		}
-		Tessellator.getInstance().draw();
+		Fx.draw();
 	}
 }

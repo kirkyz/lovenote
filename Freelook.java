@@ -30,7 +30,7 @@ public class Freelook extends Module {
 	@Override
 	public void onTick() {
 		if (mc.player == null) return;
-		boolean down = InputUtil.isKeyPressed(mc.getWindow().getHandle(), code());
+		boolean down = InputUtil.isKeyPressed(mc.getWindow(), code());
 		if (down && !active) {
 			yaw = mc.player.getYaw();
 			pitch = mc.player.getPitch();

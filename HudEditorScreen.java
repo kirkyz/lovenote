@@ -1,4 +1,7 @@
 package com.lovenote.gui;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.gui.Click;
 
 import com.lovenote.LovenoteClient;
 import com.lovenote.module.Module;
@@ -61,7 +64,7 @@ public class HudEditorScreen extends Screen {
 			int x = w.px(width), y = w.py(height), pw = w.pxW(), ph = w.pxH();
 			boolean hot = w == drag || w == resize || (mx >= x && mx <= x + pw && my >= y && my <= y + ph);
 			int c = Colors.alpha(Colors.wave(x * 0.002f), hot ? 255 : 130);
-			ctx.drawBorder(x - 2, y - 2, pw + 4, ph + 4, c);
+			ctx.drawStrokedRectangle(x - 2, y - 2, pw + 4, ph + 4, c);
 			ctx.fill(x + pw - 3, y + ph - 3, x + pw + 4, y + ph + 4, c);
 			if (hot) ctx.drawTextWithShadow(textRenderer, w.name, x, y - 12, 0xFFFFFFFF);
 		}
@@ -90,7 +93,13 @@ public class HudEditorScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseClicked(double mx, double my, int btn) {
+	public boolean mouseClicked(Click click, boolean doubled) {
+		double mouseX = click.x();
+		double mouseY = click.y();
+		int button = click.button();
+		int btn = button;
+		double mx = mouseX;
+		double my = mouseY;
 		for (Object[] t : tray) {
 			int[] r = (int[]) t[1];
 			if (mx >= r[0] && mx <= r[0] + r[2] && my >= r[1] && my <= r[1] + r[3]) {
@@ -117,11 +126,21 @@ public class HudEditorScreen extends Screen {
 				return true;
 			}
 		}
-		return super.mouseClicked(mx, my, btn);
+		return super.mouseClicked(new Click(mx, my, click.buttonInfo()), doubled);
 	}
 
 	@Override
-	public boolean mouseDragged(double mx, double my, int btn, double dx, double dy) {
+	public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+		double mouseX = click.x();
+		double mouseY = click.y();
+		int button = click.button();
+		int btn = button;
+		double mx = mouseX;
+		double my = mouseY;
+		double deltaX = offsetX;
+		double deltaY = offsetY;
+		double dx = offsetX;
+		double dy = offsetY;
 		if (resize != null) {
 			int x = resize.px(width);
 			resize.size.set((mx - x) / Math.max(1.0, resize.w));
@@ -163,15 +182,21 @@ public class HudEditorScreen extends Screen {
 			drag.fy = MathHelper.clamp(ny / (float) height, 0f, Math.max(0f, (height - hpx) / (float) height));
 			return true;
 		}
-		return super.mouseDragged(mx, my, btn, dx, dy);
+		return super.mouseDragged(new Click(mx, my, click.buttonInfo()), dx, dy);
 	}
 
 	@Override
-	public boolean mouseReleased(double mx, double my, int btn) {
+	public boolean mouseReleased(Click click) {
+		double mouseX = click.x();
+		double mouseY = click.y();
+		int button = click.button();
+		int btn = button;
+		double mx = mouseX;
+		double my = mouseY;
 		drag = null;
 		resize = null;
 		guides.clear();
-		return super.mouseReleased(mx, my, btn);
+		return super.mouseReleased(new Click(mx, my, click.buttonInfo()));
 	}
 
 	@Override

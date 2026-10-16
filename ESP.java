@@ -31,7 +31,7 @@ public class ESP extends Module {
 		for (PlayerEntity p : mc.world.getPlayers()) {
 			if (p == mc.player || !p.isAlive() || p.isSpectator()) continue;
 			Vec3d l = p.getLerpedPos(td);
-			Box b = p.getBoundingBox().offset(l.subtract(p.getPos())).expand(0.05);
+			Box b = p.getBoundingBox().offset(l.subtract(p.getEntityPos())).expand(0.05);
 			float hp = Math.max(0f, Math.min(1f, p.getHealth() / p.getMaxHealth()));
 			int c = Colors.byMode(color.get(), hp, i++ * 0.07f);
 			RenderUtil.box(m, b, fill.get() ? Colors.alpha(c, opacity.getI()) : 0, outline.get() ? c : 0);
