@@ -755,4 +755,654 @@ public class LovenoteScreen extends Screen {
 			circle(ctx, x + 13, ly + (compact ? 15 : 13), 2, Colors.lerp(Colors.faint(), Colors.wave(0f), on));
 			int textW = cardW - 15 - 44;
 			String name = textRenderer.trimToWidth(m.name, textW);
-			txt(ctx, name, x + 20, ly + (compact ? 11 : 9), Colors.lerp(Colors.dim(), Colors.text(),
+			txt(ctx, name, x + 20, ly + (compact ? 11 : 9), Colors.lerp(Colors.dim(), Colors.text(), Math.max(on, hv * 0.8f)));
+			if (!compact && showDesc) {
+				txt(ctx, textRenderer.trimToWidth(m.description, textW), x + 20, ly + 24, Colors.faint());
+			}
+			drawSwitch(ctx, x + cardW - 33, ly + (compact ? 10 : 16), on);
+			if (m.key != -1 && !compact) {
+				String kb = "[" + keyName(m.key) + "]";
+				txt(ctx, kb, x + cardW - 38 - textRenderer.getWidth(kb), ly + 26, Colors.alpha(Colors.faint(), 150));
+			}
+			txt(ctx, "\u203A", x + cardW - 12, ly + (compact ? 11 : 16), Colors.alpha(Colors.faint(), (int) (120 + 100 * hv)));
+
+			addHit(x, ly, cardW, cardH, K_CARD, m, null, 0);
+			addHit(x + cardW - 37, ly + (compact ? 4 : 10), 34, 22, K_SWITCH, m, null, 0);
+
+			if (hov && im != null && im.tooltips.get() && !name.equals(m.name)) tooltip = m.name;
+			la = 1f;
+		}
+		endClip(ctx);
+		scrollbar(ctx, cx + cw + 6, top, bottom, scrollShown, maxScroll);
+		if (list.isEmpty()) txt(ctx, "No modules found", cx + 4, top + 8, Colors.faint());
+	}
+
+	// ---------- rail
+
+	private void drawRail(DrawContext ctx, int mx, int my, InterfaceModule im, int corner) {
+		int rx = railX();
+		float speed = im != null ? im.sidebar.getF() : 300f;
+		boolean hover = dragWin == 0 && !animating && mx >= rx && mx < rx + railW && my >= wy && my < wy + winH;
+		float sb = ease("sb", hover ? 1f : 0f, speed);
+		int sbw = RAIL_MIN + (int) ((railW - RAIL_MIN) * sb);
+		int sx = railRight ? rx + railW - sbw : rx;
+
+		if (sb > 0.02f) {
+			for (int i = 5; i >= 1; i--) rr(ctx, sx + sbw - 2, wy + 4, i * 2 + 2, winH - 8, 8, Colors.alpha(0x000000, (int) (9 * sb)));
+		}
+		rr(ctx, sx, wy, sbw, winH, corner, Colors.dark ? 0xFA0C0C12 : 0xFAEDEDF4);
+		grad(ctx, sx + 2, wy + 8, sx + sbw - 2, wy + 9, Colors.alpha(Colors.C1, 90), Colors.alpha(Colors.C3, 90));
+
+		// ---- spinning 3D drain gang logo
+		int logoCx = sx + 23;
+		int logoCy = wy + 24;
+		boolean showLogo = im == null || im.logo.get();
+		int logoSize = im != null ? im.logoSize.getI() : 26;
+		long spinMs = im != null ? (long) im.logoSpin.getI() : 2600L;
+		if (showLogo) {
+			if (im == null || im.logoGlow.get()) {
+				for (int g = 12; g >= 1; g--) {
+					int al = (int) (6 * (1f - g / 13f) + 3);
+					circle(ctx, logoCx, logoCy, g + 8, Colors.alpha(Colors.C2, al));
+				}
+			}
+			DrainLogo.draw3D(ctx, logoCx, logoCy, logoSize, Colors.wave(0f), DrainLogo.spin(spinMs), 4);
+		} else {
+			circle(ctx, logoCx, logoCy, 9, Colors.wave(0f));
+			txtS(ctx, "\u2665", logoCx - 3, logoCy - 4, 0xFFFFFFFF);
+		}
+		if (sb > 0.05f) txtS(ctx, "lovenote", sx + 42, wy + 20, Colors.alpha(Colors.text(), (int) (255 * sb)));
+
+		// ---- rows
+		String q = search.getText().trim();
+		int avail = winH - 56 - 40;
+		int rowH = MathHelper.clamp(avail / Math.max(1, pages.length), 16, 24);
+		int[] ys = new int[pages.length];
+		int y = wy + 56;
+		for (int i = 0; i < pages.length; i++) {
+			if (i == 7 || i == 9) y += 5;
+			ys[i] = y;
+			y += rowH;
+		}
+
+		// sliding selection pill
+		int targetY = ys[MathHelper.clamp(page, 0, pages.length - 1)];
+		pillY = pillY < 0f ? targetY : pillY + (targetY - pillY) * (1f - (float) Math.exp(-dt / 70f));
+		if (q.isEmpty() && sb > 0.05f) {
+			rr(ctx, sx + 5, Math.round(pillY), sbw - 10, rowH, 6, Colors.alpha(Colors.C2, (int) (70 * sb)));
+			rr(ctx, sx + 5, Math.round(pillY) + rowH / 2 - 7, 2, 14, 1, Colors.alpha(Colors.wave(0f), (int) (255 * sb)));
+		}
+
+		for (int i = 0; i < pages.length; i++) {
+			int ry = ys[i];
+			boolean hov = hover && mx >= sx + 5 && mx < sx + sbw - 5 && my >= ry && my < ry + rowH;
+			float hv = ease("pg" + i, hov ? 1f : 0f, 120);
+			float slide = (1f - MathHelper.clamp((tabMs - i * 12f) / 220f, 0f, 1f)) * 10f;
+			if (hv > 0.02f && i != page) rr(ctx, sx + 5, ry, sbw - 10, rowH, 6, Colors.alpha(Colors.C2, (int) (26 * hv)));
+			if (i < icons.length) ctx.drawItem(icons[i], sx + 13 + (int) slide, ry + (rowH - 16) / 2);
+			if (sb > 0.05f) txt(ctx, pages[i].label, sx + 42, ry + (rowH - 8) / 2, Colors.alpha(Colors.lerp(Colors.dim(), Colors.text(), Math.max(hv * 0.7f, i == page ? 1f : 0f)), (int) (255 * sb)));
+			pageRects.add(new int[]{sx + 5, ry, sbw - 10, rowH, i});
+		}
+
+		int ey = wy + winH - 36;
+		boolean ehov = hover && mx >= sx + 5 && mx < sx + sbw - 5 && my >= ey && my < ey + rowH;
+		float eh = ease("pgE", ehov ? 1f : 0f, 120);
+		if (eh > 0.02f) rr(ctx, sx + 5, ey, sbw - 10, rowH, 6, Colors.alpha(Colors.C2, (int) (28 * eh)));
+		ctx.drawItem(editorIcon, sx + 13, ey + (rowH - 16) / 2);
+		if (sb > 0.05f) txt(ctx, "HUD editor", sx + 42, ey + (rowH - 8) / 2, Colors.alpha(Colors.dim(), (int) (255 * sb)));
+		pageRects.add(new int[]{sx + 5, ey, sbw - 10, rowH, -2});
+	}
+
+	// ---------- settings window
+
+	private void drawPanel(DrawContext ctx, int mx, int my, float panelA, int corner) {
+		Module m = panelModule;
+		float saved = ga;
+		ga = saved * panelA;
+
+		var ms = ctx.getMatrices();
+		float sc = 0.94f + 0.06f * panelA;
+		float ccx = panX + PW / 2f, ccy = panY + PH / 2f;
+		ms.push();
+		ms.translate(ccx, ccy, 0);
+		ms.scale(sc, sc, 1f);
+		ms.translate(-ccx, -ccy, 0);
+
+		int px = panX + (int) ((1f - panelA) * 22), py = panY;
+
+		for (int i = 7; i >= 1; i--) rr(ctx, px - i, py - i, PW + i * 2, PH + i * 2, corner, Colors.alpha(Colors.C2, 5));
+		rr(ctx, px - 1, py - 1, PW + 2, PH + 2, corner + 1, Colors.alpha(Colors.C2, 70));
+		rr(ctx, px, py, PW, PH, corner, Colors.alpha(Colors.card(), 0xF8));
+		addHit(px, py, PW, PH, K_NONE, null, null, 0);
+
+		txtS(ctx, m.name, px + 13, py + 10, Colors.text());
+		txt(ctx, textRenderer.trimToWidth(m.description, PW - 84), px + 13, py + 23, Colors.faint());
+
+		float on = ease(m.name + ":s", m.enabled ? 1f : 0f, 170);
+		drawSwitch(ctx, px + PW - 74, py + 12, on);
+		addHit(px + PW - 77, py + 8, 28, 18, K_PTOGGLE, m, null, 0);
+		circle(ctx, px + PW - 40, py + 17, 4, 0xFF3DD68C);
+		circle(ctx, px + PW - 28, py + 17, 4, 0xFFF5B83D);
+		circle(ctx, px + PW - 16, py + 17, 4, 0xFFEF4444);
+		addHit(px + PW - 22, py + 11, 12, 12, K_PCLOSE, m, null, 0);
+
+		fill(ctx, px + 9, py + 37, px + PW - 9, py + 38, Colors.alpha(Colors.track(), 170));
+
+		int top = py + 42, bottom = py + PH - 34;
+		int total = 4 + panelTotal(m, PW - 26);
+		panelMax = Math.max(0, total - (bottom - top));
+		panelScrollTarget = MathHelper.clamp(panelScrollTarget, 0, panelMax);
+		panelScrollShown += (panelScrollTarget - panelScrollShown) * (1f - (float) Math.exp(-dt / 40f));
+		if (Math.abs(panelScrollTarget - panelScrollShown) < 0.2f) panelScrollShown = panelScrollTarget;
+
+		setClip(ctx, px, top, px + PW, bottom);
+		int y = top + 4 - Math.round(panelScrollShown);
+		String lastGroup = null;
+		for (Setting s : m.settings) {
+			String g = groupName(s);
+			if (!g.equals(lastGroup)) {
+				if (lastGroup != null) fill(ctx, px + 13, y - 2, px + PW - 13, y - 1, Colors.alpha(Colors.track(), 120));
+				y += 4;
+				txt(ctx, g, px + 13, y, Colors.alpha(Colors.faint(), 190));
+				y += 14;
+				lastGroup = g;
+			}
+			y += drawSetting(ctx, m, s, px + 13, y, PW - 26, true);
+		}
+		endClip(ctx);
+		scrollbar(ctx, px + PW - 6, top, bottom, panelScrollShown, panelMax);
+
+		int by = py + PH - 27;
+		fill(ctx, px + 9, by - 6, px + PW - 9, by - 5, Colors.alpha(Colors.track(), 170));
+		txt(ctx, "Keybind", px + 13, by + 3, Colors.dim());
+		String kn = listening == m ? "..." : keyName(m.key);
+		int kw = textRenderer.getWidth(kn) + 16;
+		boolean khov = mx >= px + PW - 13 - kw && mx <= px + PW - 13 && my >= by && my <= by + 16;
+		float kh = ease("bind", khov || listening == m ? 1f : 0f, 120);
+		rr(ctx, px + PW - 13 - kw, by, kw, 16, 8, Colors.lerp(Colors.chip(), Colors.C2, kh * 0.7f));
+		txt(ctx, kn, px + PW - 13 - kw + 8, by + 4, Colors.lerp(Colors.text(), 0xFF101015, kh * 0.7f));
+		addHit(px + PW - 13 - kw, by, kw, 16, K_BIND, m, null, 0);
+		ms.pop();
+		ga = saved;
+	}
+
+	// ---------- themes page
+
+	private int themeCard(DrawContext ctx, int x, int y, int w, String title, InterfaceModule im, boolean interactive, int corner, Setting... settings) {
+		int h = 26;
+		for (Setting s : settings) h += rowH(s, w - 22);
+		rr(ctx, x, y, w, h, corner - 2, Colors.card());
+		rr(ctx, x + 11, y + 9, 7, 7, 2, Colors.wave(0f));
+		txt(ctx, title, x + 24, y + 8, Colors.text());
+		int yy = y + 24;
+		for (Setting s : settings) yy += drawSetting(ctx, im, s, x + 12, yy, w - 22, interactive);
+		return h;
+	}
+
+	private void renderThemes(DrawContext ctx, int mx, int my, float delta, int cx, int cy, int cw, InterfaceModule im, boolean interactive, int corner) {
+		if (im == null) return;
+		int colW = (cw - 8) / 2, x1 = cx, x2 = cx + colW + 8;
+		int accRows = (Colors.PRESETS.length + ACC_COLS - 1) / ACC_COLS;
+		int accentH = 100 + accRows * 18;
+
+		int leftH = 4 + (26 + rowH(im.main, colW - 22) + rowH(im.style, colW - 22) + rowH(im.card, colW - 22)
+				+ rowH(im.opacity, colW - 22) + rowH(im.glow, colW - 22) + rowH(im.shadow, colW - 22)
+				+ rowH(im.headerLine, colW - 22) + rowH(im.sheen, colW - 22)) + 6 + accentH + 6;
+		int rightH = 4 + (26 + rowH(im.anim, colW - 22) + rowH(im.animSpeed, colW - 22) + rowH(im.sidebar, colW - 22)
+				+ rowH(im.stagger, colW - 22) + rowH(im.staggerSpeed, colW - 22) + rowH(im.hoverLift, colW - 22)
+				+ rowH(im.ripples, colW - 22)) + 6;
+
+		int top = cy + 2, bottom = wy + winH - 28;
+		maxScroll = Math.max(0, Math.max(leftH, rightH) - (bottom - top));
+		scrollTarget = MathHelper.clamp(scrollTarget, 0, maxScroll);
+		scrollShown += (scrollTarget - scrollShown) * (1f - (float) Math.exp(-dt / 40f));
+		if (Math.abs(scrollTarget - scrollShown) < 0.2f) scrollShown = scrollTarget;
+
+		setClip(ctx, cx - 2, top - 2, cx + cw + 4, bottom);
+
+		int y = top - Math.round(scrollShown);
+		y += themeCard(ctx, x1, y, colW, "Logo", im, interactive, corner,
+				im.logo, im.logoSpin, im.logoSize, im.logoGlow) + 6;
+		y += themeCard(ctx, x1, y, colW, "Window", im, interactive, corner,
+				im.guiScale, im.windowWidth, im.windowHeight, im.corner, im.railWidth, im.railSide, im.footer) + 6;
+		y += themeCard(ctx, x1, y, colW, "Content", im, interactive, corner,
+				im.columns, im.sort, im.compact, im.descriptions, im.tooltips) + 6;
+
+		int h = accentH;
+		int accentY = y;
+		rr(ctx, x1, accentY, colW, h, corner - 2, Colors.card());
+		rr(ctx, x1 + 11, accentY + 9, 7, 7, 2, Colors.wave(0f));
+		txt(ctx, "Accent", x1 + 24, accentY + 8, Colors.text());
+		String modeLbl = im.accent.is("Custom") ? "custom" : im.accent.get();
+		txt(ctx, modeLbl, x1 + colW - 12 - textRenderer.getWidth(modeLbl), accentY + 8, Colors.faint());
+
+		int sq = 15, sgap = 3;
+		int gx = x1 + 12, gy = accentY + 26;
+		for (int i = 0; i < Colors.PRESETS.length; i++) {
+			int r = i / ACC_COLS, c = i % ACC_COLS;
+			int bx = gx + c * (sq + sgap);
+			int by = gy + r * (sq + sgap);
+			boolean sel = im.accent.index() == i;
+			if (sel) rr(ctx, bx - 2, by - 2, sq + 4, sq + 4, 4, Colors.alpha(Colors.text(), 210));
+			grad(ctx, bx, by, bx + sq, by + sq, 0xFF000000 | Colors.PRESETS[i][0], 0xFF000000 | Colors.PRESETS[i][1]);
+			float hv = ease("acc" + i, sel ? 1f : 0f, 140);
+			if (hv > 0.01f && !sel) rr(ctx, bx, by, sq, sq, 3, Colors.alpha(Colors.wave(0f), (int) (70 * hv)));
+			addHit(bx, by, sq, sq, K_ACCENT, null, null, i);
+			if (interactive && mx >= bx && mx < bx + sq && my >= by && my < by + sq) tooltip = Colors.PRESET_NAMES[i];
+		}
+
+		int fy = gy + accRows * (sq + sgap) + 8;
+		fill(ctx, x1 + 12, fy - 5, x1 + colW - 12, fy - 4, Colors.alpha(Colors.track(), 150));
+		txt(ctx, "Custom hex", x1 + 12, fy, Colors.faint());
+
+		int fw = (colW - 34) / 2;
+		int fx1 = x1 + 12, fx2 = fx1 + fw + 10;
+		int fy2 = fy + 12;
+		settingFields = true;
+		if (!primField.isFocused() && !primField.getText().equalsIgnoreCase(im.customPrimary)) primField.setText(im.customPrimary);
+		if (!secField.isFocused() && !secField.getText().equalsIgnoreCase(im.customSecondary)) secField.setText(im.customSecondary);
+		settingFields = false;
+
+		rr(ctx, fx1, fy2, fw, 16, 6, Colors.alpha(Colors.chip(), 220));
+		rr(ctx, fx1, fy2, 3, 16, 1, Colors.alpha(0xFF000000 | im.customPrimaryInt(), 255));
+		txt(ctx, "#", fx1 + 4, fy2 + 4, Colors.faint());
+		placeField(primField, fx1 + 10, fy2 + 4, fw - 14);
+		if (interactive) renderField(ctx, primField, mx, my, delta);
+
+		rr(ctx, fx2, fy2, fw, 16, 6, Colors.alpha(Colors.chip(), 220));
+		rr(ctx, fx2, fy2, 3, 16, 1, Colors.alpha(0xFF000000 | im.customSecondaryInt(), 255));
+		txt(ctx, "#", fx2 + 4, fy2 + 4, Colors.faint());
+		placeField(secField, fx2 + 10, fy2 + 4, fw - 14);
+		if (interactive) renderField(ctx, secField, mx, my, delta);
+
+		int uy = fy2 + 22;
+		boolean cSel = im.accent.is("Custom");
+		boolean uh = interactive && mx >= x1 + 12 && mx <= x1 + fw * 2 + 22 && my >= uy && my <= uy + 16;
+		float uhv = ease("useCustom", uh ? 1f : 0f, 120);
+		rr(ctx, x1 + 12, uy, fw * 2 + 10, 16, 8, Colors.lerp(cSel ? Colors.C2 : Colors.chip(), Colors.C2, uhv * 0.6f));
+		String ul = cSel ? "Custom active" : "Use custom";
+		txt(ctx, ul, x1 + 12 + (fw * 2 + 10 - textRenderer.getWidth(ul)) / 2, uy + 4,
+				Colors.lerp(Colors.text(), 0xFF101015, uhv * 0.7f));
+		addHit(x1 + 12, uy, fw * 2 + 10, 16, K_ACCENT, null, null, Colors.PRESETS.length);
+		int leftBottom = accentY + h + 6;
+
+		int ry = top - Math.round(scrollShown);
+		ry += themeCard(ctx, x2, ry, colW, "Animation", im, interactive, corner,
+				im.anim, im.animSpeed, im.sidebar, im.stagger, im.staggerSpeed, im.hoverLift, im.ripples) + 6;
+		ry += themeCard(ctx, x2, ry, colW, "Style", im, interactive, corner,
+				im.main, im.style, im.card, im.opacity, im.glow, im.shadow, im.headerLine, im.sheen) + 6;
+		ry += themeCard(ctx, x2, ry, colW, "Background", im, interactive, corner,
+				im.particles, im.particleSpeed) + 6;
+		int rightBottom = ry;
+
+		endClip(ctx);
+		maxScroll = Math.max(0, Math.max(leftBottom, rightBottom) - (bottom - top));
+		scrollTarget = MathHelper.clamp(scrollTarget, 0, maxScroll);
+		scrollbar(ctx, cx + cw + 6, top, bottom, scrollShown, maxScroll);
+	}
+
+	// ---------- spotify page
+
+	private void control(DrawContext ctx, int x, int y, int w, String glyph, int kind, boolean interactive, double mx, double my) {
+		boolean hov = interactive && mx >= x && mx <= x + w && my >= y && my <= y + 22;
+		float h = ease("spc" + kind, hov ? 1f : 0f, 110);
+		rr(ctx, x, y, w, 22, 7, Colors.lerp(Colors.chip(), Colors.C2, h * 0.55f));
+		txt(ctx, glyph, x + (w - textRenderer.getWidth(glyph)) / 2, y + 7, Colors.lerp(Colors.dim(), Colors.text(), h));
+		addHit(x, y, w, 22, kind, null, null, 0);
+	}
+
+	private void seek(Hit h, double mx) {
+		SpotifyManager sp = SpotifyManager.I;
+		if (sp.durationMs <= 0) return;
+		double t = MathHelper.clamp((mx - h.x) / (double) h.w, 0.0, 1.0);
+		sp.seek((long) (t * sp.durationMs));
+	}
+
+	private void vol(Hit h, double mx) {
+		localVol = (int) Math.round(MathHelper.clamp((mx - h.x) / (double) h.w, 0.0, 1.0) * 100.0);
+		SpotifyManager.I.setVolume(localVol);
+	}
+
+	private void renderSpotify(DrawContext ctx, int mx, int my, float delta, int cx, int top, int cw, int bottom,
+			boolean interactive, InterfaceModule im, int corner) {
+		SpotifyManager sp = SpotifyManager.I;
+		LyricsManager L = LyricsManager.I;
+		boolean live = sp.connected && sp.hasTrack;
+
+		int cardW = Math.min(cw, 470);
+		int x = cx + (cw - cardW) / 2;
+		int y = top + 2;
+		int cardH = Math.min(bottom - y - 2, 336);
+		rr(ctx, x, y, cardW, cardH, corner - 2, Colors.card());
+		grad(ctx, x + 10, y, x + cardW - 10, y + 2, Colors.C1, Colors.C3);
+
+		int art = 96;
+		int ax = x + 16, ay = y + 18;
+		if (live && sp.artTexture != null) {
+			ctx.drawTexture(sp.artTexture, ax, ay, art, art, 0, 0, 64, 64, 64, 64);
+		} else {
+			rr(ctx, ax, ay, art, art, 10, Colors.alpha(Colors.chip(), 230));
+			txtScaled(ctx, "\u266A", ax + 36, ay + 26, Colors.faint(), 3.2f);
+		}
+
+		int tx = ax + art + 16;
+		int tw = x + cardW - 16 - tx;
+		txt(ctx, "NOW PLAYING", tx, y + 18, Colors.alpha(Colors.faint(), 190));
+		SpotifyHud.marquee(ctx, textRenderer, live ? sp.title : "Nothing playing", tx, y + 32, tw, Colors.text());
+		SpotifyHud.marquee(ctx, textRenderer,
+				live ? sp.artist : (sp.connected ? "Open Spotify and press play" : "Bridge not connected"),
+				tx, y + 45, tw, Colors.dim());
+		if (live && !sp.album.isEmpty()) txt(ctx, textRenderer.trimToWidth(sp.album, tw), tx, y + 58, Colors.faint());
+
+		int barY = ay + art + 14;
+		long prog = live ? sp.progress() : 0;
+		float frac = live && sp.durationMs > 0 ? MathHelper.clamp(prog / (float) sp.durationMs, 0f, 1f) : 0f;
+		int barX = x + 16, barW = cardW - 32;
+		rr(ctx, barX, barY, barW, 5, 2, Colors.track());
+		if (frac > 0f) grad(ctx, barX, barY, barX + Math.max(2, (int) (barW * frac)), barY + 5, Colors.C1, Colors.C3);
+		circle(ctx, MathHelper.clamp(barX + (int) (barW * frac), barX + 2, barX + barW - 2), barY + 2, 3, 0xFFFFFFFF);
+		addHit(barX - 4, barY - 4, barW + 8, 13, SP_SEEK, null, null, 0);
+		txt(ctx, SpotifyHud.fmt(prog), barX, barY + 8, Colors.faint());
+		String dur = SpotifyHud.fmt(live ? sp.durationMs : 0);
+		txt(ctx, dur, barX + barW - textRenderer.getWidth(dur), barY + 8, Colors.faint());
+
+		int cy2 = barY + 28;
+		int bw = 34, gap = 10;
+		int bx = x + (cardW - (bw * 3 + gap * 2)) / 2;
+		control(ctx, bx, cy2, bw, "\u23EE", SP_PREV, interactive, mx, my);
+		control(ctx, bx + bw + gap, cy2, bw, live && sp.playing ? "\u23F8" : "\u25B6", SP_PLAY, interactive, mx, my);
+		control(ctx, bx + (bw + gap) * 2, cy2, bw, "\u23ED", SP_NEXT, interactive, mx, my);
+
+		int volY = cy2 + 42;
+		txt(ctx, "Volume", x + 16, volY, Colors.dim());
+		if (localVol < 0) localVol = 100;
+		int vx = x + 70, vwid = cardW - 32 - 54 - 36;
+		rr(ctx, vx, volY + 3, vwid, 3, 1, Colors.track());
+		grad(ctx, vx, volY + 3, vx + Math.max(2, (int) (vwid * localVol / 100f)), volY + 6, Colors.C1, Colors.C3);
+		addHit(vx - 4, volY - 3, vwid + 8, 12, SP_VOL, null, null, 0);
+		txt(ctx, localVol + "%", vx + vwid + 8, volY, Colors.faint());
+
+		int conY = volY + 22;
+		String cbtn = sp.connected ? "Disconnect" : "Connect";
+		int cbw = textRenderer.getWidth(cbtn) + 20;
+		boolean chov = interactive && mx >= x + 16 && mx <= x + 16 + cbw && my >= conY && my <= conY + 18;
+		float ch = ease("spcon", chov ? 1f : 0f, 120);
+		rr(ctx, x + 16, conY, cbw, 18, 9, Colors.lerp(Colors.chip(), Colors.C2, ch * 0.6f));
+		txt(ctx, cbtn, x + 26, conY + 5, Colors.lerp(Colors.text(), 0xFF101015, ch * 0.7f));
+		addHit(x + 16, conY, cbw, 18, sp.connected ? SP_DISCONNECT : SP_CONNECT, null, null, 0);
+		txt(ctx, textRenderer.trimToWidth(sp.status, cardW - cbw - 40), x + 16 + cbw + 10, conY + 5, Colors.faint());
+
+		int ly = conY + 28;
+		Lyrics lyricMod = LovenoteClient.modules.get(Lyrics.class);
+		boolean lyrOn = lyricMod != null && lyricMod.enabled;
+		drawSwitch(ctx, x + cardW - 38, ly + 1, ease("splyr", lyrOn ? 1f : 0f, 150));
+		txt(ctx, "Lyrics HUD", x + 16, ly, lyrOn ? Colors.text() : Colors.dim());
+		addHit(x + 16, ly - 4, cardW - 32, 18, K_LYRICS, null, null, 0);
+
+		if (L.hasLyrics()) {
+			int shown = 0;
+			for (int i = -1; i <= 2 && shown < 3; i++) {
+				String t = L.lineAt(i);
+				if (t.isEmpty()) continue;
+				int col = i == 0 ? Colors.wave(0f) : (i < 0 ? Colors.faint() : Colors.dim());
+				txt(ctx, textRenderer.trimToWidth(t, cardW - 32), x + 16, ly + 20 + shown * 13, col);
+				shown++;
+			}
+		} else {
+			txt(ctx, textRenderer.trimToWidth(L.status, cardW - 32), x + 16, ly + 20, Colors.faint());
+		}
+	}
+
+	// ---------- input
+
+	private boolean over(Hit h, double mx, double my) {
+		if (mx < h.clip[0] || mx > h.clip[2] || my < h.clip[1] || my > h.clip[3]) return false;
+		return mx >= h.x && mx <= h.x + h.w && my >= h.y && my <= h.y + h.h;
+	}
+
+	private boolean overField(TextFieldWidget f, double mx, double my) {
+		return mx >= f.getX() / gs - 2 && mx <= (f.getX() + f.getWidth()) / gs + 2
+				&& my >= f.getY() / gs - 2 && my <= (f.getY() + 12) / gs + 2;
+	}
+
+	private boolean inSearch(double mx, double my) {
+		int swid = Math.min(200, contentW() / 2);
+		return mx >= contentX() && mx <= contentX() + swid && my >= wy + 9 && my <= wy + 27;
+	}
+
+	private void applyAccent(InterfaceModule im, int idx) {
+		if (im == null) return;
+		if (idx >= 0 && idx < Colors.PRESETS.length) im.accent.setIndex(idx);
+		else im.accent.set("Custom");
+		im.apply();
+	}
+
+	private void changed(Module m) {
+		if (m != null && m.enabled) {
+			m.onDisable();
+			m.onEnable();
+		}
+	}
+
+	@Override
+	public void removed() {
+		Config.save();
+	}
+
+	@Override
+	public boolean mouseClicked(double mx, double my, int button) {
+		mx /= gs;
+		my /= gs;
+		InterfaceModule im = LovenoteClient.modules.get(InterfaceModule.class);
+
+		if (listening != null) {
+			listening.key = button == 1 ? -1 : GLFW.GLFW_MOUSE_BUTTON_LEFT;
+			listening = null;
+			return true;
+		}
+		if (button == 1 && selected != null) {
+			selected = null;
+			panelModule = null;
+			return true;
+		}
+		if (button != 0 && button != 1) return super.mouseClicked(mx, my, button);
+
+		search.setFocused(false);
+		primField.setFocused(false);
+		secField.setFocused(false);
+		idField.setFocused(false);
+
+		if (button == 0 && pages[page] == Category.THEMES && search.getText().isEmpty()) {
+			if (overField(primField, mx, my)) { primField.setFocused(true); return true; }
+			if (overField(secField, mx, my)) { secField.setFocused(true); return true; }
+		}
+		if (button == 0 && inSearch(mx, my)) { search.setFocused(true); return true; }
+
+		if (button == 0 && (selected == null || mx < panX || mx > panX + PW || my < panY || my > panY + PH)
+				&& mx >= wx && mx <= wx + winW && my >= wy && my <= wy + 34) {
+			dragWin = 1;
+			grabX = (int) mx - wx;
+			grabY = (int) my - wy;
+			return true;
+		}
+		if (button == 0 && selected != null && mx >= panX && mx <= panX + PW && my >= panY && my <= panY + 34) {
+			dragWin = 2;
+			grabX = (int) mx - panX;
+			grabY = (int) my - panY;
+			return true;
+		}
+
+		for (int[] r : pageRects) {
+			if (mx >= r[0] && mx <= r[0] + r[2] && my >= r[1] && my <= r[1] + r[3]) {
+				if (r[4] == -2) {
+					client.setScreen(new com.lovenote.gui.HudEditorScreen());
+				} else {
+					page = r[4];
+					tabMs = 0;
+					scrollTarget = 0;
+					scrollShown = 0;
+					pillY = -1f;
+					search.setText("");
+				}
+				return true;
+			}
+		}
+
+		for (int i = hits.size() - 1; i >= 0; i--) {
+			Hit hit = hits.get(i);
+			if (!over(hit, mx, my)) continue;
+			addRipple((int) mx, (int) my, im);
+			switch (hit.kind) {
+				case K_NONE -> { }
+				case K_CARD -> {
+					selected = hit.module;
+					panelModule = hit.module;
+					panelScrollTarget = 0;
+				}
+				case K_SWITCH -> hit.module.toggle();
+				case K_BOOL -> {
+					((BoolSetting) hit.setting).toggle();
+					changed(hit.module);
+				}
+				case K_SLIDER -> {
+					dragging = hit;
+					setSlider(hit, mx);
+					changed(hit.module);
+				}
+				case K_MODE -> {
+					((ModeSetting) hit.setting).setIndex(hit.idx);
+					changed(hit.module);
+				}
+				case K_MULTI -> {
+					((MultiSetting) hit.setting).toggle(hit.idx);
+					changed(hit.module);
+				}
+				case K_PTOGGLE -> hit.module.toggle();
+				case K_PCLOSE -> {
+					selected = null;
+					panelModule = null;
+				}
+				case K_BIND -> listening = hit.module;
+				case K_ACCENT -> applyAccent(im, hit.idx);
+				case K_EDITOR -> client.setScreen(new com.lovenote.gui.HudEditorScreen());
+				case K_CLOSE -> close();
+				case K_LYRICS -> {
+					Lyrics lyr = LovenoteClient.modules.get(Lyrics.class);
+					if (lyr != null) lyr.toggle();
+				}
+				case SP_CONNECT -> SpotifyManager.I.connect();
+				case SP_DISCONNECT -> SpotifyManager.I.disconnect();
+				case SP_PREV -> SpotifyManager.I.previous();
+				case SP_PLAY -> SpotifyManager.I.togglePlay();
+				case SP_NEXT -> SpotifyManager.I.next();
+				case SP_SEEK -> {
+					dragging = hit;
+					seek(hit, mx);
+				}
+				case SP_VOL -> {
+					dragging = hit;
+					vol(hit, mx);
+				}
+				default -> { }
+			}
+			return true;
+		}
+		return super.mouseClicked(mx, my, button);
+	}
+
+	@Override
+	public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+		mx /= gs;
+		my /= gs;
+		if (dragWin == 1) {
+			mainX = (int) mx - grabX;
+			mainY = (int) my - grabY;
+			clampWindows();
+			return true;
+		}
+		if (dragWin == 2) {
+			panX = (int) mx - grabX;
+			panY = (int) my - grabY;
+			clampWindows();
+			return true;
+		}
+		if (dragging != null) {
+			if (dragging.kind == K_SLIDER) {
+				setSlider(dragging, mx);
+				changed(dragging.module);
+				return true;
+			}
+			if (dragging.kind == SP_SEEK) {
+				seek(dragging, mx);
+				return true;
+			}
+			if (dragging.kind == SP_VOL) {
+				vol(dragging, mx);
+				return true;
+			}
+		}
+		return super.mouseDragged(mx, my, button, dx, dy);
+	}
+
+	@Override
+	public boolean mouseReleased(double mx, double my, int button) {
+		dragWin = 0;
+		dragging = null;
+		return super.mouseReleased(mx, my, button);
+	}
+
+	@Override
+	public boolean mouseScrolled(double mx, double my, double amount) {
+		mx /= gs;
+		my /= gs;
+		InterfaceModule im = LovenoteClient.modules.get(InterfaceModule.class);
+		if (InputUtil.isKeyPressed(client.getWindow().getHandle(), GLFW.GLFW_KEY_LEFT_CONTROL) && im != null) {
+			im.guiScale.set(im.guiScale.get() + amount * 5);
+			return true;
+		}
+		if (selected != null && mx >= panX && mx <= panX + PW && my >= panY && my <= panY + PH) {
+			panelScrollTarget = MathHelper.clamp(panelScrollTarget - amount * 24, 0, panelMax);
+			return true;
+		}
+		scrollTarget = MathHelper.clamp(scrollTarget - amount * 28, 0, maxScroll);
+		sbAlpha = 1f;
+		return true;
+	}
+
+	@Override
+	public boolean keyPressed(int key, int scan, int mods) {
+		if (listening != null) {
+			listening.key = key == GLFW.GLFW_KEY_ESCAPE ? -1 : key;
+			listening = null;
+			return true;
+		}
+		boolean typing = search.isFocused() || primField.isFocused() || secField.isFocused() || idField.isFocused();
+		if (key == GLFW.GLFW_KEY_ESCAPE) {
+			if (typing) {
+				search.setFocused(false);
+				primField.setFocused(false);
+				secField.setFocused(false);
+				idField.setFocused(false);
+				return true;
+			}
+			close();
+			return true;
+		}
+		if (typing) {
+			if (search.isFocused() && search.keyPressed(key, scan, mods)) return true;
+			if (primField.isFocused() && primField.keyPressed(key, scan, mods)) return true;
+			if (secField.isFocused() && secField.keyPressed(key, scan, mods)) return true;
+			if (idField.isFocused() && idField.keyPressed(key, scan, mods)) return true;
+		}
+		return super.keyPressed(key, scan, mods);
+	}
+
+	@Override
+	public boolean charTyped(char c, int mods) {
+		if (search.isFocused()) return search.charTyped(c, mods);
+		if (primField.isFocused()) return primField.charTyped(c, mods);
+		if (secField.isFocused()) return secField.charTyped(c, mods);
+		if (idField.isFocused()) return idField.charTyped(c, mods);
+		return super.charTyped(c, mods);
+	}
+}
