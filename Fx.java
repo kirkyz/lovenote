@@ -1,68 +1,61 @@
-package com.lovenote.util;
+cd /workspaces/lovenote
+rm AutoPotion.java
+cat > AutoPotion.java <<'EOF'
+package com.lovenote.module.impl;
 
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BuiltBuffer;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.util.Identifier;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
+import com.lovenote.module.Category;
+import com.lovenote.module.Module;
+import com.lovenote.setting.NumberSetting;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.PotionContentsComponent;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.Hand;
 
-/** Shared world-space effect drawing: camera basis, layer selection, vertex emitters. */
-public final class Fx {
-	private Fx() {}
+/** Throws a splash healing potion at your feet when health is low. */
+public class AutoPotion extends Module {
+	private final NumberSetting health = add(new NumberSetting("Health", 8, 1, 19, 1));
+	private final NumberSetting delay = add(new NumberSetting("Delay (ticks)", 12, 2, 40, 1));
+	private int timer;
 
-	public static final Vector3f RIGHT = new Vector3f();
-	public static final Vector3f UP = new Vector3f();
-
-	private static final ThreadLocal<RenderLayer> LAYER = new ThreadLocal<>();
-	private static final ThreadLocal<BufferBuilder> BUFFER = new ThreadLocal<>();
-
-	/** Refresh the camera basis so billboards always face the viewer. */
-	public static void cameraBasis(Camera cam) {
-		RIGHT.set(1, 0, 0);
-		UP.set(0, 1, 0);
-		cam.getRotation().transform(RIGHT);
-		cam.getRotation().transform(UP);
+	public AutoPotion() {
+		super("AutoPotion", Category.COMBAT);
 	}
 
-	/**
-	 * No-op now: 1.21.11 has no RenderSystem blend state. Blending, culling and
-	 * depth writes are baked into the RenderLayer that texQuads/colorQuads picked.
-	 * Kept so every call site keeps working.
-	 */
-	public static void additive() { }
-
-	/** No-op now, same reason. */
-	public static void end() { }
-
-	public static void vc(BufferBuilder b, Matrix4f m, float x, float y, float z, int c) {
-		b.vertex(m, x, y, z)
-				.color((c >> 16) & 255, (c >> 8) & 255, c & 255, (c >>> 24) & 255);
+	private int findHeal() {
+		for (int i = 0; i < 9; i++) {
+			ItemStack st = mc.player.getInventory().getStack(i);
+			if (!st.isOf(Items.SPLASH_POTION)) continue;
+			PotionContentsComponent contents = st.get(DataComponentTypes.POTION_CONTENTS);
+			if (contents == null) continue;
+			boolean heal = false;
+			for (StatusEffectInstance e : contents.getEffects()) {
+				if (e.getEffectType() == StatusEffects.INSTANT_HEALTH) { heal = true; break; }
+			}
+			if (heal) return i;
+		}
+		return -1;
 	}
 
-	public static void vt(BufferBuilder b, Matrix4f m, float x, float y, float z, float u, float v, int c) {
-		b.vertex(m, x, y, z)
-				.texture(u, v)
-				.color((c >> 16) & 255, (c >> 8) & 255, c & 255, (c >>> 24) & 255);
-	}
+	@Override
+	public void onTick() {
+		if (mc.player == null || mc.interactionManager == null) return;
+		if (timer > 0) { timer--; return; }
+		if (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get()) return;
+		int slot = findHeal();
+		if (slot == -1) return;
 
-	/** Camera-facing quad, centred on (x,y,z). */
-	public static void billboard(BufferBuilder b, Matrix4f m, float x, float y, float z, float size, int color) {
-		float h = size * 0.5f;
-		float rx = RIGHT.x * h, ry = RIGHT.y * h, rz = RIGHT.z * h;
-		float ux = UP.x * h, uy = UP.y * h, uz = UP.z * h;
-		vt(b, m, x - rx - ux, y - ry - uy, z - rz - uz, 0f, 1f, color);
-		vt(b, m, x + rx - ux, y + ry - uy, z + rz - uz, 1f, 1f, color);
-		vt(b, m, x + rx + ux, y + ry + uy, z + rz + uz, 1f, 0f, color);
-		vt(b, m, x - rx + ux, y - ry + uy, z - rz + uz, 0f, 0f, color);
+		int prev = mc.player.getInventory().getSelectedSlot();
+		mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), 90f, mc.player.isOnGround(), false));
+		mc.player.getInventory().setSelectedSlot(slot);
+		mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+		mc.player.getInventory().setSelectedSlot(prev);
+		timer = delay.getI();
 	}
-
-	/** Open a textured quad batch for the given texture. Call Fx.draw() when done. */
-	public static BufferBuilder texQuads(Identifier texture) {
-		return begin(RenderLayers.blockScreenEffect(texture));
-	}
-
-	/** Open an untextured coloured quad batch. Call Fx
+}
+EOF
+head -14 AutoPotion.java
+grep -c "class AutoPotion" AutoPotion.java
