@@ -20,21 +20,17 @@ public class ModuleManager {
 		modules.add(new AimAssist());
 		modules.add(new Triggerbot());
 		modules.add(new AutoClicker());
-		modules.add(new Criticals());
-		modules.add(new WTap());
-		modules.add(new Velocity());
-		modules.add(new AntiBot());
 		modules.add(new AutoTotem());
 		modules.add(new AutoArmor());
-		modules.add(new AutoGApple());
-		modules.add(new AutoPotion());
 		modules.add(new AutoCrystal());
 		modules.add(new CrystalTap());
 		modules.add(new CrystalBreak());
-		modules.add(new AutoCity());
-		modules.add(new AutoTrap());
-		modules.add(new AutoWeb());
-		modules.add(new Surround());
+		// ---- hypixel
+		modules.add(new AutoFarm());
+		modules.add(new AutoFish());
+		modules.add(new CommandMacro());
+		modules.add(new ServerInfo());
+		modules.add(new StaffDetector());
 		// ---- movement
 		modules.add(new Sprint());
 		modules.add(new Speed());
@@ -49,10 +45,11 @@ public class ModuleManager {
 		modules.add(new ESP());
 		modules.add(new ItemESP());
 		modules.add(new Glow());
+		modules.add(new Chams());
 		modules.add(new Tracers());
 		modules.add(new TargetESP());
 		modules.add(new Wings());
-	    modules.add(new SkyShader()); 
+		modules.add(new SkyShader());
 		modules.add(new SwingAnimation());
 		modules.add(new JumpCircles());
 		modules.add(new Trail());
@@ -89,16 +86,28 @@ public class ModuleManager {
 		modules.add(new HitLog());
 		modules.add(new Notifications());
 		// ---- misc
-		modules.add(new AutoTool());
 		modules.add(new FastPlace());
-		modules.add(new AutoRespawn());
-		modules.add(new AutoLog());
 		modules.add(new FakePlayer());
 		modules.add(new Panic());
+
+		// file the hypixel-specific stuff into its own tab (widgets stay on HUD)
+		hypixel("Velocity", "WTap", "Criticals", "AntiBot", "AutoTrap", "AutoWeb", "Surround",
+				"AutoCity", "AutoPotion", "AutoGApple", "AutoTool", "AutoLog", "AutoRespawn",
+				"AutoFarm", "AutoFish", "CommandMacro", "ServerInfo", "StaffDetector");
 
 		describe();
 		for (String n : new String[]{"Watermark", "ModuleList", "TargetHud", "Notifications", "HitLog"}) {
 			for (Module m : modules) if (m.name.equals(n)) m.enabled = true;
+		}
+	}
+
+	private void hypixel(String... names) {
+		for (String n : names) {
+			for (Module m : modules) {
+				if (!m.name.equals(n)) continue;
+				if (m instanceof HudWidget) continue;
+				m.category = Category.HYPIXEL;
+			}
 		}
 	}
 
@@ -111,21 +120,30 @@ public class ModuleManager {
 		d("AimAssist", "Smoothly aims at nearby targets");
 		d("Triggerbot", "Attacks when your crosshair is on a target");
 		d("AutoClicker", "Holds a steady CPS while you hold attack");
-		d("Criticals", "Allows you to do critical hits even when it's impossible");
-		d("WTap", "Resets sprint on hit for full knockback");
-		d("Velocity", "Reduces or cancels knockback");
-		d("AntiBot", "Removes bots created by anti-cheat");
 		d("AutoTotem", "Automatically places a totem in the off-hand");
 		d("AutoArmor", "Automatically equips the best armor");
-		d("AutoGApple", "Eats golden apples when reaching a certain health level");
-		d("AutoPotion", "Automatically uses splash healing potions");
 		d("AutoCrystal", "Places and breaks end crystals around targets");
 		d("CrystalTap", "Places and detonates crystals under your crosshair");
 		d("CrystalBreak", "Breaks end crystals that are in range");
-		d("AutoCity", "Mines the obsidian surrounding a target");
+
+		d("Velocity", "Reduces or cancels knockback");
+		d("WTap", "Resets sprint on hit for full knockback");
+		d("Criticals", "Allows you to do critical hits even when it's impossible");
+		d("AntiBot", "Removes bots created by anti-cheat");
 		d("AutoTrap", "Automatically places traps around targets");
 		d("AutoWeb", "Automatically places webs on targets");
 		d("Surround", "Surrounds your feet with obsidian");
+		d("AutoCity", "Mines the obsidian surrounding a target");
+		d("AutoPotion", "Automatically uses splash healing potions");
+		d("AutoGApple", "Eats golden apples when reaching a certain health level");
+		d("AutoTool", "Switches to the best tool while mining");
+		d("AutoLog", "Disconnects when your health gets low");
+		d("AutoRespawn", "Respawns automatically when you die");
+		d("AutoFarm", "Farms crops and blocks around you");
+		d("AutoFish", "Casts and reels in automatically");
+		d("CommandMacro", "Runs chat commands on a keybind or interval");
+		d("ServerInfo", "Shows the current server, TPS and ping");
+		d("StaffDetector", "Alerts you when staff join the server");
 
 		d("Sprint", "Keeps you sprinting while moving forward");
 		d("Speed", "Moves you faster along the ground");
@@ -140,10 +158,11 @@ public class ModuleManager {
 		d("ESP", "Highlights player models with configurable boxes");
 		d("ItemESP", "Highlights dropped items");
 		d("Glow", "Vanilla outline on players, visible through walls");
+		d("Chams", "Re-colours entity models, visible through walls");
 		d("Tracers", "Draws lines from your crosshair to players");
 		d("TargetESP", "Animated rings around your current target");
 		d("Wings", "Translucent wings behind your back");
-		d("WorldShaders", "Recolours the sky and clouds with presets");
+		d("SkyShader", "Custom sky, sun, stars and cloud tint");
 		d("SwingAnimation", "Changes first-person item swing animations");
 		d("JumpCircles", "Expanding ring where you jump");
 		d("Trail", "Leaves a particle trail behind you");
@@ -164,10 +183,11 @@ public class ModuleManager {
 		d("WorldTint", "Tints the sky, fog and screen edges.");
 
 		d("Watermark", "Client name, user, fps, time and IP");
-		d("Music", "Now-playing widget for Spotify");
+		d("Music", "Now-playing widget");
 		d("StaffList", "Lists spectators (vanished staff)");
 		d("TargetHud", "Shows the player you last hit");
 		d("Speed Display", "Shows your current speed in blocks per second");
+		d("Speed", "Shows your current speed in blocks per second");
 		d("Coordinates", "Shows your coordinates");
 		d("Keybinds", "Lists your module keybinds");
 		d("Potions", "Shows active potion effects");
@@ -179,10 +199,7 @@ public class ModuleManager {
 		d("HitLog", "Log of hits, pops and events");
 		d("Notifications", "Toasts when modules are toggled");
 
-		d("AutoTool", "Switches to the best tool while mining");
 		d("FastPlace", "Removes the block placing delay");
-		d("AutoRespawn", "Respawns automatically when you die");
-		d("AutoLog", "Disconnects when your health gets low");
 		d("FakePlayer", "Spawns a dummy player to test on");
 		d("Panic", "Turns every module off at once");
 	}
