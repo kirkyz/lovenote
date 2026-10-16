@@ -8,10 +8,8 @@ import com.lovenote.setting.NumberSetting;
 import com.lovenote.util.Colors;
 import com.lovenote.util.Fx;
 import com.lovenote.util.Tex;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.lovenote.util.WorldRenderContext;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
@@ -42,7 +40,6 @@ public class Bloom extends Module {
 		if (mc.world == null || mc.player == null) return;
 		Tex.ensure();
 		Fx.cameraBasis(ctx.camera());
-		RenderSystem.setShaderTexture(0, Tex.GLOW);
 		Fx.additive();
 		Matrix4f mat = m.peek().getPositionMatrix();
 		float td = ctx.tickDelta();
@@ -51,14 +48,14 @@ public class Bloom extends Module {
 			if (p == mc.player && !self.get()) continue;
 			if (!p.isAlive()) continue;
 			Vec3d pos = p.getLerpedPos(td);
-			if (pos.distanceTo(mc.player.getPos()) > range.get()) continue;
+			if (pos.distanceTo(mc.player.getEntityPos()) > range.get()) continue;
 			float hp = Math.max(0f, Math.min(1f, p.getHealth() / p.getMaxHealth()));
 			int c = pick(color.get(), hp, i++ * 0.08f);
 			float f = (float) (size.get() * p.getHeight());
-			BufferBuilder b = Fx.texQuads();
+			BufferBuilder b = Fx.texQuads(Tex.GLOW);
 			Fx.billboard(b, mat, (float) pos.x, (float) (pos.y + p.getHeight() * 0.5), (float) pos.z, f,
 					Colors.alpha(c, 90));
-			Tessellator.getInstance().draw();
+			Fx.draw();
 		}
 		Fx.end();
 	}
