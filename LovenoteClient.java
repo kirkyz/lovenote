@@ -17,13 +17,14 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 public class LovenoteClient implements ClientModInitializer {
 	public static ModuleManager modules;
 	public static KeyBinding openGui, hudEditor, spotifyNext, spotifyPrev, spotifyPause;
 
-	private static final String CAT = "Lovenote";
+	private static final KeyBinding.Category CAT = KeyBinding.Category.create(Identifier.of("lovenote", "main"));
 
 	@Override
 	public void onInitializeClient() {
@@ -58,15 +59,14 @@ public class LovenoteClient implements ClientModInitializer {
 			modules.tick();
 		});
 
-		// fog override is only live between these two events, so the GUI keeps vanilla fog values
 		WorldRenderEvents.START.register(ctx -> Fog.active = true);
 		WorldRenderEvents.END.register(ctx -> Fog.active = false);
 
-		HudRenderCallback.EVENT.register((ctx, td) -> {
+		HudRenderCallback.EVENT.register((ctx, tickCounter) -> {
 			MinecraftClient mc = MinecraftClient.getInstance();
 			if (mc.player == null || mc.options.hudHidden) return;
-			if (mc.currentScreen instanceof HudEditorScreen) return; // editor draws the widgets itself
-			modules.hud(ctx, td);
+			if (mc.currentScreen instanceof HudEditorScreen) return;
+			modules.hud(ctx, tickCounter.getTickDelta(false));
 		});
 
 		WorldRenderEvents.LAST.register(ctx -> {
