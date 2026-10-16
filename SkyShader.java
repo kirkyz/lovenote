@@ -8,6 +8,7 @@ import com.lovenote.setting.ModeSetting;
 import com.lovenote.setting.NumberSetting;
 import com.lovenote.util.Colors;
 import com.lovenote.util.Fx;
+import com.lovenote.util.Tex;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Camera;
@@ -20,8 +21,9 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
+import org.lwjgl.opengl.GL11;
 
 import java.util.Random;
 
@@ -89,12 +91,13 @@ public class SkyShader extends Module {
 	}
 
 	private boolean starsOn() {
-		return starBrightness.get() > 0.01f
+		return starBrightness.getF() > 0.01f
 				&& (preset.is("Night") || preset.is("Void") || preset.is("Aurora") || preset.is("Custom"));
 	}
 
 	private boolean auroraOn() {
-		return auroraStrength.get() > 0.01f && (preset.is("Aurora") || preset.is("Custom") || preset.is("Cyber"));
+		return auroraStrength.getF() > 0.01f
+				&& (preset.is("Aurora") || preset.is("Custom") || preset.is("Cyber"));
 	}
 
 	/** Tint applied to vanilla clouds, or -1 for untouched. */
@@ -193,12 +196,12 @@ public class SkyShader extends Module {
 
 		float spin = (mc.world == null ? 0f : mc.world.getSkyAngle(td)) * 6.28318f;
 		float cs = MathHelper.cos(spin), sn = MathHelper.sin(spin);
-		float bright = starBrightness.get();
+		float bright = starBrightness.getF();
 
+		Tex.ensure();
 		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(org.lwjgl.opengl.GL11.GL_SRC_ALPHA, org.lwjgl.opengl.GL11.GL_ONE);
-		RenderSystem.setShaderTexture(0, com.lovenote.util.Tex.STAR);
-		com.lovenote.util.Tex.ensure();
+		RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+		RenderSystem.setShaderTexture(0, Tex.STAR);
 
 		BufferBuilder b = Fx.texQuads();
 		for (int i = 0; i < starCount; i++) {
@@ -215,15 +218,15 @@ public class SkyShader extends Module {
 	}
 
 	private void aurora(Matrix4f m, float td) {
-		float str = auroraStrength.get();
-		float time = (System.currentTimeMillis() % 100000L) / 1000f * auroraSpeed.get();
+		float str = auroraStrength.getF();
+		float time = (System.currentTimeMillis() % 100000L) / 1000f * auroraSpeed.getF();
 
+		Tex.ensure();
 		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(org.lwjgl.opengl.GL11.GL_SRC_ALPHA, org.lwjgl.opengl.GL11.GL_ONE);
-		BufferBuilder b = Fx.texQuads();
-		com.lovenote.util.Tex.ensure();
-		RenderSystem.setShaderTexture(0, com.lovenote.util.Tex.SOFT);
+		RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+		RenderSystem.setShaderTexture(0, Tex.SOFT);
 
+		BufferBuilder b = Fx.texQuads();
 		for (int band = 0; band < 3; band++) {
 			float phase = time + band * 2.1f;
 			int col = Colors.rainbow(band * 0.22f + time * 0.02f);
@@ -248,10 +251,10 @@ public class SkyShader extends Module {
 		float ang = (mc.world == null ? 0f : mc.world.getSkyAngle(td)) * 6.28318f;
 		float sx = MathHelper.cos(ang) * R, sy = MathHelper.sin(ang) * R;
 		boolean day = sy > -20f;
-		float size = 34f * sunSize.get();
+		float size = 34f * sunSize.getF();
 
 		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(org.lwjgl.opengl.GL11.GL_SRC_ALPHA, org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA);
+		RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
 		RenderSystem.setShaderTexture(0, day ? SUN : MOON);
 
