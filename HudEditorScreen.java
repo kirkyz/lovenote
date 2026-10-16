@@ -175,8 +175,7 @@ public class HudEditorScreen extends Screen {
 	}
 
 	@Override
-public boolean mouseScrolled(double mx, double my, double horizontalAmount, double verticalAmount) {
-    return super.mouseScrolled(mx, my, horizontalAmount, verticalAmount);
-}
+	public boolean mouseScrolled(double mx, double my, double horizontalAmount, double verticalAmount) {
+		return super.mouseScrolled(mx, my, horizontalAmount, verticalAmount);
 	}
-
+}
