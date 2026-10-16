@@ -15,7 +15,7 @@ public abstract class Module {
 	protected final MinecraftClient mc = MinecraftClient.getInstance();
 
 	public final String name;
-	public final Category category;
+	public Category category;
 	public final List<Setting> settings = new ArrayList<>();
 	public String description = "";
 	public boolean enabled;
@@ -27,9 +27,10 @@ public abstract class Module {
 		this.name = name;
 		this.category = category;
 	}
+
 	protected void describe(String text) {
-    this.description = text;
-}
+		this.description = text;
+	}
 
 	protected <T extends Setting> T add(T s) {
 		settings.add(s);
