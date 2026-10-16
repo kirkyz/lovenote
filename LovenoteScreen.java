@@ -62,8 +62,9 @@ public class LovenoteScreen extends Screen {
 	private final List<int[]> pageRects = new ArrayList<>(); // x,y,w,h,pageIndex (-2 = editor)
 	private final Map<String, Float> anim = new HashMap<>();
 
-	private int wx, wy;
-	private float dt, ga = 1f, openMs, closeMs, scrollTarget, scrollShown, panelScrollTarget, panelScrollShown;
+private int wx, wy;
+	private float gs = 1f;
+	private int vw, vh;	private float dt, ga = 1f, openMs, closeMs, scrollTarget, scrollShown, panelScrollTarget, panelScrollShown;
 	private int maxScroll, panelMax;
 	private boolean closing, finishClose, animating;
 	private long lastNano;
@@ -96,16 +97,25 @@ public class LovenoteScreen extends Screen {
 		try { Integer.parseInt(s, 16); return true; } catch (Exception e) { return false; }
 	}
 
-	@Override
+@Override
 	protected void init() {
+		InterfaceModule im0 = LovenoteClient.modules.get(InterfaceModule.class);
+		gs = im0 != null ? MathHelper.clamp(im0.guiScale.getI() / 100f, 0.4f, 1.1f) : 1f;
+		vw = Math.max(160, Math.round(width / gs));
+		vh = Math.max(120, Math.round(height / gs));
+
 		if (mainX == Integer.MIN_VALUE) {
-			mainX = (width - W) / 2;
-			mainY = (height - H) / 2;
+			mainX = (vw - W) / 2;
+			mainY = (vh - H) / 2;
 		}
 		if (panX == Integer.MIN_VALUE) {
-			panX = mainX + W + 8 + PW <= width - 4 ? mainX + W + 8 : mainX + W - PW - 10;
+			panX = mainX + W + 8 + PW <= vw - 4 ? mainX + W + 8 : mainX + W - PW - 10;
 			panY = mainY + 10;
 		}
+		mainX = MathHelper.clamp(mainX, Math.min(0, vw - W), Math.max(0, vw - W));
+		mainY = MathHelper.clamp(mainY, Math.min(0, vh - H), Math.max(0, vh - H));
+		panX = MathHelper.clamp(panX, 0, Math.max(0, vw - PW));
+		panY = MathHelper.clamp(panY, 0, Math.max(0, vh - PH));
 		openMs = 0;
 		closing = false;
 		finishClose = false;
@@ -315,8 +325,10 @@ public class LovenoteScreen extends Screen {
 
 		InterfaceModule im = LovenoteClient.modules.get(InterfaceModule.class);
 		if (im != null) im.apply();
+		gs = im != null ? MathHelper.clamp(im.guiScale.getI() / 100f, 0.4f, 1.1f) : 1f;
+		vw = Math.max(160, Math.round(width / gs));
+		vh = Math.max(120, Math.round(height / gs));
 		float animMs = im != null ? im.animSpeed.getF() : 300f;
-
 		hits.clear();
 		pageRects.clear();
 		wx = mainX;
@@ -348,6 +360,7 @@ public class LovenoteScreen extends Screen {
 
 		var ms = ctx.getMatrices();
 		ms.push();
+		ms.scale(gs, gs, 1f);
 		if (im != null && im.anim.is("Tilt")) {
 			float sc = 0.9f + 0.1f * eo;
 			float cx = wx + W / 2f, cy = wy + H / 2f;
@@ -597,6 +610,7 @@ public class LovenoteScreen extends Screen {
 		int colW = (cw - 8) / 2, x1 = cx, x2 = cx + colW + 8;
 
 		int y = cy + 4;
+		y += themeCard(ctx, x1, y, colW, "Menu", im, interactive, im.guiScale) + 6;
 		y += themeCard(ctx, x1, y, colW, "Main color", im, interactive, im.main) + 6;
 
 		// accent card
@@ -735,9 +749,9 @@ public class LovenoteScreen extends Screen {
 		return false;
 	}
 
-	@Override
 	public boolean mouseClicked(double mx, double my, int btn) {
 		if (animating || closing) return true;
+		mx /= gs; my /= gs;
 
 		for (int[] r : pageRects) {
 			if (mx >= r[0] && mx < r[0] + r[2] && my >= r[1] && my < r[1] + r[3]) {
@@ -809,17 +823,16 @@ public class LovenoteScreen extends Screen {
 		}
 		return super.mouseClicked(mx, my, btn);
 	}
-
-	@Override
-	public boolean mouseDragged(double mx, double my, int btn, double dx, double dy) {
+public boolean mouseDragged(double mx, double my, int btn, double dx, double dy) {
+		mx /= gs; my /= gs; dx /= gs; dy /= gs;
 		if (dragWin == 1) {
-			mainX = MathHelper.clamp((int) mx - grabX, Math.min(0, width - W), Math.max(0, width - W));
-			mainY = MathHelper.clamp((int) my - grabY, Math.min(0, height - H), Math.max(0, height - H));
+			mainX = MathHelper.clamp((int) mx - grabX, Math.min(0, vw - W), Math.max(0, vw - W));
+			mainY = MathHelper.clamp((int) my - grabY, Math.min(0, vh - H), Math.max(0, vh - H));
 			return true;
 		}
 		if (dragWin == 2) {
-			panX = MathHelper.clamp((int) mx - grabX, 0, Math.max(0, width - PW));
-			panY = MathHelper.clamp((int) my - grabY, 0, Math.max(0, height - PH));
+			panX = MathHelper.clamp((int) mx - grabX, 0, Math.max(0, vw - PW));
+			panY = MathHelper.clamp((int) my - grabY, 0, Math.max(0, vh - PH));
 			return true;
 		}
 		if (dragging != null) {
@@ -836,18 +849,18 @@ public class LovenoteScreen extends Screen {
 		dragging = null;
 		dragWin = 0;
 		localVol = -1;
-		return super.mouseReleased(mx, my, btn);
+		return super.mouseReleased(mx / gs, my / gs, btn);
 	}
 
 	@Override
 	public boolean mouseScrolled(double mx, double my, double amount) {
-		if (panelModule != null && selected != null && mx >= panX && mx < panX + PW && my >= panY && my < panY + PH) {
-			panelScrollTarget = MathHelper.clamp(panelScrollTarget - (float) amount * 22f, 0, panelMax);
-		} else {
-			scrollTarget = MathHelper.clamp(scrollTarget - (float) amount * 30f, 0, maxScroll);
+		if (hasControlDown()) {
+			InterfaceModule im = LovenoteClient.modules.get(InterfaceModule.class);
+			if (im != null) im.guiScale.set(im.guiScale.get() + amount * 5);
+			return true;
 		}
-		return true;
-	}
+		mx /= gs; my /= gs;
+		if (panelModule != null && selected != null && mx >= panX && mx < panX + PW && my >= panY && my < panY + PH) {
 
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
