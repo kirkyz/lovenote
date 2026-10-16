@@ -12,6 +12,8 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 public class RenderSystemMixin {
 
 	private static Fog fogModule() {
+		// only interfere while the world is being drawn; the GUI pass gets vanilla's fog values back
+		if (!Fog.active) return null;
 		if (LovenoteClient.modules == null) return null;
 		Fog f = LovenoteClient.modules.get(Fog.class);
 		return f != null && f.enabled ? f : null;
