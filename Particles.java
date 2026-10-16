@@ -3,6 +3,7 @@ package com.lovenote.module.impl;
 import com.lovenote.module.Category;
 import com.lovenote.module.Module;
 import com.lovenote.setting.ModeSetting;
+import net.minecraft.client.option.ParticlesMode;
 
 public class Particles extends Module {
 	private final ModeSetting mode = add(new ModeSetting("Mode", "Decreased", "All", "Decreased", "Minimal"));
@@ -14,9 +15,11 @@ public class Particles extends Module {
 
 	@Override
 	public void onTick() {
-		var opt = mc.options.getParticles();
-		int want = mode.is("All") ? 0 : (mode.is("Minimal") ? 2 : 1);
-		int guard = 0;
-		while (opt.getValue().ordinal() != want && guard++ < 4) opt.cycle(1);
+		ParticlesMode want = switch (mode.get()) {
+			case "All" -> ParticlesMode.ALL;
+			case "Minimal" -> ParticlesMode.MINIMAL;
+			default -> ParticlesMode.DECREASED;
+		};
+		if (mc.options.getParticles().getValue() != want) mc.options.getParticles().setValue(want);
 	}
 }
