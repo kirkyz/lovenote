@@ -8,14 +8,10 @@ import com.lovenote.util.Colors;
 import com.lovenote.util.RenderUtil;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
+import org.joml.Matrix3x2fStack;
 
-/**
- * Base class for draggable HUD widgets. Position is stored as a fraction of the screen
- * so it survives resolution / GUI-scale changes. Drawn in local space starting at (0,0).
- */
 public abstract class HudWidget extends Module {
 	/** true while the HUD editor is open: widgets show placeholder content. */
 	public static boolean editing;
@@ -59,13 +55,13 @@ public abstract class HudWidget extends Module {
 	}
 
 	public void renderAt(DrawContext ctx, float td) {
-		MatrixStack m = ctx.getMatrices();
-		m.push();
-		m.translate(px(ctx.getScaledWindowWidth()), py(ctx.getScaledWindowHeight()), 0);
+		Matrix3x2fStack m = ctx.getMatrices();
+		m.pushMatrix();
+		m.translate(px(ctx.getScaledWindowWidth()), py(ctx.getScaledWindowHeight()));
 		float s = size.getF();
-		m.scale(s, s, 1f);
+		m.scale(s, s);
 		draw(ctx, td);
-		m.pop();
+		m.popMatrix();
 	}
 
 	public int px(int sw) { return Math.round(fx * sw); }
