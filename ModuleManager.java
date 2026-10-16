@@ -101,6 +101,7 @@ public class ModuleManager {
 		modules.add(new Beams());
 		modules.add(new Fog());
 		modules.add(new BlockHighlight());
+		modules.add(new Waypoints());
 		// ---- hud widgets
 		modules.add(new InterfaceModule());
 		modules.add(new Watermark());
@@ -246,8 +247,9 @@ public class ModuleManager {
 		d("CustomCrosshair", "Animated crosshair in your theme colour");
 		d("Bloom", "Soft additive glow around players");
 		d("Beams", "Vertical light shafts above players");
-		d("Fog", "Custom fog colour and distance");
+		d("Fog", "Custom fog distance and colour");
 		d("BlockHighlight", "Outlines the block you are looking at");
+		d("Waypoints", "Saved points with beams and distance labels");
 
 		d("Watermark", "Client name, user, fps, time and IP");
 		d("Music", "Now-playing widget");
@@ -291,7 +293,9 @@ public class ModuleManager {
 		return null;
 	}
 
-	public List<Module> in(Category c) {
+	public List<Category> in(Category c) { return null; }
+
+	public List<Module> modulesIn(Category c) {
 		List<Module> out = new ArrayList<>();
 		for (Module m : modules) if (m.category == c || m.alsoIn.contains(c)) out.add(m);
 		return out;
