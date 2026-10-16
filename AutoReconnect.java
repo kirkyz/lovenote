@@ -4,7 +4,7 @@ import com.lovenote.module.Category;
 import com.lovenote.module.Module;
 import com.lovenote.setting.NumberSetting;
 import net.minecraft.client.gui.screen.ConnectScreen;
-import net.minecraft.client.gui.screen.DisconnectScreen;
+import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 
@@ -26,13 +26,13 @@ public class AutoReconnect extends Module {
 			info = mc.getCurrentServerEntry();
 			address = info.address;
 		}
-		if (address == null) return;
+		if (address == null || info == null) return;
 
-		if (mc.currentScreen instanceof DisconnectScreen) {
+		if (mc.currentScreen instanceof DisconnectedScreen) {
 			if (timer < 0) timer = delay.getI() * 20;
 			if (timer > 0) { timer--; return; }
 			timer = -1;
-			ConnectScreen.connect(mc.currentScreen, mc, ServerAddress.parse(address), info, false, null);
+			ConnectScreen.connect(mc, ServerAddress.parse(address), info);
 			return;
 		}
 		timer = -1;
