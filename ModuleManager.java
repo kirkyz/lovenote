@@ -1,7 +1,6 @@
 package com.lovenote.module;
 
 import com.lovenote.module.impl.*;
-import com.lovenote.util.Colors;
 import com.lovenote.util.RenderUtil;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.gui.DrawContext;
@@ -100,6 +99,8 @@ public class ModuleManager {
 		modules.add(new CustomCrosshair());
 		modules.add(new Bloom());
 		modules.add(new Beams());
+		modules.add(new Fog());
+		modules.add(new BlockHighlight());
 		// ---- hud widgets
 		modules.add(new InterfaceModule());
 		modules.add(new Watermark());
@@ -124,6 +125,8 @@ public class ModuleManager {
 		modules.add(new CoordsHud());
 		modules.add(new PingHud());
 		modules.add(new TabList());
+		modules.add(new ComboCounter());
+		modules.add(new Compass());
 		// ---- misc
 		modules.add(new FastPlace());
 		modules.add(new FakePlayer());
@@ -243,6 +246,8 @@ public class ModuleManager {
 		d("CustomCrosshair", "Animated crosshair in your theme colour");
 		d("Bloom", "Soft additive glow around players");
 		d("Beams", "Vertical light shafts above players");
+		d("Fog", "Custom fog colour and distance");
+		d("BlockHighlight", "Outlines the block you are looking at");
 
 		d("Watermark", "Client name, user, fps, time and IP");
 		d("Music", "Now-playing widget");
@@ -266,6 +271,8 @@ public class ModuleManager {
 		d("CoordsHud", "Position, chunk and facing");
 		d("PingHud", "Ping and connection quality");
 		d("TabList", "Clean player list with ping");
+		d("ComboCounter", "Counts consecutive hits without taking damage");
+		d("Compass", "Horizontal compass strip");
 
 		d("FastPlace", "Removes the block placing delay");
 		d("FakePlayer", "Spawns a dummy player to test on");
@@ -290,9 +297,10 @@ public class ModuleManager {
 		return out;
 	}
 
-public void tick() {
+	public void tick() {
 		for (Module m : modules) if (m.enabled) m.onTick();
 	}
+
 	public void attack(Entity target) {
 		for (Module m : modules) if (m.enabled) m.onAttack(target);
 	}
