@@ -19,6 +19,7 @@ public class InterfaceModule extends Module {
 	public final NumberSetting animSpeed = add(new NumberSetting("Speed (ms)", 300, 100, 1000, 25));
 	public final ModeSetting style = add(new ModeSetting("GUI style", "Classic", "Liquid", "Classic", "Transparent"));
 	public final NumberSetting opacity = add(new NumberSetting("Opacity", 100, 40, 100, 1));
+	public final NumberSetting guiScale = add(new NumberSetting("Menu scale", 65, 40, 110, 5));
 	public final NumberSetting sidebar = add(new NumberSetting("Sidebar speed (ms)", 300, 100, 800, 25));
 
 	public String customPrimary = "A855F7", customSecondary = "9647FF";
