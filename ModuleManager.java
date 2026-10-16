@@ -36,6 +36,7 @@ public class ModuleManager {
 		modules.add(new Surround());
 		modules.add(new AutoTrap());
 		modules.add(new AutoCity());
+		modules.add(new OldCombat());
 		// ---- hypixel
 		modules.add(new AutoFarm());
 		modules.add(new AutoFish());
@@ -112,6 +113,10 @@ public class ModuleManager {
 		modules.add(new Beams());
 		modules.add(new BlockHighlight());
 		modules.add(new Waypoints());
+		modules.add(new Aurora());
+		modules.add(new Starfield());
+		modules.add(new SunGlow());
+		modules.add(new Vignette());
 		// ---- render
 		modules.add(new Fog());
 		modules.add(new RenderDistance());
@@ -188,7 +193,7 @@ public class ModuleManager {
 				"AutoCity", "AutoPotion", "AutoGApple", "AutoTool", "AutoLog", "AutoRespawn",
 				"AutoFarm", "AutoFish", "CommandMacro", "ServerInfo", "StaffDetector",
 				"FastUse", "SafeWalk", "NoJumpDelay", "AntiLevitation", "AutoJumpReset",
-				"AutoPearl", "AutoAnchor");
+				"AutoPearl", "AutoAnchor", "OldCombat");
 		donut("AutoSell", "AutoBuy", "AutoTip", "ChestStealer", "SpawnerESP", "LootBeam",
 				"AutoReconnect", "ChestTracker", "AutoGG", "AutoFarm", "AutoFish", "AutoTool", "AutoArmor");
 
@@ -248,6 +253,7 @@ public class ModuleManager {
 		d("CommandMacro", "Runs chat commands on a keybind or interval");
 		d("ServerInfo", "Shows the current server, TPS and ping");
 		d("StaffDetector", "Alerts you when staff join the server");
+		d("OldCombat", "1.8 style combat feel with no cooldown gate");
 
 		d("Sprint", "Keeps you sprinting while moving forward");
 		d("Speed", "Moves you faster along the ground");
@@ -312,6 +318,10 @@ public class ModuleManager {
 		d("Beams", "Vertical light shafts above players");
 		d("BlockHighlight", "Outlines the block you are looking at");
 		d("Waypoints", "Saved points with beams and distance labels");
+		d("Aurora", "Drifting aurora curtains high in the sky");
+		d("Starfield", "Twinkling stars spread across the sky");
+		d("SunGlow", "Additive glow around the sun and moon");
+		d("Vignette", "Soft darkened screen edges and letterbox bars");
 
 		d("Fog", "Custom fog distance and colour");
 		d("RenderDistance", "Overrides the client view distance");
