@@ -55,7 +55,8 @@ public class KillEffects extends Module {
 				if (bolt != null) {
 					bolt.setPosition(p.x, p.y, p.z);
 					bolt.setCosmetic(true);
-					mc.world.addEntity(2_000_000 + (idCounter++ % 1000), bolt);
+					bolt.setId(2_000_000 + (idCounter++ % 1000));
+mc.world.addEntity(bolt);
 				}
 			}
 			case "Totem" -> burst(ParticleTypes.TOTEM_OF_UNDYING, p, 0.6);
