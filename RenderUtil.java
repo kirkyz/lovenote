@@ -1,6 +1,5 @@
 package com.lovenote.util;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderLayer;
@@ -21,18 +20,10 @@ public final class RenderUtil {
 	// ---------------------------------------------------------------- 3D
 
 	public static void begin3D(float lineWidth) {
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.disableDepthTest();
-		RenderSystem.disableCull();
-		RenderSystem.lineWidth(lineWidth);
+		// blend / depth / cull state now lives in the RenderLayer
 	}
 
 	public static void end3D() {
-		RenderSystem.lineWidth(1f);
-		RenderSystem.enableCull();
-		RenderSystem.enableDepthTest();
-		RenderSystem.disableBlend();
 	}
 
 	private static void v(VertexConsumer vc, Matrix4f m, double x, double y, double z, int c) {
