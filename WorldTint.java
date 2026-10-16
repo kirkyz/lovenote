@@ -11,7 +11,6 @@ import com.lovenote.util.Tex;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
@@ -44,9 +43,9 @@ public class WorldTint extends Module {
 		double cg = ((c >> 8) & 255) / 255.0;
 		double cb = (c & 255) / 255.0;
 		return new Vec3d(
-			MathHelper.clamp(in.x * (1.0 - t + t * cr * 1.8), 0, 1),
-			MathHelper.clamp(in.y * (1.0 - t + t * cg * 1.8), 0, 1),
-			MathHelper.clamp(in.z * (1.0 - t + t * cb * 1.8), 0, 1));
+				MathHelper.clamp(in.x * (1.0 - t + t * cr * 1.8), 0, 1),
+				MathHelper.clamp(in.y * (1.0 - t + t * cg * 1.8), 0, 1),
+				MathHelper.clamp(in.z * (1.0 - t + t * cb * 1.8), 0, 1));
 	}
 
 	@Override
@@ -55,17 +54,13 @@ public class WorldTint extends Module {
 		Tex.ensure();
 		int w = ctx.getScaledWindowWidth(), h = ctx.getScaledWindowHeight();
 		int a = vigStrength.getI();
-		Matrix4f mat = ctx.getMatrices().peek().getPositionMatrix();
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.setShaderTexture(0, Tex.VIGNETTE);
-		BufferBuilder b = Fx.texQuads();
+		Matrix4f mat = RenderSystem.getModelViewStack();
+		BufferBuilder b = Fx.texQuads(Tex.VIGNETTE);
 		int col = Colors.alpha(0x000000, a);
 		Fx.vt(b, mat, 0, 0, 0, 0f, 0f, col);
 		Fx.vt(b, mat, 0, h, 0, 0f, 1f, col);
 		Fx.vt(b, mat, w, h, 0, 1f, 1f, col);
 		Fx.vt(b, mat, w, 0, 0, 1f, 0f, col);
-		Tessellator.getInstance().draw();
-		RenderSystem.disableBlend();
+		Fx.draw();
 	}
 }
