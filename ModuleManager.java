@@ -134,6 +134,19 @@ public class ModuleManager {
 		modules.add(new SpawnerESP());
 		modules.add(new LootBeam());
 		modules.add(new AutoReconnect());
+		// ---- newer additions
+		modules.add(new FastUse());
+		modules.add(new NoJumpDelay());
+		modules.add(new SafeWalk());
+		modules.add(new AutoPearl());
+		modules.add(new AntiLevitation());
+		modules.add(new AutoJumpReset());
+		modules.add(new AutoAnchor());
+		modules.add(new PlayerTracker());
+		modules.add(new KillCounter());
+		modules.add(new DeathCoords());
+		modules.add(new AutoGG());
+		modules.add(new ChestTracker());
 		// ---- hud widgets
 		modules.add(new InterfaceModule());
 		modules.add(new Watermark());
@@ -173,9 +186,11 @@ public class ModuleManager {
 		// file the hypixel-specific stuff into its own tab as well (widgets stay on HUD)
 		hypixel("Velocity", "WTap", "Criticals", "AntiBot", "AutoTrap", "AutoWeb", "Surround",
 				"AutoCity", "AutoPotion", "AutoGApple", "AutoTool", "AutoLog", "AutoRespawn",
-				"AutoFarm", "AutoFish", "CommandMacro", "ServerInfo", "StaffDetector");
+				"AutoFarm", "AutoFish", "CommandMacro", "ServerInfo", "StaffDetector",
+				"FastUse", "SafeWalk", "NoJumpDelay", "AntiLevitation", "AutoJumpReset",
+				"AutoPearl", "AutoAnchor");
 		donut("AutoSell", "AutoBuy", "AutoTip", "ChestStealer", "SpawnerESP", "LootBeam",
-				"AutoReconnect", "AutoFarm", "AutoFish", "AutoTool", "AutoArmor");
+				"AutoReconnect", "ChestTracker", "AutoGG", "AutoFarm", "AutoFish", "AutoTool", "AutoArmor");
 
 		describe();
 		for (String n : new String[]{"Interface", "Watermark", "ModuleList", "TargetHud",
@@ -319,6 +334,19 @@ public class ModuleManager {
 		d("SpawnerESP", "Boxes spawners through walls");
 		d("LootBeam", "Vertical beams on dropped items");
 		d("AutoReconnect", "Rejoins the server after a disconnect");
+
+		d("FastUse", "Instantly uses items without the delay");
+		d("NoJumpDelay", "Removes the delay between jumps");
+		d("SafeWalk", "Stops you walking off block edges");
+		d("AutoPearl", "Throws a pearl when you fall or get knocked");
+		d("AntiLevitation", "Cancels the levitation effect");
+		d("AutoJumpReset", "Resets your sprint after a jump");
+		d("AutoAnchor", "Charges and detonates respawn anchors");
+		d("PlayerTracker", "Tracks where players were last seen");
+		d("KillCounter", "Counts your kills this session");
+		d("DeathCoords", "Logs your death coordinates");
+		d("AutoGG", "Says gg at the end of a game");
+		d("ChestTracker", "Remembers chests you have opened");
 
 		d("Watermark", "Client name, user, fps, time and IP");
 		d("Music", "Now-playing widget");
