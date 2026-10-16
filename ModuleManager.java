@@ -290,11 +290,9 @@ public class ModuleManager {
 		return out;
 	}
 
-	public void tick() {
-		Colors.applyCurrent();
+public void tick() {
 		for (Module m : modules) if (m.enabled) m.onTick();
 	}
-
 	public void attack(Entity target) {
 		for (Module m : modules) if (m.enabled) m.onAttack(target);
 	}
