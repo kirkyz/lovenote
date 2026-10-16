@@ -9,13 +9,13 @@ import net.minecraft.util.Identifier;
 /** Runtime-generated textures. Nothing needs to ship in assets/. */
 public final class Tex {
     public static final Identifier GLOW =
-            new Identifier("lovenote", "gen/glow");
+            Identifier.of("lovenote", "gen/glow");
     public static final Identifier SOFT =
-            new Identifier("lovenote", "gen/soft");
+            Identifier.of("lovenote", "gen/soft");
     public static final Identifier STAR =
-            new Identifier("lovenote", "gen/star");
+            Identifier.of("lovenote", "gen/star");
     public static final Identifier VIGNETTE =
-            new Identifier("lovenote", "gen/vignette");
+            Identifier.of("lovenote", "gen/vignette");
 
     private static boolean built;
 
