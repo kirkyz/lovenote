@@ -9,6 +9,7 @@
     "ClientWorldMixin",
     "HeldItemRendererMixin",
     "InGameHudMixin",
+    "LivingEntityAccessor",
     "LivingEntityMixin",
     "LivingEntityRendererMixin",
     "MinecraftClientAccessor",
