@@ -4,17 +4,16 @@ import com.lovenote.module.Category;
 import com.lovenote.module.Module;
 import com.lovenote.setting.BoolSetting;
 
-public class ToggleSprint extends Module {
-	private final BoolSetting sneakToo = add(new BoolSetting("Also toggle sneak", false));
+public class NoViewBob extends Module {
+	private final BoolSetting hide = add(new BoolSetting("Hide bobbing", true));
 
-	public ToggleSprint() {
-		super("ToggleSprint", Category.PLAYER);
-		describe("Sprint stays on without holding the key.");
+	public NoViewBob() {
+		super("NoViewBob", Category.RENDER);
+		describe("Removes walking camera bob.");
 	}
 
 	@Override
 	public void onTick() {
-		if (!mc.options.getSprintToggled().getValue()) mc.options.getSprintToggled().setValue(true);
-		if (sneakToo.get() && !mc.options.getSneakToggled().getValue()) mc.options.getSneakToggled().setValue(true);
+		if (mc.options.getBobView().getValue() != hide.get()) mc.options.getBobView().setValue(hide.get());
 	}
 }
