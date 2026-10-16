@@ -12,6 +12,7 @@
     "LivingEntityMixin",
     "LivingEntityRendererMixin",
     "MinecraftClientAccessor",
+    "PlayerListHudMixin",
     "RenderSystemMixin",
     "WorldRendererMixin"
   ],
