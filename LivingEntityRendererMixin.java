@@ -7,6 +7,7 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
@@ -21,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class LivingEntityRendererMixin {
 
 	@Invoker("getTexture")
-	protected abstract Identifier lovenote$texture(LivingEntity entity);
+	public abstract Identifier lovenote$texture(Entity entity);
 
 	private static Chams chams() {
 		return LovenoteClient.modules == null ? null : LovenoteClient.modules.get(Chams.class);
