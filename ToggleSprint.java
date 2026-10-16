@@ -14,7 +14,7 @@ public class ToggleSprint extends Module {
 
 	@Override
 	public void onTick() {
-		if (mc.options.sprintToggled != true) mc.options.sprintToggled = true;
-		if (sneakToo.get() && !mc.options.sneakToggled) mc.options.sneakToggled = true;
+		if (!mc.options.getSprintToggled().getValue()) mc.options.getSprintToggled().setValue(true);
+		if (sneakToo.get() && !mc.options.getSneakToggled().getValue()) mc.options.getSneakToggled().setValue(true);
 	}
 }
